@@ -39,7 +39,8 @@ function toNumber(value: string | number) {
   template: `
     @if (mapInitialized$ | async) {
       <google-map [height]="mapHeight ?? 'auto'" width="100%" [zoom]="zoom" [center]="{lat, lng}"
-                  [options]="{disableDefaultUI: true, minZoom: zoom, restriction: {
+                  [options]="{disableDefaultUI: true, minZoom: zoom
+                  , restriction: {
                     latLngBounds: {
                       north: 85,
                       south: -85,
@@ -92,9 +93,6 @@ function toNumber(value: string | number) {
 })
 export class AppComponent implements OnInit {
   private http = inject(HttpClient);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private host = inject(ElementRef);
 
   @Input({alias: 'google-maps-api-key'}) public googleMapsApiKey?: string;
   @Input({alias: 'elastic-search-url'}) public elasticSearchUrl?: string;
@@ -105,12 +103,12 @@ export class AppComponent implements OnInit {
   @Input({transform: toNumber}) public zoom: number = 0;
   @Input({transform: toNumber}) public lat: number = 0;
   @Input({transform: toNumber}) public lng: number = 0;
+  @Input() public sdg!: string;
   public shownDate$ = new BehaviorSubject(new Date());
   public loadedDate$ = new BehaviorSubject(new Date());
   public mapInitialized$: Observable<boolean> = EMPTY;
   public markerPositions$: Observable<{ c: google.maps.LatLngLiteral, country: string }[]> = EMPTY;
   public isLoading$ = new BehaviorSubject(true);
-  public sdg$: Observable<string | null> = EMPTY;
   public data$: Observable<NewsItem[]> = EMPTY;
   public sentiment$: Observable<number> = EMPTY;
   public isPlaying$ = new BehaviorSubject(false);
@@ -121,12 +119,10 @@ export class AppComponent implements OnInit {
     if (!this.minDate) log.error('missing min date');
     if (!this.maxDate) log.error('missing max date');
     if (!this.delayMs) log.error('missing delay ms');
-
-    this.router.initialNavigation();
+    if (!this.sdg) log.error('missing sdg');
 
     this.shownDate$.next(new Date(this.maxDate));
     this.mapInitialized$ = this.initializeMap();
-    this.sdg$ = this.initializeSdg();
     this.data$ = this.initializeData();
     this.sentiment$ = this.initializeSentiment();
     this.markerPositions$ = this.initializeMarkerPositions();
@@ -165,23 +161,15 @@ export class AppComponent implements OnInit {
       )
   }
 
-  private initializeSdg() {
-    return this.route.queryParamMap.pipe(
-      map(params => params.get('SDG')),
-      distinctUntilChanged(),
-    )
-  }
-
   private initializeData() {
     if (!this.elasticSearchUrl) {
       return of([]);
     }
 
-    return this.sdg$.pipe(
-      combineLatestWith(this.shownDate$),
-      filter(([ _, shownDate ]) => shownDate >= new Date(this.minDate)),
+    return this.shownDate$.pipe(
+      filter((shownDate) => shownDate >= new Date(this.minDate)),
       tap(() => this.isLoading$.next(true)),
-      switchMap(([ sdg, shownDate ]) => this.http.post<{ hits: { hits: NewsItem[] } }>(this.elasticSearchUrl!,
+      switchMap((shownDate) => this.http.post<{ hits: { hits: NewsItem[] } }>(this.elasticSearchUrl!,
         {
           "size": 10000,
           "query": {
@@ -189,7 +177,7 @@ export class AppComponent implements OnInit {
               "must": [
                 {
                   "match": {
-                    "SDG.keyword": `SDG ${ sdg }`
+                    "SDG.keyword": `SDG ${ this.sdg }`
                   }
                 },
                 {
