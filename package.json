@@ -4,8 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --output-hashing=none --configuration production && npm run package",
-    "package": "cat dist/news-widget/polyfills.js dist/news-widget/main.js > dist/news-widget/component-lib.js",
+    "build": "ng build --output-hashing=none --configuration production",
     "server": "http-server -p 3000",
     "watch": "ng build --watch --configuration development"
   },
