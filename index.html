@@ -10,15 +10,18 @@
 <body>
 <news-widget
   google-maps-api-key="AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc"
-  elastic-search-url="http://localhost:9206/media/_search"
-  min-date="2000-01-01"
-  max-date="2023-12-25"
+  elastic-search-url="https://qmidas.quintelligence.com/elasticsearch-sgd/media/_search"
+  aspect-ratio="16:9"
+  uri="d2781b6e-ac05-4b9e-a4c9-ec0d1a4c2d57"
+  tag-key="f9afd6db-9425-4720-a89c-5de5af57c238"
+  tag-endpoint="https://eventregistry.org/api/v1/article/getArticlesForTopicPage"
+  last-days="31"
   delay-ms="1500"
   lat="40"
   zoom="2"
   sdg="1"
 />
-<script type="module" src="../dist/news-widget/polyfills.js"></script>
-<script type="module" src="../dist/news-widget/main.js"></script>
+<script type="module" src="../component/polyfills.js"></script>
+<script type="module" src="../component/main.js"></script>
 </body>
 </html>
