@@ -56,8 +56,8 @@ function toNumber(value: string | number) {
                 }
             </div>
 
-            <div class="overflow-hidden h-fit">
-                <angular-tag-cloud [overflow]="false" [data]="(cloudData$ | async) ?? []" class="!w-full"/>
+            <div class="overflow-hidden">
+                <angular-tag-cloud [overflow]="false" [data]="(cloudData$ | async) ?? []" class="!w-full m-auto"/>
                 <app-sentiment-meter [value]="sentiment$ | async"/>
                 <div class="flex justify-between gap-4 mt-4 ml-6 w-full">
                     <div class="text-lg">
