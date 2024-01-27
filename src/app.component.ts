@@ -185,7 +185,7 @@ export class AppComponent implements OnInit {
                     }
                 })
 
-                return Math.round((sentiment / total) * 100) / 100;
+                return Math.round((sentiment / (total || 1)) * 100) / 100;
             }),
             shareReplay(1),
         )
