@@ -1,25 +1,26 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
 </head>
 <body>
 <news-widget
-  google-maps-api-key="AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc"
-  elastic-search-url="https://qmidas.quintelligence.com/elasticsearch-sgd/media/_search"
-  aspect-ratio="16:9"
-  uri="d2781b6e-ac05-4b9e-a4c9-ec0d1a4c2d57"
-  tag-key="f9afd6db-9425-4720-a89c-5de5af57c238"
-  tag-endpoint="https://eventregistry.org/api/v1/article/getArticlesForTopicPage"
-  last-days="31"
-  delay-ms="1500"
-  lat="40"
-  zoom="2"
-  sdg="1"
+        map-height="400px"
+        map-circle-radius-factor="1"
+        google-maps-api-key="AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc"
+        elastic-search-url="https://qmidas.quintelligence.com/elasticsearch-sgd/media/_search"
+        uri="d2781b6e-ac05-4b9e-a4c9-ec0d1a4c2d57"
+        tag-key="f9afd6db-9425-4720-a89c-5de5af57c238"
+        tag-endpoint="https://eventregistry.org/api/v1/article/getArticlesForTopicPage"
+        last-days="31"
+        delay-ms="1500"
+        lat="40"
+        zoom="2"
+        sdg="1"
 />
 <script type="module" src="../component/polyfills.js"></script>
 <script type="module" src="../component/main.js"></script>

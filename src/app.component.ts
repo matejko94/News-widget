@@ -39,8 +39,8 @@ function toNumber(value: string | number) {
       }
     ` ],
     template: `
-        <app-heatmap [googleMapsApiKey]="googleMapsApiKey" [mapHeight]="mapHeight"
-                     [zoom]="zoom" [location]="{lat,lng}" [newsItems]="data$ | async"
+        <app-heatmap [googleMapsApiKey]="googleMapsApiKey" [mapHeight]="mapHeight" [zoom]="zoom"
+                     [mapCircleRadiusFactor]="mapCircleRadiusFactor" [location]="{lat,lng}" [newsItems]="data$ | async"
         />
         <div class="grid grid-cols-2 h-[550px]">
             <div class="overflow-y-auto h-full">
@@ -76,6 +76,7 @@ export class AppComponent implements OnInit {
     @Input({alias: 'google-maps-api-key'}) public googleMapsApiKey?: string;
     @Input({alias: 'elastic-search-url'}) public elasticSearchUrl?: string;
     @Input({alias: 'map-height'}) public mapHeight?: string;
+    @Input({alias: 'map-circle-radius-factor', transform: toNumber}) public mapCircleRadiusFactor: number = 1;
     @Input({alias: 'last-days', transform: toNumber}) public lastDays!: number;
     @Input({alias: 'delay-ms', transform: toNumber}) public delayMs?: number;
     @Input({transform: toNumber}) public zoom: number = 0;
