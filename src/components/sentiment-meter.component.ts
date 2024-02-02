@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-sentiment-meter',
@@ -37,7 +37,8 @@ import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, ViewChil
               </svg>
             </g>
             <g id="needle" transform="translate(175.000000, 18.000000)">
-              <polygon #triangle fill="#3C3C3B" transform="rotate(90, 10, 162)" style="transition: all 500ms ease" points="10 0 15 162 5 162"></polygon>
+              <polygon #triangle fill="#3C3C3B" transform="rotate(90, 10, 162)" style="transition: all 500ms ease"
+                       points="10 0 15 162 5 162"></polygon>
             </g>
           </g>
         </g>
@@ -61,7 +62,7 @@ export class SentimentMeterComponent {
   private rotate(value: number) {
     if (this.el) {
       this.el.nativeElement.style.transformOrigin = '10px 162px';
-      this.el.nativeElement.style.transform = `rotate(${value * 90}deg)`;
+      this.el.nativeElement.style.transform = `rotate(${ value * 90 }deg)`;
     }
   }
 }

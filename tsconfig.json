@@ -2,7 +2,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "./dist/out-tsc",
+    "outDir": "./out-tsc/app",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
@@ -20,6 +20,7 @@
     "useDefineForClassFields": false,
     "lib": [
       "ES2022",
+      "ES2015",
       "dom"
     ]
   },
@@ -28,5 +29,11 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "files": [
+    "src/app.component.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
 }
