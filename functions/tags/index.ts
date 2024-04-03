@@ -5,7 +5,6 @@ interface Env {
 export const onRequest: PagesFunction<Env> = async ({request, env}) => {
     const cache = caches.default;
     const key = request.url;
-    await cache.delete(key)
     let response = await cache.match(key);
 
     console.log('response', response, "key", key, "request", request, "env", env);
