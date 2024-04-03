@@ -23,8 +23,9 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
             'Content-Type': 'application/json',
         },
     }).then(response => {
-        const newResponse = new Response(response.body, {
-            status: response.status,
+        const clonedResponse = response.clone();
+        const newResponse = new Response(clonedResponse.body, {
+            status: clonedResponse.status,
             headers: {
                 'Cache-Control': 'max-age=86400, public'
             }
