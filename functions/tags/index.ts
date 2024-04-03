@@ -3,8 +3,9 @@ interface Env {
 }
 
 export const onRequest: PagesFunction<Env> = async ({request, env}) => {
-    const key = new Request(new URL(request.url).toString(), request);
-    let response = await caches.default.match(key);
+    const cache = await caches.default;
+    const key = request.url;
+    let response = await cache.match(key);
 
     console.log('response', response, "key", key, "request", request, "env", env);
 
@@ -21,6 +22,12 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
         headers: {
             'Content-Type': 'application/json',
         },
-    }).then(({status}) => new Response(JSON.stringify(response), {status}))
-        .catch(({message}) => new Response(JSON.stringify({message}), {status: 500}));
+    }).then(({status}) => {
+        response.headers.set('Cache-Control', 'max-age=86400, public');
+        cache.put(key, response.clone());
+
+        const newResponse = new Response(response.body, {status});
+        newResponse.headers.set('Cache-Control', 'max-age=86400, public');
+        return newResponse;
+    }).catch(({message}) => new Response(JSON.stringify({message}), {status: 500}));
 }
