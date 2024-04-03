@@ -3,7 +3,7 @@ interface Env {
 }
 
 export const onRequest: PagesFunction<Env> = async ({request, env}) => {
-    const cache = await caches.default;
+    const cache = caches.default;
     const key = request.url;
     let response = await cache.match(key);
 
@@ -22,7 +22,7 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
         headers: {
             'Content-Type': 'application/json',
         },
-    }).then(response => {
+    }).then(async (response) => {
         const clonedResponse = response.clone();
         const newResponse = new Response(clonedResponse.body, {
             status: clonedResponse.status,
@@ -30,8 +30,8 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
                 'Cache-Control': 'max-age=86400, public'
             }
         });
-        cache.put(key, newResponse.clone());
-        console.log("cached", cache.match(key));
+        await cache.put(key, newResponse.clone());
+        console.log("cached", await cache.match(key));
         return newResponse;
     }).catch(err => {
         console.error(err);
