@@ -22,11 +22,11 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
         headers: {
             'Content-Type': 'application/json',
         },
-    }).then(({status}) => {
+    }).then(response => {
         response.headers.set('Cache-Control', 'max-age=86400, public');
         cache.put(key, response.clone());
 
-        const newResponse = new Response(response.body, {status});
+        const newResponse = new Response(response.body, {status: response.status});
         newResponse.headers.set('Cache-Control', 'max-age=86400, public');
         return newResponse;
     }).catch(({message}) => new Response(JSON.stringify({message}), {status: 500}));
