@@ -17,6 +17,13 @@ import { APP_CONFIG } from "../config";
         MapCircle
     ],
     styles: [`
+      :host {
+        display: block;
+        width: 100%;
+        height: 100%;
+        aspect-ratio: 16 / 8;
+      }
+
         ::ng-deep google-map .map-container {
             aspect-ratio: 16 / 8;
         }
