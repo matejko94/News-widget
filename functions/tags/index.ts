@@ -13,6 +13,8 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
         return response;
     }
 
+    console.log(env.ENDPOINT)
+
     console.log("cache miss");
     return fetch(env.ENDPOINT, {
         method: 'GET',
