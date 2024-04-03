@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "watch": "ng build --watch --configuration production",
-    "build": "ng build --output-hashing=none --configuration production",
+    "build": "ng build --configuration production",
     "server": "http-server -p 3000"
   },
   "private": true,

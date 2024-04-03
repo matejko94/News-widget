@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { HttpClient, HttpHeaders, provideHttpClient, withJsonpSupport } from "@angular/common/http";
 import { GoogleMapsModule } from "@angular/google-maps";
-import { BehaviorSubject, catchError, delay, EMPTY, filter, map, Observable, of, pairwise, shareReplay, startWith, switchMap, take, tap } from "rxjs";
+import { BehaviorSubject, catchError, delay, EMPTY, filter, map, Observable, of, pairwise, shareReplay, startWith, switchMap, tap } from "rxjs";
 import { AsyncPipe, DatePipe, JsonPipe, SlicePipe } from "@angular/common";
 import { NewsItem } from "./entities/news-item.interface";
 import { CloudData, TagCloudComponent } from "angular-tag-cloud-module";
@@ -11,10 +11,7 @@ import { createApplication } from "@angular/platform-browser";
 import { SentimentMeterComponent } from "./components/sentiment-meter.component";
 import { CloudDataDto } from "./entities/cloud-data-dto.interface";
 import { HeatmapComponent } from "./components/heatmap.component";
-
-function toNumber(value: string | number) {
-    return Number(value)
-}
+import { toNumber } from "./util/to-number";
 
 @Component({
     selector: 'app-root',
@@ -79,11 +76,11 @@ export class AppComponent implements OnInit {
     @Input({alias: 'map-circle-radius-factor', transform: toNumber}) public mapCircleRadiusFactor: number = 1;
     @Input({alias: 'last-days', transform: toNumber}) public lastDays!: number;
     @Input({alias: 'delay-ms', transform: toNumber}) public delayMs?: number;
+    @Input({alias: 'tag-endpoint'}) public tagEndpoint!: string;
+    @Input({alias: 'tag-key'}) public apiKey!: string;
     @Input({transform: toNumber}) public zoom: number = 0;
     @Input({transform: toNumber}) public lat: number = 0;
     @Input({transform: toNumber}) public lng: number = 0;
-    @Input({alias: 'tag-endpoint'}) public tagEndpoint!: string;
-    @Input({alias: 'tag-key'}) public apiKey!: string;
     @Input() public sdg!: string;
     @Input() public uri!: string;
     public shownDate$ = new BehaviorSubject(new Date());
@@ -157,7 +154,7 @@ export class AppComponent implements OnInit {
                 {
                     headers: new HttpHeaders({
                         'Content-Type': 'application/json',
-                        'Authorization': 'Basic ' + btoa('elastic:changeme'),
+                        'Authorization': 'Basic ' + btoa('elastic_searchpoint:9GWd1yPhSRxvP7JTrZ'),
                     }),
                 })),
             map(response => response.hits.hits),
