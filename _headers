@@ -1,0 +1,2 @@
+https://news-widget.pages.dev/*
+  Content-Security-Policy: script-src 'nonce-123'
