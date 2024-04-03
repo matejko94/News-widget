@@ -7,6 +7,8 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
     const key = new Request(new URL(request.url).toString(), request);
     let response = await caches.default.match(key);
 
+    console.log('response', response, "key", key, "request", request, "env", env);
+
     if (response) {
         return response;
     }
