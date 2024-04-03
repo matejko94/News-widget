@@ -20,14 +20,14 @@ import { CloudDataDto } from "./entities/cloud-data-dto.interface";
       @tailwind base;
       @tailwind components;
       @tailwind utilities;
-      
+
       ::ng-deep body {
         font-family: 'Roboto', sans-serif;
         font-size: 16px;
         line-height: 1.5;
         margin: 0;
         padding: 0;
-        
+
         * {
           box-sizing: border-box;
         }
@@ -39,7 +39,7 @@ import { CloudDataDto } from "./entities/cloud-data-dto.interface";
         height: 100%;
         padding: 0.25rem;
       }
-      
+
       .h-container {
         height: 550px;
       }
@@ -115,10 +115,6 @@ export class AppComponent implements OnInit {
     }
 
     private initializeData() {
-        if (!this.appConfig.elasticSearchUrl) {
-            return of([]);
-        }
-
         return this.shownDate$.pipe(
             tap(() => this.isLoading$.next(true)),
             switchMap(shownDate => this.http.post<{ hits: { hits: NewsItem[] } }>(
@@ -184,19 +180,18 @@ export class AppComponent implements OnInit {
     }
 
     private initializeCloudData() {
-        return this.http.get<CloudDataDto>(
-            `${ this.appConfig.tagEndpoint }?uri=${ this.appConfig.uri }&apiKey=${ this.appConfig.apiKey }&resultType=keywordAggr`
-        ).pipe(
-            map(({keywordAggr}) => keywordAggr.results.map(result => ({
-                text: result.keyword,
-                weight: result.weight * 1000
-            }))),
-            shareReplay(1),
-            catchError(e => {
-                console.error('failed to fetch cloud data', e);
-                return of([])
-            })
-        );
+        return this.http.get<CloudDataDto>(`https://news-widget.pages.dev/tags`)
+            .pipe(
+                map(({keywordAggr}) => keywordAggr.results.map(result => ({
+                    text: result.keyword,
+                    weight: result.weight * 1000
+                }))),
+                shareReplay(1),
+                catchError(e => {
+                    console.error('failed to fetch cloud data', e);
+                    return of([])
+                })
+            );
     }
 
     private get minDate() {

@@ -10,15 +10,16 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
     console.log('response', response, "key", key, "request", request, "env", env);
 
     if (response) {
+        console.log("cache hit");
         return response;
     }
 
+    console.log("cache miss");
     return fetch(env.ENDPOINT, {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Basic ${ btoa(env.TOKEN) }`,
         },
-        body: request.body,
     }).then(({status}) => new Response(JSON.stringify(response), {status}))
         .catch(({message}) => new Response(JSON.stringify({message}), {status: 500}));
 }

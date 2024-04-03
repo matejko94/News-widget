@@ -2,10 +2,7 @@ import { InjectionToken } from '@angular/core';
 
 export interface AppConfig {
     googleMapsApiKey: string;
-    uri: string;
     elasticSearchUrl: string
-    tagEndpoint: string;
-    apiKey: string;
     sdg: string;
     mapHeight: string;
     mapCircleRadiusFactor: number;
@@ -27,10 +24,7 @@ export function configFactory(): AppConfig {
 
     return {
         googleMapsApiKey: params.get('googleMapsApiKey') ?? "AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc",
-        uri: params.get('uri') ?? "d2781b6e-ac05-4b9e-a4c9-ec0d1a4c2d57",
         elasticSearchUrl: params.get('elasticSearchUrl') ?? "https://qmidas.quintelligence.com/elasticsearch-sgd/media/_search",
-        tagEndpoint: params.get('tagEndpoint') ?? "https://eventregistry.org/api/v1/article/getArticlesForTopicPage",
-        apiKey: params.get("apiKey") ?? "f9afd6db-9425-4720-a89c-5de5af57c238",
         sdg: params.get('sdg')!,
         mapHeight: params.get('mapHeight') ?? "auto",
         mapCircleRadiusFactor: params.has('mapCircleRadiusFactor') ? Number(params.get('mapCircleRadiusFactor')) : 1.5,
