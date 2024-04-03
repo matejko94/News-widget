@@ -27,7 +27,8 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
         const newResponse = new Response(clonedResponse.body, {
             status: clonedResponse.status,
             headers: {
-                'Cache-Control': 'max-age=86400, public'
+                'Cache-Control': 'max-age=86400, public',
+                'Access-Control-Allow-Origin': '*',
             }
         });
         await cache.put(key, newResponse.clone());
