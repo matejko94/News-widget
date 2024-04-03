@@ -30,7 +30,7 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
                 'Cache-Control': 'max-age=86400, public'
             }
         });
-        cache.put(key, newResponse);
+        cache.put(key, newResponse.clone());
         console.log("cached", cache.match(key));
         return newResponse;
     }).catch(err => {
