@@ -5,5 +5,4 @@
     "lib": ["esnext"],
     "types": ["@cloudflare/workers-types"]
   },
-    "include": ["index.ts"],
 }

@@ -15,8 +15,10 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
 
     return fetch(env.ENDPOINT, {
         headers: {
-            Authorization: `Basic ${ env.TOKEN }`,
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${ btoa(env.TOKEN) }`,
         },
+        body: request.body,
     }).then(({status}) => new Response(JSON.stringify(response), {status}))
         .catch(({message}) => new Response(JSON.stringify({message}), {status: 500}));
 }
