@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import { GoogleMap, MapCircle } from "@angular/google-maps";
-import { catchError, EMPTY, map, Observable, of, take } from "rxjs";
+import { catchError, EMPTY, map, Observable, of, take, tap } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { NewsItem } from "../entities/news-item.interface";
 import { CircleItem } from "../entities/circle-item";
+import { APP_CONFIG } from "../config";
 
 @Component({
     selector: 'app-heatmap',
@@ -15,13 +16,14 @@ import { CircleItem } from "../entities/circle-item";
         GoogleMap,
         MapCircle
     ],
+    styles: [`
+        ::ng-deep google-map .map-container {
+            aspect-ratio: 16 / 8;
+        }
+    `],
     template: `
-        @if (mapInitialized | async) {
-            <google-map [height]="mapHeight() ?? 'auto'" width="100%" [zoom]="zoom()"
-                        [center]="location()"
-                        [options]="{ disableDefaultUI: true, minZoom: this.zoom(), 
-                        restriction: { latLngBounds: { north: 85, south: -85, west: -180, east: 180}}}">
-
+        @if (mapInitialized$ | async) {
+            <google-map [height]="mapHeight" width="100%" [zoom]="zoom" [center]="location" [options]="mapOptions">
                 @for (pos of markerPositions(); track pos.country) {
                     <map-circle [center]="pos.c" [title]="pos.country" [options]="pos.options"/>
                 }
@@ -31,27 +33,38 @@ import { CircleItem } from "../entities/circle-item";
 })
 export class HeatmapComponent {
     private http = inject(HttpClient);
+    private appConfig = inject(APP_CONFIG);
 
-    googleMapsApiKey = input.required<string | undefined>();
-    mapHeight = input.required<string | undefined>();
-    mapCircleRadiusFactor = input.required<number>();
-    zoom = input.required<number>();
-    location = input.required<google.maps.LatLngLiteral>();
     newsItems = input.required<NewsItem[] | null>();
-    public mapInitialized: Observable<boolean> = EMPTY;
+    mapHeight = this.appConfig.mapHeight;
+    mapCircleRadiusFactor = this.appConfig.mapCircleRadiusFactor;
+    zoom = this.appConfig.zoom;
+    location = {
+        lat: this.appConfig.lat,
+        lng: this.appConfig.lng
+    };
+    public mapOptions = {
+        disableDefaultUI: true,
+        minZoom: this.appConfig.zoom,
+        restriction: {
+            latLngBounds:
+                {
+                    north: 85,
+                    south: -85,
+                    west: -180,
+                    east: 180
+                }
+        }
+    }
+    public mapInitialized$: Observable<boolean> = EMPTY;
     public markerPositions = computed(() => this.createMarkerPositions(this.newsItems()));
 
     public ngOnInit() {
-        console.log(this)
-        this.mapInitialized = this.initializeMap();
+        this.mapInitialized$ = this.initializeMap();
     }
 
     private initializeMap() {
-        if (!this.googleMapsApiKey()) {
-            return of(false);
-        }
-
-        return this.http.jsonp(`https://maps.googleapis.com/maps/api/js?key=${ this.googleMapsApiKey() }`, 'callback')
+        return this.http.jsonp(`https://maps.googleapis.com/maps/api/js?key=${ this.appConfig.googleMapsApiKey }`, 'callback')
             .pipe(
                 take(1),
                 map(() => true),
@@ -96,7 +109,7 @@ export class HeatmapComponent {
                 c: location,
                 options: {
                     fillColor: this.getColorForValue(sentiment),
-                    radius: (5000000 * this.mapCircleRadiusFactor()) * (count / totalNews),
+                    radius: (5000000 * this.mapCircleRadiusFactor) * (count / totalNews),
                     strokeWeight: 1,
                     strokeColor: this.getColorForValue(sentiment)
                 }

@@ -1,28 +1,37 @@
-import { ChangeDetectionStrategy, Component, inject, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders, provideHttpClient, withJsonpSupport } from "@angular/common/http";
-import { GoogleMapsModule } from "@angular/google-maps";
-import { BehaviorSubject, catchError, delay, EMPTY, filter, map, Observable, of, pairwise, shareReplay, startWith, switchMap, tap } from "rxjs";
-import { AsyncPipe, DatePipe, JsonPipe, SlicePipe } from "@angular/common";
-import { NewsItem } from "./entities/news-item.interface";
-import { CloudData, TagCloudComponent } from "angular-tag-cloud-module";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { createCustomElement } from "@angular/elements";
-import { createApplication } from "@angular/platform-browser";
-import { SentimentMeterComponent } from "./components/sentiment-meter.component";
-import { CloudDataDto } from "./entities/cloud-data-dto.interface";
+import { bootstrapApplication } from "@angular/platform-browser";
+import { APP_CONFIG, configFactory } from "./config";
+import { AsyncPipe, DatePipe, SlicePipe } from "@angular/common";
 import { HeatmapComponent } from "./components/heatmap.component";
-import { toNumber } from "./util/to-number";
+import { SentimentMeterComponent } from "./components/sentiment-meter.component";
+import { CloudData, TagCloudComponent } from "angular-tag-cloud-module";
+import { BehaviorSubject, catchError, delay, EMPTY, filter, map, Observable, of, pairwise, shareReplay, startWith, switchMap, tap } from "rxjs";
+import { NewsItem } from "./entities/news-item.interface";
+import { CloudDataDto } from "./entities/cloud-data-dto.interface";
 
 @Component({
-    selector: 'app-root',
+    selector: 'news-widget',
     standalone: true,
-    imports: [ GoogleMapsModule, AsyncPipe, SentimentMeterComponent, DatePipe, JsonPipe, SlicePipe, TagCloudComponent, HeatmapComponent ],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    encapsulation: ViewEncapsulation.ShadowDom,
+    imports: [ AsyncPipe, DatePipe, HeatmapComponent, SentimentMeterComponent, SlicePipe, TagCloudComponent ],
     styles: [ `
       @tailwind base;
       @tailwind components;
       @tailwind utilities;
+      
+      ::ng-deep body {
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        
+        * {
+          box-sizing: border-box;
+        }
+      }
 
       :host {
         display: block;
@@ -30,17 +39,16 @@ import { toNumber } from "./util/to-number";
         height: 100%;
         padding: 0.25rem;
       }
-
-      google-map .map-container {
-        aspect-ratio: 16 / 9;
+      
+      .h-container {
+        height: 550px;
       }
     ` ],
     template: `
-        <app-heatmap [googleMapsApiKey]="googleMapsApiKey" [mapHeight]="mapHeight" [zoom]="zoom"
-                     [mapCircleRadiusFactor]="mapCircleRadiusFactor" [location]="{lat,lng}" [newsItems]="data$ | async"
-        />
-        <div class="grid grid-cols-2 h-[550px]">
-            <div class="overflow-y-auto h-full">
+        <app-heatmap [newsItems]="data$ | async"/>
+
+        <div class="grid grid-cols-2 h-container">
+            <div class="overflow-y-auto h-container">
                 @for (newsItem of data$ | async; track newsItem._source.url) {
                     <div class="border-b-2 my-3" [title]="(newsItem._source.body | slice:0:100) + '...'">
                         <a class="font-semibold text-lg mb-2" [href]="newsItem._source.url">
@@ -50,16 +58,21 @@ import { toNumber } from "./util/to-number";
                             {{ newsItem._source.dateTimePub | date: 'EEE MMM d yyyy, HH:mm': 'UTC' }}
                         </div>
                     </div>
+                } @empty {
+                    <div class="flex flex-col justify-center items-center h-full text-xl font-semibold text-gray-600">
+                        No news found
+                    </div>
                 }
             </div>
 
-            <div class="overflow-hidden">
+            <div class="overflow-hidden flex flex-col items-center">
                 <angular-tag-cloud [overflow]="false" [data]="(cloudData$ | async) ?? []" class="!w-full m-auto"/>
-                <app-sentiment-meter [value]="sentiment$ | async"/>
-                <div class="flex justify-between gap-4 mt-4 ml-6 w-full">
+                <app-sentiment-meter [value]="sentiment$ | async" class="pl-6"/>
+                <div class="flex justify-between gap-4 ml-6 w-full">
                     <div class="text-lg">
                         <div>Showing: <b>{{ loadedDate$ | async | date: 'dd.MM.yyyy' }}</b></div>
-                        <div>Total: <b>{{ (data$ | async)?.length }}</b> | Sentiment: <b>{{ sentiment$ | async }}</b>
+                        <div>
+                            Total: <b>{{ (data$ | async)?.length }}</b> | Sentiment: <b>{{ sentiment$ | async }}</b>
                         </div>
                     </div>
                 </div>
@@ -69,20 +82,8 @@ import { toNumber } from "./util/to-number";
 })
 export class AppComponent implements OnInit {
     private http = inject(HttpClient);
+    private appConfig = inject(APP_CONFIG);
 
-    @Input({alias: 'google-maps-api-key'}) public googleMapsApiKey?: string;
-    @Input({alias: 'elastic-search-url'}) public elasticSearchUrl?: string;
-    @Input({alias: 'map-height'}) public mapHeight?: string;
-    @Input({alias: 'map-circle-radius-factor', transform: toNumber}) public mapCircleRadiusFactor: number = 1;
-    @Input({alias: 'last-days', transform: toNumber}) public lastDays!: number;
-    @Input({alias: 'delay-ms', transform: toNumber}) public delayMs?: number;
-    @Input({alias: 'tag-endpoint'}) public tagEndpoint!: string;
-    @Input({alias: 'tag-key'}) public apiKey!: string;
-    @Input({transform: toNumber}) public zoom: number = 0;
-    @Input({transform: toNumber}) public lat: number = 0;
-    @Input({transform: toNumber}) public lng: number = 0;
-    @Input() public sdg!: string;
-    @Input() public uri!: string;
     public shownDate$ = new BehaviorSubject(new Date());
     public loadedDate$ = new BehaviorSubject(new Date());
     public isLoading$ = new BehaviorSubject(true);
@@ -91,14 +92,6 @@ export class AppComponent implements OnInit {
     public sentiment$: Observable<number> = EMPTY;
 
     public ngOnInit() {
-        if (!this.googleMapsApiKey) console.error('missing google maps api key');
-        if (!this.elasticSearchUrl) console.error('missing elastic search url');
-        if (!this.lastDays) console.error('missing last days');
-        if (!this.delayMs) console.error('missing delay ms');
-        if (!this.sdg) console.error('missing sdg');
-        if (!this.uri) console.error('missing uri');
-        if (!this.apiKey) console.error('missing api key');
-
         this.shownDate$.next(new Date());
         this.data$ = this.initializeData();
         this.cloudData$ = this.initializeCloudData();
@@ -108,7 +101,7 @@ export class AppComponent implements OnInit {
             startWith(true),
             pairwise(),
             filter(([ prev, next ]) => prev && !next),
-            delay(this.delayMs ?? 0),
+            delay(this.appConfig.delayMs),
             tap(() => {
                 const currentDate = new Date(this.shownDate$.value);
 
@@ -122,13 +115,14 @@ export class AppComponent implements OnInit {
     }
 
     private initializeData() {
-        if (!this.elasticSearchUrl) {
+        if (!this.appConfig.elasticSearchUrl) {
             return of([]);
         }
 
         return this.shownDate$.pipe(
             tap(() => this.isLoading$.next(true)),
-            switchMap(shownDate => this.http.post<{ hits: { hits: NewsItem[] } }>(this.elasticSearchUrl!,
+            switchMap(shownDate => this.http.post<{ hits: { hits: NewsItem[] } }>(
+                this.appConfig.elasticSearchUrl,
                 {
                     "size": 10000,
                     "query": {
@@ -136,7 +130,7 @@ export class AppComponent implements OnInit {
                             "must": [
                                 {
                                     "match": {
-                                        "SDG.keyword": `SDG ${ this.sdg }`
+                                        "SDG.keyword": `SDG ${ this.appConfig.sdg }`
                                     }
                                 },
                                 {
@@ -191,7 +185,7 @@ export class AppComponent implements OnInit {
 
     private initializeCloudData() {
         return this.http.get<CloudDataDto>(
-            `${ this.tagEndpoint }?uri=${ this.uri }&apiKey=${ this.apiKey }&resultType=keywordAggr`
+            `${ this.appConfig.tagEndpoint }?uri=${ this.appConfig.uri }&apiKey=${ this.appConfig.apiKey }&resultType=keywordAggr`
         ).pipe(
             map(({keywordAggr}) => keywordAggr.results.map(result => ({
                 text: result.keyword,
@@ -203,22 +197,18 @@ export class AppComponent implements OnInit {
                 return of([])
             })
         );
-
     }
 
     private get minDate() {
-        return new Date(new Date().setDate(new Date().getDate() - this.lastDays));
+        return new Date(new Date().setDate(new Date().getDate() - this.appConfig.lastDays));
     }
 
 }
 
-(async () => {
-    const {injector} = await createApplication({
-        providers: [
-            provideHttpClient(withJsonpSupport()),
-            provideAnimations()
-        ]
-    })
-
-    customElements.define('news-widget', createCustomElement(AppComponent, {injector}));
-})();
+bootstrapApplication(AppComponent, {
+    providers: [
+        provideHttpClient(withJsonpSupport()),
+        provideAnimations(),
+        {provide: APP_CONFIG, useFactory: configFactory}
+    ]
+}).catch(err => console.error(err));
