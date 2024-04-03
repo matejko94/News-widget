@@ -1,22 +1,21 @@
-Run locally on http://172.17.0.2:3000/?SDG=1:
-```shell
-docker build -t news-widget .
+## Configuration
+- open [src/config.ts](./src/config.ts) and check the configuration default values
+- currently next queryParameters are supported:
+
+```
+googleMapsApiKey - google maps api key
+elasticSearchUrl - elasticsearch url
+sdg - sdg number (required)
+mapHeight - map height
+mapCircleRadiusFactor - map circle radius factor
+lastDays - last days
+delayMs - delay ms
+zoom - initial map zoom
+lat - initial map lat
+lng - initial map lng
 ```
 
-```shell
-docker run -d -p 3000:3000 news-widget
-```
-
-To build polyfills.js and main.js files:
-
-first install dependencies:
-```shell
-  npm install
-```
-
-then build:
-```shell
-  npm run build
-```
-
-Go to /dist/news-widget
+## Workers proxy
+- currently worker caches requests for 1 day
+- cache can be bypassed with hard reload `CTRL + SHIFT + R` or `CTRL + F5`
+- full endpoint url with queryParameters can eb configured under `ENDPOINT` environment variable on [Cloudflare Dashboard](https://dash.cloudflare.com/79b2aa6fff4d448f6c2208509b887c37/pages/view/news-widget/settings/environment-variables)
