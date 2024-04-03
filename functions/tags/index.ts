@@ -23,11 +23,15 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
             'Content-Type': 'application/json',
         },
     }).then(response => {
-        response.headers.set('Cache-Control', 'max-age=86400, public');
-        cache.put(key, response.clone());
+        const clonedResponse = response.clone();
+        clonedResponse.headers.set('Cache-Control', 'max-age=86400, public');
+        cache.put(key, clonedResponse.clone());
 
         const newResponse = new Response(response.body, {status: response.status});
         newResponse.headers.set('Cache-Control', 'max-age=86400, public');
         return newResponse;
-    }).catch(({message}) => new Response(JSON.stringify({message}), {status: 500}));
+    }).catch(err => {
+        console.error(err);
+        return new Response(JSON.stringify(err), {status: 500})
+    });
 }
