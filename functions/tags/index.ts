@@ -1,6 +1,5 @@
 interface Env {
     ENDPOINT: string;
-    TOKEN: string;
 }
 
 export const onRequest: PagesFunction<Env> = async ({request, env}) => {
