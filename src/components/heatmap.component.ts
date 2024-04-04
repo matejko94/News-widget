@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import { GoogleMap, MapCircle } from "@angular/google-maps";
-import { catchError, EMPTY, map, Observable, of, take, tap } from "rxjs";
+import { catchError, EMPTY, map, Observable, of, take } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { NewsItem } from "../entities/news-item.interface";
 import { CircleItem } from "../entities/circle-item";
@@ -24,10 +24,10 @@ import { APP_CONFIG } from "../config";
         aspect-ratio: 16 / 8;
       }
 
-        ::ng-deep google-map .map-container {
-            aspect-ratio: 16 / 8;
-        }
-    `],
+      ::ng-deep google-map .map-container {
+        aspect-ratio: 16 / 8;
+      }
+    ` ],
     template: `
         @if (mapInitialized$ | async) {
             <google-map [height]="mapHeight" width="100%" [zoom]="zoom" [center]="location" [options]="mapOptions">
@@ -124,7 +124,7 @@ export class HeatmapComponent {
     }
 
     private getColorForValue(value: number) {
-        return `hsl(${ ((1 - value) / 2) * 120 }, ${ 100 }%, ${ 50 }%)`;
+        return `hsl(${ ((value + 1) / 2) * 120 }, ${ 100 }%, ${ 50 }%)`;
     }
 
 }
