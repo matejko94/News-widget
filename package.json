@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "dev": "ng serve",
-    "build": "ng build --configuration production && cat component/index.html && ls component"
+    "build": "ng build --configuration production"
   },
   "private": true,
   "dependencies": {

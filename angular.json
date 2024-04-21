@@ -41,7 +41,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
-            "outputPath": "component/",
+            "outputPath": "dist/",
             "index": "index.html",
             "main": "src/app.component.ts",
             "polyfills": [
