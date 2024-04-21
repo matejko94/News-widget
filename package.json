@@ -3,10 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "dev": "npm run watch & npm run server",
-    "watch": "ng build --watch --configuration development",
-    "build": "ng build --configuration production",
-    "server": "http-server -p 3000"
+    "dev": "ng serve",
+    "build": "ng build --configuration production"
   },
   "private": true,
   "dependencies": {
@@ -14,13 +12,11 @@
     "@angular/common": "^17.3.2",
     "@angular/compiler": "^17.3.2",
     "@angular/core": "^17.3.2",
-    "@angular/elements": "^17.3.2",
     "@angular/google-maps": "^17.0.4",
     "@angular/platform-browser": "^17.3.2",
     "@angular/platform-browser-dynamic": "^17.3.2",
     "@angular/router": "^17.3.2",
     "angular-tag-cloud-module": "^17.0.0",
-    "http-server": "^14.1.1",
     "nodemon": "^3.1.0",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.2",

@@ -180,7 +180,7 @@ export class AppComponent implements OnInit {
     }
 
     private initializeCloudData() {
-        return this.http.get<CloudDataDto>(`https://news-widget.pages.dev/tags`)
+        return this.http.get<CloudDataDto>(`https://news-widget.pages.dev/tags?topicKey=${ this.appConfig.topicKey }`)
             .pipe(
                 map(({keywordAggr}) => keywordAggr.results.map(result => ({
                     text: result.keyword,

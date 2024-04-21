@@ -5,6 +5,7 @@ export interface AppConfig {
     elasticSearchUrl: string
     sdg: string;
     mapHeight: string;
+    topicKey: string;
     mapCircleRadiusFactor: number;
     lastDays: number;
     delayMs: number;
@@ -22,10 +23,15 @@ export function configFactory(): AppConfig {
         throw new Error('missing sdg');
     }
 
+    if (!params.has('topicKey')) {
+        throw new Error('missing topicKey');
+    }
+
     return {
         googleMapsApiKey: params.get('googleMapsApiKey') ?? "AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc",
         elasticSearchUrl: params.get('elasticSearchUrl') ?? "https://qmidas.quintelligence.com/elasticsearch-sgd/media/_search",
         sdg: params.get('sdg')!,
+        topicKey: params.get('topicKey')!,
         mapHeight: params.get('mapHeight') ?? "auto",
         mapCircleRadiusFactor: params.has('mapCircleRadiusFactor') ? Number(params.get('mapCircleRadiusFactor')) : 1.5,
         lastDays: params.has('lastDays') ? Number(params.get('lastDays')) : 31,

@@ -1,3 +1,14 @@
+## Local development
+- install packages:
+```bash
+npm install
+```
+- start development server:
+```bash
+npm run dev
+```
+ - provide sdg and topicKey query parameters in localhost url
+
 ## Configuration
 - open [src/config.ts](./src/config.ts) and check the configuration default values
 - currently next queryParameters are supported:
