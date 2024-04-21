@@ -28,7 +28,7 @@ export function configFactory(): AppConfig {
     }
 
     return {
-        googleMapsApiKey: params.get('googleMapsApiKey') ?? "AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc",
+        googleMapsApiKey: params.get('googleMapsApiKey') ?? "AIzaSyCdtOGarihoROHd5RzK4jBXdr6b8g6xit4",
         elasticSearchUrl: params.get('elasticSearchUrl') ?? "https://qmidas.quintelligence.com/elasticsearch-sgd/media/_search",
         sdg: params.get('sdg')!,
         topicKey: params.get('topicKey')!,
