@@ -61,7 +61,20 @@ export class HeatmapComponent {
                     west: -180,
                     east: 180
                 }
-        }
+        },
+        styles: [
+            {
+              "featureType": "administrative.country",
+              "elementType": "labels",
+              "stylers": [
+                { "visibility": "off" }
+              ]
+            },{
+                    "featureType": "water",
+                    "elementType": "geometry",
+                    "stylers": [{ "lightness": 17 }]
+            }
+          ]
     }
     public mapInitialized$: Observable<boolean> = EMPTY;
     public markerPositions = computed(() => this.createMarkerPositions(this.newsItems()));
@@ -117,7 +130,8 @@ export class HeatmapComponent {
                 options: {
                     fillColor: this.getColorForValue(sentiment),
                     radius: (5000000 * this.mapCircleRadiusFactor) * (count / totalNews),
-                    strokeWeight: 1,
+                    strokeWeight: 2,
+                    fillOpacity: 0.6,
                     strokeColor: this.getColorForValue(sentiment)
                 }
             }));
