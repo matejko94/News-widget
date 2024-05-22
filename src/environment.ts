@@ -1,7 +1,7 @@
 export const environment = {
     api: {
         news: {
-            url:'https://qmidas.quintelligence.com/elasticsearch-sgd/media/_search',
+            url:'https://midas.ijs.si/elasticsearch-sgd/media/_search',
             auth: btoa('elastic_searchpoint:9GWd1yPhSRxvP7JTrZ')
         },
         googleMaps: {
