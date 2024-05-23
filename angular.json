@@ -43,7 +43,10 @@
           "options": {
             "outputPath": "dist/",
             "index": "index.html",
-            "main": "src/app.component.ts",
+            "main": "src/main.ts",
+            "styles": [
+              "src/styles.scss"
+            ],
             "polyfills": [
               "zone.js"
             ],

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "dev": "ng serve",
+    "start": "ng serve",
     "build": "ng build --configuration production"
   },
   "private": true,
@@ -17,7 +17,6 @@
     "@angular/platform-browser-dynamic": "^17.3.2",
     "@angular/router": "^17.3.2",
     "angular-tag-cloud-module": "^17.0.0",
-    "nodemon": "^3.1.0",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.2",
     "zone.js": "~0.14.2"
