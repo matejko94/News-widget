@@ -22,7 +22,9 @@
       "ES2022",
       "ES2015",
       "dom"
-    ]
+    ],
+    "typeRoots": ["node_modules/@types", "src/types"],
+    "types": ["geojson"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
