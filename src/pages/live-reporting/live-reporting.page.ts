@@ -295,7 +295,7 @@ export default class LiveReportingPage implements AfterViewInit {
         // Map the data to the countries
         const data = countries.features.map((feature: Feature<Geometry, { name: string }>) => ({
             feature: feature,
-            value: rearranged[countryCodes[feature.properties.name]] // Random data for demonstration
+            value: rearranged[countryCodes[feature.properties.name]] || 0 // Random data for demonstration
 
         }));
 
@@ -309,25 +309,25 @@ export default class LiveReportingPage implements AfterViewInit {
                 datasets: [{
                     label: 'Countries',
                     data: data,
-                    backgroundColor: (context) => {
-                        // console.log(context.datasetIndex)
-                        // console.log(context)
-                        if (context.dataIndex !== undefined) {
-                            const value = context.dataset.data[context.dataIndex].value;
-                            const opacity = (value - 50) / 50;
-                            return `rgba(244, 4, 0, ${opacity + 0.5})`;
-                        } else {
-                            return `rgba(244, 4, 0, ${0})`;
-                        }
-                    },
-                    borderColor: '#FFFFFF',
+                    // backgroundColor: (context) => {
+                    //     // console.log(context.datasetIndex)
+                    //     // console.log(context)
+                    //     if (context.dataIndex !== undefined) {
+                    //         const value = context.dataset.data[context.dataIndex].value;
+                    //         const opacity = (value - 10000) / 10000;
+                    //         return `rgba(244, 4, 0, ${opacity + 0.5})`;
+                    //     } else {
+                    //         return `rgba(244, 4, 0, ${0})`;
+                    //     }
+                    // },
+                    borderColor: '#000000',
                     borderWidth: 1
                 }]
             },
             options: {
                 plugins: {
                     legend: {
-                        display: false
+                        display: true
                     }
                 }
                 ,
@@ -336,14 +336,15 @@ export default class LiveReportingPage implements AfterViewInit {
                         axis: 'x',
                         projection: 'mercator'
                     },
-                    // color: {
-                    //     axis: 'x',
-                    //     //interpolate: (v) => (v < 0.5 ? 'green' : 'red'),
-                    //     legend: {
-                    //       position: 'bottom-right',
-                    //       align: 'right',
-                    //     },
-                    //   },
+                    color: {
+                        axis: 'x',
+                        interpolate: (v) => `rgba(244, 4, 0, ${v})`,
+                        //interpolate: (v) => (v < 0.5 ? 'green' : 'red'),
+                        legend: {
+                          position: 'bottom-right',
+                          align: 'right',
+                        },
+                      },
                 }
             }
         });
