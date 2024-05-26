@@ -74,7 +74,20 @@ export class HeatmapComponent implements OnInit {
                     west: -180,
                     east: 180
                 }
+            },
+        styles: [
+            {
+              "featureType": "administrative.country",
+              "elementType": "labels",
+              "stylers": [
+                { "visibility": "off" }
+              ]
+            },{
+                    "featureType": "water",
+                    "elementType": "geometry",
+                    "stylers": [{ "lightness": 17 }]
             }
+          ]
         }
     }
 
@@ -127,7 +140,8 @@ export class HeatmapComponent implements OnInit {
                 options: {
                     fillColor: this.getColorForValue(sentiment),
                     radius: (5000000 * circleRadius) * (count / totalNews),
-                    strokeWeight: 1,
+                    strokeWeight: 2,
+                    fillOpacity: 0.6,
                     strokeColor: this.getColorForValue(sentiment)
                 }
             }));

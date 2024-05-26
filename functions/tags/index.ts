@@ -13,11 +13,15 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
         console.log("cache hit");
         return response;
     }
-
-    console.log(env.ENDPOINT)
-
     console.log("cache miss ");
-    return fetch(env.ENDPOINT, {
+
+    const topicKey = new URL(request.url).searchParams.get('topicKey');
+
+    if (!topicKey) {
+        return new Response('Missing queryParameter: topicKey', {status: 400});
+    }
+
+    return fetch(`${ env.ENDPOINT }&uri=${ topicKey }`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
