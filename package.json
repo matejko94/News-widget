@@ -33,6 +33,7 @@
     "@angular/compiler-cli": "^17.3.2",
     "@cloudflare/workers-types": "^4.20240402.0",
     "@types/d3": "^7.4.3",
+    "@types/geojson": "^7946.0.14",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",

@@ -78,6 +78,9 @@ importers:
       '@types/d3':
         specifier: ^7.4.3
         version: 7.4.3
+      '@types/geojson':
+        specifier: ^7946.0.14
+        version: 7946.0.14
       autoprefixer:
         specifier: ^10.4.16
         version: 10.4.19(postcss@8.4.38)
