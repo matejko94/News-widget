@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit } from "@angular/core";
-import { BehaviorSubject, delay, EMPTY, filter, map, Observable, pairwise, share, shareReplay, startWith, switchMap, tap } from "rxjs";
+import { BehaviorSubject, delay, EMPTY, filter, map, Observable, pairwise, shareReplay, startWith, switchMap, tap } from "rxjs";
 import { NewsItem } from "../../domain/news/entity/news-item.interface";
 import { CloudData, TagCloudComponent } from "angular-tag-cloud-module";
 import { SentimentMeterComponent } from "../../ui/sentiment-meter/sentiment-meter.component";
@@ -47,7 +47,8 @@ import { NewsService } from "../../domain/news/service/news.service";
             </div>
 
             <div class="overflow-hidden flex flex-col items-center">
-                <angular-tag-cloud [overflow]="false" [data]="(cloudData$ | async) ?? []" class="!w-full m-auto"/>
+                <angular-tag-cloud [realignOnResize]="true" [overflow]="false" [data]="(cloudData$ | async) ?? []"
+                                   class="!w-full m-auto"/>
                 <app-sentiment-meter [value]="sentimentAverage$ | async" class="pl-6"/>
                 <div class="flex justify-between gap-4 ml-6 w-full">
                     <div class="text-lg">
