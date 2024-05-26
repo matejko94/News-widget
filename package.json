@@ -16,6 +16,7 @@
     "@angular/platform-browser": "^17.3.2",
     "@angular/platform-browser-dynamic": "^17.3.2",
     "@angular/router": "^17.3.2",
+    "@types/topojson-client": "^3.1.4",
     "angular-tag-cloud-module": "^17.0.0",
     "chart.js": "^4.4.2",
     "chartjs-chart-geo": "^4.3.0",
