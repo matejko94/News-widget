@@ -1,3 +1,37 @@
 canvas {
   width: 75%;
 }
+
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: 10vh; /* or whatever height you want for the container */
+    align-items: center;
+    justify-content: center;
+    text-align: center; /* centers the text inside the elements */
+
+}
+
+.centered-element {
+    position: relative;
+    padding: 20px 0; /* Add some padding to make space for the lines */
+}
+
+.centered-element:before,
+.centered-element:after {
+    content: "";
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    height: 1px; /* Line height */
+    background: black; /* Line color */
+}
+
+.centered-element:before {
+    top: 0;
+}
+
+.centered-element:after {
+    bottom: 0;
+}
