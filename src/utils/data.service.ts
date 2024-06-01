@@ -181,6 +181,46 @@ export class DataService {
         )
    }
 
+   getMediaByCountryCount(sdg: string): Observable<ScienceItem[]> {
+        return this.http.post<ScienceDto>(
+            environment.api.news.url,
+            {
+                "size": 0,
+                "query": {
+                    "bool": {
+                        "filter": [
+                            {
+                                "match": {
+                                    "SDG.keyword": `SDG ${sdg}`
+                                }
+                            }
+                        ]
+                    }
+                },
+                "aggs": {
+                    "countries": {
+                        "terms": {
+                            "field": "concepts.location.label.eng.keyword",
+                            "size": 10
+                        }
+                    }
+                }
+            },
+            {
+                headers: new HttpHeaders({
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + environment.api.news.auth,
+                }),
+            }).pipe(
+            map(response => response.aggregations.countries.buckets),
+            catchError(e => {
+                console.error('failed to fetch data', e);
+                return of([])
+            }),
+            shareReplay(1)
+        )
+   }
+
    getPolicyCount(sdg: string): Observable<number> {
         return this.http.post<{count: number}>(
             environment.api.policy_count.url,

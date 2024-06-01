@@ -19,8 +19,8 @@ import {DataService} from "../../utils/data.service";
   //   }
   // ` ],
   template: `
-    <div class="chart-container">
-      <canvas id="MyChart">{{ chart }}</canvas>
+    <div class="pie-chart-container">
+      <canvas id="PieChart">{{ chart }}</canvas>
     </div>
   `
 
@@ -46,7 +46,7 @@ export class PieChartComponent implements AfterViewInit{
           dataArray.push(data.doc_count)
           labelArray.push(data.key)
         }
-      this.chart = new Chart("MyChart", {
+      this.chart = new Chart("PieChart", {
         type: 'pie',
         // type: 'doughnut',
         data: {
