@@ -48,8 +48,10 @@ import { NewsService } from "../../domain/news/service/news.service";
 
             <div class="overflow-hidden flex flex-col items-center">
                 <angular-tag-cloud [realignOnResize]="true" [overflow]="false" [data]="(cloudData$ | async) ?? []"
-                                   class="!w-full m-auto"/>
+                                   class="pl-6"/>
+                
                 <app-sentiment-meter [value]="sentimentAverage$ | async" class="pl-6"/>
+                
                 <div class="flex justify-between gap-4 ml-6 w-full">
                     <div class="text-lg">
                         <div>Showing: <b>{{ loadedDate$ | async | date: 'dd.MM.yyyy' }}</b></div>

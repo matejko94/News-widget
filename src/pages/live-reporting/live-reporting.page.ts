@@ -22,7 +22,16 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
     selector: 'app-live-reporting',
     imports: [AsyncPipe, SlicePipe, PieChartComponent],
     template: `
-        <div style="width:100%;">
+            <head>
+                <link rel="icon" href="https://sdg-observatory.ircai.org/wp-content/uploads/2023/08/cropped-cropped-IRCAI_favikon-32x32.png" />
+                <meta charset="UTF-8">
+                <meta name="viewport"
+                      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+                <meta http-equiv="X-UA-Compatible" content="ie=edge">
+                <title>{{this.sdg()}}</title>
+            </head>
+            <body>>
+            <div style="width:100%;">
             <canvas id="geoChart" #geoChart></canvas>
             <div class="grid grid-cols-4 h-container grid-container">
                 <div class="centered-element">
@@ -47,7 +56,9 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
                 <app-piechart [sdg]="this.sdg()"></app-piechart>   
             </div>
 
-        </div>`,
+        </div>
+            </body>
+    `,
     styleUrls: ['./app.component.css']
 })
 
