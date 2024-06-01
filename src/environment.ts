@@ -8,6 +8,10 @@ export const environment = {
             url:'https://midas.ijs.si/elasticsearch-sgd/science/_search',
             auth: btoa('elastic_searchpoint:9GWd1yPhSRxvP7JTrZ')
         },
+        innovation: {
+            url:'https://midas.ijs.si/elasticsearch-sgd/innovations_v2/_search',
+            auth: btoa('elastic_searchpoint:9GWd1yPhSRxvP7JTrZ')
+        },
         science_count: {
             url:'https://midas.ijs.si/elasticsearch-sgd/science/_count',
             auth: btoa('elastic_searchpoint:9GWd1yPhSRxvP7JTrZ')

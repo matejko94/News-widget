@@ -12,6 +12,7 @@ import {ScienceItem} from "../../domain/news/entity/science-item.interface";
 import {countryCodes} from "../../resorces/country_mapper"
 import { DataService } from '../../utils/data.service';
 import {AsyncPipe, SlicePipe} from "@angular/common";
+import {PieChartComponent} from "../../ui/pie-chart/pie.chart";
 
 // Register the necessary Chart.js components and the Geo chart controller
 Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, ProjectionScale);
@@ -19,7 +20,7 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
 @Component({
     standalone: true,
     selector: 'app-live-reporting',
-    imports: [AsyncPipe, SlicePipe],
+    imports: [AsyncPipe, SlicePipe, PieChartComponent],
     template: `
         <div style="width:100%;">
             <canvas id="geoChart" #geoChart></canvas>
@@ -40,7 +41,10 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
                     <b>{{ textPolicyToDisplay$ | async }}</b>
                     <p>Academic-corporate collaboration</p>
                 </div>
-
+            </div>
+             
+            <div class="grid grid-cols-2">
+                <app-piechart [sdg]="this.sdg()"></app-piechart>   
             </div>
 
         </div>`,
@@ -185,4 +189,6 @@ export default class LiveReportingPage implements AfterViewInit {
             console.error('Error creating Geo chart:', error);
         }
     }
+
+    protected readonly sentimentAverage$ = EMPTY;
 }

@@ -59,6 +59,40 @@ export class DataService {
         )
     }
 
+   getInnovations(sdg: string): Observable<ScienceItem[]> {
+        return this.http.post<ScienceDto>(
+            environment.api.innovation.url,
+                    {
+                       "size":0,
+                       "query":{
+                          "wildcard":{
+                             "SDG.keyword":`*SDG ${sdg}*`
+                          }
+                       },
+                       "aggs":{
+                          "countries":{
+                             "terms":{
+                                "field":"country",
+                                "size":5
+                             }
+                          }
+                       }
+                    },
+            {
+                headers: new HttpHeaders({
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + environment.api.news.auth,
+                }),
+            }).pipe(
+            map(response => response.aggregations.countries.buckets),
+            catchError(e => {
+                console.error('failed to fetch data', e);
+                return of([])
+            }),
+            shareReplay(1)
+        )
+    }
+
     getScienceCount(sdg: string): Observable<number> {
         return this.http.post<{count: number}>(
             environment.api.science_count.url,
@@ -149,7 +183,7 @@ export class DataService {
 
    getPolicyCount(sdg: string): Observable<number> {
         return this.http.post<{count: number}>(
-            environment.api.media_count.url,
+            environment.api.policy_count.url,
             {
                 "query": {
                     "bool": {
