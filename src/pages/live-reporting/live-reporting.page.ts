@@ -13,6 +13,7 @@ import {countryCodes} from "../../resorces/country_mapper"
 import { DataService } from '../../utils/data.service';
 import {AsyncPipe, SlicePipe} from "@angular/common";
 import {PieChartComponent} from "../../ui/pie-chart/pie.chart";
+import {BarchartComponent} from "../../ui/bar-chart/bar.chart";
 
 // Register the necessary Chart.js components and the Geo chart controller
 Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, ProjectionScale);
@@ -20,7 +21,7 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
 @Component({
     standalone: true,
     selector: 'app-live-reporting',
-    imports: [AsyncPipe, SlicePipe, PieChartComponent],
+    imports: [AsyncPipe, SlicePipe, PieChartComponent, BarchartComponent],
     template: `
             <head>
                 <link rel="icon" href="https://sdg-observatory.ircai.org/wp-content/uploads/2023/08/cropped-cropped-IRCAI_favikon-32x32.png" />
@@ -54,6 +55,7 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
              
             <div class="grid grid-cols-2">
                 <app-piechart [sdg]="this.sdg()"></app-piechart>   
+                <app-barchart [sdg]="this.sdg()"></app-barchart>
             </div>
 
         </div>
