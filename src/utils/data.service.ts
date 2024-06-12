@@ -73,7 +73,7 @@ export class DataService {
                           "countries":{
                              "terms":{
                                 "field":"country",
-                                "size":5
+                                "size":10
                              }
                           }
                        }

@@ -35,3 +35,9 @@ canvas {
 .centered-element:after {
     bottom: 0;
 }
+
+.chart-container {
+    width: 70%; /* Adjust the width as needed */
+    height: 70%; /* Adjust the height as needed */
+    margin: auto; /* Center the container */
+}

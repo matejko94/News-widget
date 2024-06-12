@@ -40,7 +40,7 @@ export class BarchartComponent implements AfterViewInit{
               {
                 label: "number of news ...",
                 data: dataArray,
-                backgroundColor: "rgba(255, 99, 132, 0.7)",
+                backgroundColor: "rgba(146, 193, 192, 0.7)",
               }
             ]
           },
@@ -48,7 +48,7 @@ export class BarchartComponent implements AfterViewInit{
             plugins: {
               title: {
                 display: true,
-                text: "Top 10 countries by RA",
+                text: "SDG News Exposure",
                 font: {
                   size: 18,
                   weight: 'bold',
