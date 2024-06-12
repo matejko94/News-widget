@@ -41,21 +41,25 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
                 </div>
                 <div class="centered-element">
                     <b>{{ textPercentageToDisplay$ | async }}</b>
-                    <p>Compound annual growth rate</p>
+                    <p>Measured indicators</p>
                 </div>
                 <div class="centered-element">
                     <b>{{ textMediaToDisplay$ | async }}</b>
-                    <p>International collaboration</p>
+                    <p>Exposure to the Media</p>
                 </div>
                 <div class="centered-element">
                     <b>{{ textPolicyToDisplay$ | async }}</b>
-                    <p>Academic-corporate collaboration</p>
+                    <p>SDG AI Polices</p>
                 </div>
             </div>
              
             <div class="grid grid-cols-2">
-                <app-piechart [sdg]="this.sdg()"></app-piechart>   
-                <app-barchart [sdg]="this.sdg()"></app-barchart>
+                <div class="chart-container">
+                    <app-piechart [sdg]="this.sdg()"></app-piechart>
+                </div>
+                <div class="chart-container">
+                    <app-barchart [sdg]="this.sdg()"></app-barchart>
+                </div>
             </div>
 
         </div>

@@ -55,11 +55,16 @@ export class PieChartComponent implements AfterViewInit{
             label: 'Top 5 countries by innovation',
             data: dataArray,
             backgroundColor: [
-              'rgb(255, 99, 132)',
-              'rgb(54, 162, 235)',
-              'rgb(255, 205, 86)',
-              'rgb(75, 192, 192)',
-              'rgb(153, 102, 255)'
+              'rgb(146, 193, 192)',
+              'rgb(232, 236, 196)',
+              'rgb(236, 147, 106)',
+              'rgb(222, 179, 164)',
+              'rgb(213, 166, 50)',
+              'rgb(197, 196, 188)',
+              'rgb(199, 203, 151)',
+              'rgb(237, 173, 144)',
+              'rgb(185, 189, 167)',
+              'rgb(241, 227, 191)'
             ],
             hoverOffset: 4
           }]
@@ -68,7 +73,7 @@ export class PieChartComponent implements AfterViewInit{
           plugins: {
             title: {
               display: true,
-              text: 'Top 5 countries by innovation',
+              text: 'Top 10 SDG Innovation',
               font: {
                 size: 24,
                 weight: 'bold',
