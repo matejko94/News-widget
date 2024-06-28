@@ -116,7 +116,8 @@ export default class LiveReportingPage implements AfterViewInit {
     public async showMaps(scienceItem: ScienceItem[]) {
 
 
-        const world = await this.http.get<any>('https://drive.google.com/file/d/18Ajv2D9Kmvwg8pkY2NpIPmpwkCBbw07j/view').toPromise();
+        //const world = await this.http.get<any>('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').toPromise();
+        const world = await this.http.get<any>('/assets/world-geojson2.json').toPromise();
         if (!world || !world.objects || !world.objects.countries) {
             throw new Error('Invalid TopoJSON data');
         }

@@ -41,6 +41,9 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
+            "assets": [
+              "src/assets"
+            ],
             "outputPath": "dist/",
             "index": "index.html",
             "main": "src/main.ts",
