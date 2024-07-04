@@ -9,7 +9,14 @@ import {data} from "autoprefixer";
         <div class="bar-chart-container">
             <canvas  id="BarChart" >{{ chart }}</canvas>
         </div>`,
-    standalone: true
+    standalone: true,
+    styles: [`
+    .bar-chart-container {
+      position: relative;
+      height: 300px; /* Increase the height here */
+      width: 100%;
+    }
+  `]
    // styleUrls: ['./barchart.component.css']
 })
 export class BarchartComponent implements AfterViewInit{
@@ -50,12 +57,13 @@ export class BarchartComponent implements AfterViewInit{
                 display: true,
                 text: "SDG News Exposure",
                 font: {
-                  size: 18,
+                  size: 14,
                   weight: 'bold',
                 }
               },
               legend: {
                 display: true,
+                position: 'bottom',
                 labels: {
                   font: {
                     size: 14,
@@ -75,6 +83,7 @@ export class BarchartComponent implements AfterViewInit{
                 }
               },
               y: {
+                  beginAtZero: true,
                 grid: {
                   color: 'rgba(0, 0, 0, 0.1)', // Add a light grey color to Y-axis grid lines
                 },
@@ -82,7 +91,9 @@ export class BarchartComponent implements AfterViewInit{
                   font: {
                     size: 14
                   },
-                }
+                },
+                  min: 0, // Adjust this as necessary to fit your data
+                  max: Math.max(...dataArray) * 1 // Add some padding at the top
               }
             }
           }

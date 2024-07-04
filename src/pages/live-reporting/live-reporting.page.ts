@@ -32,37 +32,36 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
                 <title>{{this.sdg()}}</title>
             </head>
             <body>>
-            <div style="width:100%;">
-            <canvas id="geoChart" #geoChart></canvas>
-            <div class="grid grid-cols-4 h-container grid-container">
-                <div class="centered-element">
-                    <b>{{ textToDisplay$ | async }}</b>
-                    <p> Publications in the period</p>
+                <div style="width:100%;">
+                    <canvas id="geoChart" #geoChart></canvas>
+                    <div class="grid grid-cols-4 h-container grid-container">
+                        <div class="centered-element">
+                            <b>{{ textToDisplay$ | async }}</b>
+                            <p> Publications in the period</p>
+                        </div>
+                        <div class="centered-element">
+                            <b>{{ textPercentageToDisplay$ | async }}</b>
+                            <p>Measured indicators</p>
+                        </div>
+                        <div class="centered-element">
+                            <b>{{ textMediaToDisplay$ | async }}</b>
+                            <p>Exposure to the Media</p>
+                        </div>
+                        <div class="centered-element">
+                            <b>{{ textPolicyToDisplay$ | async }}</b>
+                            <p>SDG AI Polices</p>
+                        </div>
+                    </div>
+                     
+                    <div class="grid grid-cols-2">
+                        <div class="chart-container">
+                            <app-piechart [sdg]="this.sdg()"></app-piechart>
+                        </div>
+                        <div class="chart-container">
+                            <app-barchart [sdg]="this.sdg()"></app-barchart>
+                        </div>
+                    </div>
                 </div>
-                <div class="centered-element">
-                    <b>{{ textPercentageToDisplay$ | async }}</b>
-                    <p>Measured indicators</p>
-                </div>
-                <div class="centered-element">
-                    <b>{{ textMediaToDisplay$ | async }}</b>
-                    <p>Exposure to the Media</p>
-                </div>
-                <div class="centered-element">
-                    <b>{{ textPolicyToDisplay$ | async }}</b>
-                    <p>SDG AI Polices</p>
-                </div>
-            </div>
-             
-            <div class="grid grid-cols-2">
-                <div class="chart-container">
-                    <app-piechart [sdg]="this.sdg()"></app-piechart>
-                </div>
-                <div class="chart-container">
-                    <app-barchart [sdg]="this.sdg()"></app-barchart>
-                </div>
-            </div>
-
-        </div>
             </body>
     `,
     styleUrls: ['./app.component.css']
@@ -148,6 +147,7 @@ export default class LiveReportingPage implements AfterViewInit {
 
         this.canvas = this.geoChart.nativeElement;
         this.ctx = this.canvas.getContext("2d");
+        console.log(this.ctx);
         // Create the chart
         const chart = new Chart(this.ctx, {
             type: 'choropleth',
@@ -180,16 +180,16 @@ export default class LiveReportingPage implements AfterViewInit {
                 ,
                 scales: {
                     projection: {
-                        axis: 'x',
-                        projection: 'mercator'
+                        axis: 'y',
+                        projection: 'naturalEarth1'
                     },
                     color: {
                         axis: 'x',
                         interpolate: (v) => `rgba(244, 4, 0, ${v})`,
                         //interpolate: (v) => (v < 0.5 ? 'green' : 'red'),
                         legend: {
-                          position: 'top',
-                          align: 'top',
+                          position: 'bottom',
+                          align: 'bottom',
                           indicatorWidth: 20,
                           margin: 15
                         },
