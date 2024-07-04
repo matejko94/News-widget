@@ -172,6 +172,7 @@ export default class LiveReportingPage implements AfterViewInit {
                 }]
             },
             options: {
+                showOutline: true,
                 plugins: {
                     legend: {
                         display: false
@@ -191,7 +192,8 @@ export default class LiveReportingPage implements AfterViewInit {
                           position: 'bottom',
                           align: 'bottom',
                           indicatorWidth: 20,
-                          margin: 15
+                          length: 500,
+                          margin: 30
                         },
                       },
                 }
