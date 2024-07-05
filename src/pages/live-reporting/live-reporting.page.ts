@@ -70,6 +70,7 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
 export default class LiveReportingPage implements AfterViewInit {
 
     public sdg = input.required<string>();
+    public map_color = input.required<string>();
     constructor(private http: HttpClient, private dataService: DataService) {
     }
 
@@ -109,6 +110,20 @@ export default class LiveReportingPage implements AfterViewInit {
         } catch (error) {
             console.error('Error creating Geo chart:', error);
         }
+    }
+
+
+    hexToRgbA(hex:string, alpha: number){
+        if (hex == undefined) {
+            hex = 'df1010'
+        }
+
+        var r = parseInt(hex.slice(1, 3), 16),
+            g = parseInt(hex.slice(3, 5), 16),
+            b = parseInt(hex.slice(5, 7), 16);
+
+
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
 
@@ -167,7 +182,7 @@ export default class LiveReportingPage implements AfterViewInit {
                     //         return `rgba(244, 4, 0, ${0})`;
                     //     }
                     // },
-                    borderColor: '#000000',
+                    borderColor: '#808080',
                     borderWidth: 1
                 }]
             },
@@ -186,7 +201,13 @@ export default class LiveReportingPage implements AfterViewInit {
                     },
                     color: {
                         axis: 'x',
-                        interpolate: (v) => `rgba(244, 4, 0, ${v})`,
+                        interpolate: (v) => {
+                            const rgba: string = this.hexToRgbA(this.map_color(), v);
+                            return rgba
+                        },
+                        //interpolate: this.map_color(),
+                        //missing: '#ffffff',
+                        missing: '#000000',
                         //interpolate: (v) => (v < 0.5 ? 'green' : 'red'),
                         legend: {
                           position: 'bottom',
