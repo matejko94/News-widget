@@ -32,37 +32,36 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
                 <title>{{this.sdg()}}</title>
             </head>
             <body>>
-            <div style="width:100%;">
-            <canvas id="geoChart" #geoChart></canvas>
-            <div class="grid grid-cols-4 h-container grid-container">
-                <div class="centered-element">
-                    <b>{{ textToDisplay$ | async }}</b>
-                    <p> Publications in the period</p>
+                <div style="width:100%;">
+                    <canvas id="geoChart" #geoChart></canvas>
+                    <div class="grid grid-cols-4 h-container grid-container">
+                        <div class="centered-element">
+                            <b>{{ textToDisplay$ | async }}</b>
+                            <p> Publications in the period</p>
+                        </div>
+                        <div class="centered-element">
+                            <b>{{ textPercentageToDisplay$ | async }}</b>
+                            <p>Measured indicators</p>
+                        </div>
+                        <div class="centered-element">
+                            <b>{{ textMediaToDisplay$ | async }}</b>
+                            <p>Exposure to the Media</p>
+                        </div>
+                        <div class="centered-element">
+                            <b>{{ textPolicyToDisplay$ | async }}</b>
+                            <p>SDG AI Polices</p>
+                        </div>
+                    </div>
+                     
+                    <div class="grid grid-cols-2">
+                        <div class="chart-container">
+                            <app-piechart [sdg]="this.sdg()"></app-piechart>
+                        </div>
+                        <div class="chart-container">
+                            <app-barchart [sdg]="this.sdg()"></app-barchart>
+                        </div>
+                    </div>
                 </div>
-                <div class="centered-element">
-                    <b>{{ textPercentageToDisplay$ | async }}</b>
-                    <p>Measured indicators</p>
-                </div>
-                <div class="centered-element">
-                    <b>{{ textMediaToDisplay$ | async }}</b>
-                    <p>Exposure to the Media</p>
-                </div>
-                <div class="centered-element">
-                    <b>{{ textPolicyToDisplay$ | async }}</b>
-                    <p>SDG AI Polices</p>
-                </div>
-            </div>
-             
-            <div class="grid grid-cols-2">
-                <div class="chart-container">
-                    <app-piechart [sdg]="this.sdg()"></app-piechart>
-                </div>
-                <div class="chart-container">
-                    <app-barchart [sdg]="this.sdg()"></app-barchart>
-                </div>
-            </div>
-
-        </div>
             </body>
     `,
     styleUrls: ['./app.component.css']
@@ -71,6 +70,7 @@ Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, P
 export default class LiveReportingPage implements AfterViewInit {
 
     public sdg = input.required<string>();
+    public map_color = input.required<string>();
     constructor(private http: HttpClient, private dataService: DataService) {
     }
 
@@ -113,6 +113,20 @@ export default class LiveReportingPage implements AfterViewInit {
     }
 
 
+    hexToRgbA(hex:string, alpha: number){
+        if (hex == undefined) {
+            hex = 'df1010'
+        }
+
+        var r = parseInt(hex.slice(1, 3), 16),
+            g = parseInt(hex.slice(3, 5), 16),
+            b = parseInt(hex.slice(5, 7), 16);
+
+
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+
     public async showMaps(scienceItem: ScienceItem[]) {
 
 
@@ -148,6 +162,7 @@ export default class LiveReportingPage implements AfterViewInit {
 
         this.canvas = this.geoChart.nativeElement;
         this.ctx = this.canvas.getContext("2d");
+        console.log(this.ctx);
         // Create the chart
         const chart = new Chart(this.ctx, {
             type: 'choropleth',
@@ -167,11 +182,12 @@ export default class LiveReportingPage implements AfterViewInit {
                     //         return `rgba(244, 4, 0, ${0})`;
                     //     }
                     // },
-                    borderColor: '#000000',
+                    borderColor: '#808080',
                     borderWidth: 1
                 }]
             },
             options: {
+                showOutline: true,
                 plugins: {
                     legend: {
                         display: false
@@ -180,18 +196,25 @@ export default class LiveReportingPage implements AfterViewInit {
                 ,
                 scales: {
                     projection: {
-                        axis: 'x',
-                        projection: 'mercator'
+                        axis: 'y',
+                        projection: 'naturalEarth1'
                     },
                     color: {
                         axis: 'x',
-                        interpolate: (v) => `rgba(244, 4, 0, ${v})`,
+                        interpolate: (v) => {
+                            const rgba: string = this.hexToRgbA(this.map_color(), v);
+                            return rgba
+                        },
+                        //interpolate: this.map_color(),
+                        //missing: '#ffffff',
+                        missing: '#000000',
                         //interpolate: (v) => (v < 0.5 ? 'green' : 'red'),
                         legend: {
-                          position: 'top',
-                          align: 'top',
+                          position: 'bottom',
+                          align: 'bottom',
                           indicatorWidth: 20,
-                          margin: 15
+                          length: 500,
+                          margin: 30
                         },
                       },
                 }

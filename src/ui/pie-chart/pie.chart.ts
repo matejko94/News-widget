@@ -75,7 +75,7 @@ export class PieChartComponent implements AfterViewInit{
               display: true,
               text: 'Top 10 SDG Innovation',
               font: {
-                size: 24,
+                size: 14,
                 weight: 'bold',
                 family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
               },

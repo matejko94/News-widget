@@ -36,8 +36,17 @@ canvas {
     bottom: 0;
 }
 
-.chart-container {
-    width: 70%; /* Adjust the width as needed */
-    height: 70%; /* Adjust the height as needed */
-    margin: auto; /* Center the container */
-}
+/*.chart-container {*/
+/*    width: 100%;  !*Adjust the width as needed*!*/
+/*    height: 500px;  !*Adjust the height as needed*!*/
+/*    display: flex; !* Flexbox to center the canvas *!*/
+/*    align-items: center; !* Vertically center *!*/
+/*    justify-content: center; !* Horizontally center *!*/
+/*    position: relative;*/
+/*}*/
+
+/*canvas {*/
+/*    display: block; !* Ensure the canvas is a block element *!*/
+/*    height: 100% !important; !* Use 100% of the container's height *!*/
+/*    width: 100% !important; !* Use 100% of the container's width *!*/
+/*}*/
