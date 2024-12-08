@@ -26,7 +26,7 @@ export const environment = {
         },
         googleMaps: {
             // TODO: change this to your own API key
-            apiKey: 'AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc'
+            apiKey: 'AIzaSyCdtOGarihoROHd5RzK4jBXdr6b8g6xit4'
         },
         cloudTag: {
             url: 'https://news-widget.pages.dev/tags'
