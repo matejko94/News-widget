@@ -1,6 +1,8 @@
 import {Env} from "../common/interface/env";
+import {checkRequired} from "../common/validation/check-required";
 
 export const onRequest: PagesFunction<Env> = async ({request, env}) => {
+    const {searchParams} = new URL(request.url);
     const cache = caches.default;
     const key = request.url;
     let response = await cache.match(key);
@@ -9,13 +11,17 @@ export const onRequest: PagesFunction<Env> = async ({request, env}) => {
         return response;
     }
 
-    const topicKey = new URL(request.url).searchParams.get('topicKey');
+    const sdg = searchParams.get('sdg');
+    const limit = searchParams.get('limit');
+    const sort = searchParams.get('sort');
 
-    if (!topicKey) {
-        return new Response('Missing queryParameter: topicKey', {status: 400});
+    const {missing} = checkRequired({sdg, limit, sort});
+
+    if (missing.length) {
+        return new Response(`Missing queryParameters: ${missing}`, {status: 400});
     }
 
-    return fetch(`${ env.ENDPOINT }&uri=${ topicKey }`, {
+    return fetch(`${env.ENDPOINT}&uri=${topicKey}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

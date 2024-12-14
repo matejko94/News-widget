@@ -9,8 +9,8 @@ import { ScienceItem } from "../../domain/news/entity/science-item.interface";
 import { countryCodes } from "../../resorces/country_mapper"
 import { DataService } from '../../utils/data.service';
 import { AsyncPipe, SlicePipe } from "@angular/common";
-import { PieChartComponent } from "../../ui/pie-chart/pie.chart";
-import { BarchartComponent } from "../../ui/bar-chart/bar.chart";
+import { PieChartComponent } from "../../ui/charts/pie-chart/pie.chart";
+import { BarchartComponent } from "../../ui/charts/bar-chart/bar.chart";
 
 Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, ProjectionScale);
 

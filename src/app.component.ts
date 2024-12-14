@@ -11,7 +11,6 @@ import { RouterOutlet } from "@angular/router";
         display: block;
         width: 100%;
         height: 100%;
-        padding: 0.25rem;
       }
     `,
     template: `<router-outlet/>`,

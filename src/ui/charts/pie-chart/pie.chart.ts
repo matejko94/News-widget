@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, input } from "@angular/core";
 import Chart from 'chart.js/auto';
-import { DataService } from "../../utils/data.service";
+import { DataService } from "../../../utils/data.service";
 
 @Component({
     selector: 'app-piechart',

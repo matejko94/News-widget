@@ -4,7 +4,7 @@ import { NewsItem } from "../../domain/news/entity/news-item.interface";
 import { CloudData, TagCloudComponent } from "angular-tag-cloud-module";
 import { SentimentMeterComponent } from "../../ui/sentiment-meter/sentiment-meter.component";
 import { AsyncPipe, DatePipe, SlicePipe } from "@angular/common";
-import { HeatmapComponent } from "../../ui/heatmap/heatmap.component";
+import { HeatmapComponent } from "../../ui/charts/heatmap/heatmap.component";
 import { NewsService } from "../../domain/news/service/news.service";
 
 @Component({
