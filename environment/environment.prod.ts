@@ -26,8 +26,7 @@ export const environment = {
             auth: btoa('elastic_searchpoint:9GWd1yPhSRxvP7JTrZ')
         },
         googleMaps: {
-            // TODO: change this to your own API key
-            apiKey: 'AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc'
+            apiKey: 'AIzaSyCdtOGarihoROHd5RzK4jBXdr6b8g6xit4'
         },
         tags: {
             url: 'https://news-widget.pages.dev/api/news/tags'
