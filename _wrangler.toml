@@ -4,4 +4,3 @@ pages_build_output_dir = "functions"
 [dev]
 port = 4000
 local_protocol = "http"
-
