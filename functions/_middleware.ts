@@ -53,10 +53,20 @@ const optionsMiddleware: PagesFunction = async ({request, next}) => {
 
     return next();
 }
+const cacheControlMiddleware: PagesFunction = async ({request, next}) => {
+    const response = await next();
+
+    if (response.status === 200) {
+        response.headers.set('Cache-Control', 'public, max-age=86400');
+    }
+
+    return response;
+};
 
 export const onRequest = [
     errorMiddleware,
     cacheMiddleware,
     corsMiddleware,
+    cacheControlMiddleware,
     optionsMiddleware,
 ];
