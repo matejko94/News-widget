@@ -4,7 +4,7 @@ import { GoogleMap, MapCircle } from "@angular/google-maps";
 import { catchError, EMPTY, map, Observable, of, take } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { NewsItem } from "../../domain/news/entity/news-item.interface";
-import { environment } from "../../environment";
+import { environment } from "../../../environment/environment";
 
 interface CircleItem {
     c: {

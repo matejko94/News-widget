@@ -1,4 +1,5 @@
 export const environment = {
+    isProduction: true,
     api: {
         news: {
             url:'https://midas.ijs.si/elasticsearch-sgd/media/_search',
@@ -26,9 +27,9 @@ export const environment = {
         },
         googleMaps: {
             // TODO: change this to your own API key
-            apiKey: 'AIzaSyCdtOGarihoROHd5RzK4jBXdr6b8g6xit4'
+            apiKey: 'AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc'
         },
-        cloudTag: {
+        tags: {
             url: 'https://news-widget.pages.dev/tags'
         }
     }

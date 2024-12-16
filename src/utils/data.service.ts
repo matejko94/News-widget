@@ -3,8 +3,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, map, Observable, of, shareReplay} from 'rxjs';
 import {ScienceItem} from "../domain/news/entity/science-item.interface";
 import {ScienceDto} from "../domain/news/entity/science-dto.interface";
-import {environment} from "../environment";
-import {ScienceCountItem} from "../domain/news/entity/science-count-item.interface";
+import {environment} from "../../environment/environment";
 
 @Injectable({
   providedIn: 'root'
@@ -47,7 +46,7 @@ export class DataService {
             {
                 headers: new HttpHeaders({
                     'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + environment.api.news.auth,
+                    'Authorization': 'Basic ' + environment.api.science.auth,
                 }),
             }).pipe(
             map(response => response.aggregations.countries.buckets),
@@ -81,7 +80,7 @@ export class DataService {
             {
                 headers: new HttpHeaders({
                     'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + environment.api.news.auth,
+                    'Authorization': 'Basic ' + environment.api.innovation.auth,
                 }),
             }).pipe(
             map(response => response.aggregations.countries.buckets),
@@ -112,7 +111,7 @@ export class DataService {
             {
                 headers: new HttpHeaders({
                     'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + environment.api.news.auth,
+                    'Authorization': 'Basic ' + environment.api.science_count.auth,
                 }),
             }).pipe(
             map(response => response.count),
@@ -138,7 +137,7 @@ export class DataService {
             {
                 headers: new HttpHeaders({
                     'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + environment.api.news.auth,
+                    'Authorization': 'Basic ' + environment.api.science_count.auth,
                 }),
             }).pipe(
             map(response => response.count),
@@ -169,7 +168,7 @@ export class DataService {
             {
                 headers: new HttpHeaders({
                     'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + environment.api.news.auth,
+                    'Authorization': 'Basic ' + environment.api.media_count.auth,
                 }),
             }).pipe(
             map(response => response.count),
@@ -240,7 +239,7 @@ export class DataService {
             {
                 headers: new HttpHeaders({
                     'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + environment.api.news.auth,
+                    'Authorization': 'Basic ' + environment.api.policy_count.auth,
                 }),
             }).pipe(
             map(response => response.count),
