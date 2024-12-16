@@ -30,7 +30,7 @@ export const environment = {
             apiKey: 'AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc'
         },
         tags: {
-            url: 'https://news-widget.pages.dev/tags'
+            url: 'https://news-widget.pages.dev/api/news/tags'
         }
     }
 }
