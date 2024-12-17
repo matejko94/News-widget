@@ -17,14 +17,7 @@ export class NewsService {
         return this.http.get<CloudTagResponse>(
             `${environment.api.tags.url}?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&sdg=${sdg}&limit=${limit}`
         ).pipe(
-            map(response => {
-                const maxWeight = response.tags.reduce((max, tag) => Math.max(max, tag.weight), 0);
-
-                return response.tags.map(({text, weight}) => ({
-                    text,
-                    weight: Math.log1p(weight) / Math.log1p(maxWeight) * 100
-                }))
-            }),
+            map(response => response.tags),
             catchError(e => {
                 console.error('failed to fetch data', e);
                 return of([])
