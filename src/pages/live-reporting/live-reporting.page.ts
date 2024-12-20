@@ -1,23 +1,23 @@
-import { AfterViewInit, Component, ElementRef, input, ViewChild } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Chart, registerables } from 'chart.js';
-import { ChoroplethController, ColorScale, GeoFeature, ProjectionScale } from 'chartjs-chart-geo';
+import {AfterViewInit, Component, ElementRef, input, ViewChild} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Chart, registerables} from 'chart.js';
+import {ChoroplethController, ColorScale, GeoFeature, ProjectionScale} from 'chartjs-chart-geo';
 import * as topojson from 'topojson-client';
-import { Feature, FeatureCollection, Geometry } from 'geojson';
-import { BehaviorSubject, EMPTY, map, Observable } from "rxjs";
-import { ScienceItem } from "../../domain/news/entity/science-item.interface";
-import { countryCodes } from "../../resorces/country_mapper"
-import { DataService } from '../../utils/data.service';
-import { AsyncPipe, SlicePipe } from "@angular/common";
-import { PieChartComponent } from "../../ui/charts/pie-chart/pie.chart";
-import { BarchartComponent } from "../../ui/charts/bar-chart/bar.chart";
+import {Feature, FeatureCollection, Geometry} from 'geojson';
+import {BehaviorSubject, EMPTY, map, Observable} from "rxjs";
+import {ScienceItem} from "../../domain/news/entity/science-item.interface";
+import {countryCodes} from "../../resorces/country_mapper"
+import {DataService} from '../../utils/data.service';
+import {AsyncPipe, SlicePipe} from "@angular/common";
+import {PieChartComponent} from "../../ui/charts/pie-chart/pie.chart";
+import {BarchartComponent} from "../../ui/charts/bar-chart/bar.chart";
 
 Chart.register(...registerables, ChoroplethController, ColorScale, GeoFeature, ProjectionScale);
 
 @Component({
     standalone: true,
     selector: 'app-live-reporting',
-    imports: [ AsyncPipe, SlicePipe, PieChartComponent, BarchartComponent ],
+    imports: [AsyncPipe, SlicePipe, PieChartComponent, BarchartComponent],
     styles: `
       canvas {
         width: 75%;
@@ -116,7 +116,7 @@ export default class LiveReportingPage implements AfterViewInit {
 
                 this.dataService.getScienceAllCount(this.sdg()).subscribe(res => {
                     const p = Math.round((response / res) * 100).toFixed(2)
-                    this.textPercentageToDisplay$.next(`${ p } %`)
+                    this.textPercentageToDisplay$.next(`${p} %`)
                 })
                 //this.textToDisplay$.next(false)
             })
@@ -140,7 +140,7 @@ export default class LiveReportingPage implements AfterViewInit {
         const g = (bigint >> 8) & 255;
         const b = bigint & 255;
 
-        return `rgba(${ r }, ${ g }, ${ b }, ${ alpha })`;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     public async showMaps(scienceItem: ScienceItem[]) {
@@ -179,7 +179,7 @@ export default class LiveReportingPage implements AfterViewInit {
             type: 'choropleth',
             data: {
                 labels: countries.features.map((d: Feature<Geometry, { name: string }>) => d.properties.name),
-                datasets: [ {
+                datasets: [{
                     label: 'Countries',
                     data: data,
                     // backgroundColor: (context) => {
@@ -195,7 +195,7 @@ export default class LiveReportingPage implements AfterViewInit {
                     // },
                     borderColor: '#808080',
                     borderWidth: 1
-                } ]
+                }]
             },
             options: {
                 showOutline: true,

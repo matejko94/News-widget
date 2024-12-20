@@ -16,4 +16,7 @@ import { RouterOutlet } from "@angular/router";
     template: `<router-outlet/>`,
 })
 export class AppComponent {
+    constructor() {
+        console.log('Version: 1.0.0');
+    }
 }

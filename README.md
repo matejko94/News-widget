@@ -14,7 +14,7 @@ npm run start
 [http://localhost:4200/news?sdg=1&topicKey=d2781b6e-ac05-4b9e-a4c9-ec0d1a4c2d57](http://localhost:4200/news?sdg=1&topicKey=d2781b6e-ac05-4b9e-a4c9-ec0d1a4c2d57)
 
 ## Configuration
-- to editing urls, keys etc. open [src/environment.ts](src/environment.ts)
+- to editing urls, keys etc. open [src/environment.ts](environment/environment.ts)
 
 ## Workers proxy
 - currently worker caches requests for 1 day

@@ -1,11 +1,11 @@
-import { inject, Injectable } from "@angular/core";
-import { CloudDataDto } from "../entity/cloud-data-dto.interface";
-import { catchError, map, Observable, of, shareReplay } from "rxjs";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { CloudItem } from "../entity/cloud-item.interface";
-import { NewsItem } from "../entity/news-item.interface";
-import { NewsDto } from "../entity/news-dto.interface";
-import { environment } from "../../../environment";
+import {inject, Injectable} from "@angular/core";
+import {catchError, map, Observable, of, shareReplay} from "rxjs";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {environment} from "../../../../environment/environment";
+import {Tag} from "../../../../functions/api/news/tags/interface/tag.interface";
+import {CloudTagResponse} from "../../../../functions/api/news/tags/interface/cloud-tag-response.interface";
+import {NewsItem} from "../entity/news-item.interface";
+import {NewsDto} from "../entity/news-dto.interface";
 
 @Injectable({
     providedIn: 'root'
@@ -13,19 +13,17 @@ import { environment } from "../../../environment";
 export class NewsService {
     private http = inject(HttpClient);
 
-    public getCloudData(topicKey: string): Observable<CloudItem[]> {
-        return this.http.get<CloudDataDto>(`${environment.api.cloudTag.url}?topicKey=${ topicKey }`)
-            .pipe(
-                map(({keywordAggr}) => keywordAggr.results.map(result => ({
-                    text: result.keyword,
-                    weight: result.weight * 1000
-                }))),
-                shareReplay(1),
-                catchError(e => {
-                    console.error('failed to fetch cloud data', e);
-                    return of([])
-                })
-            );
+    public getCloudData(sdg: string, startDate: Date, endDate: Date, limit: number): Observable<Tag[]> {
+        return this.http.get<CloudTagResponse>(
+            `${environment.api.tags.url}?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&sdg=${sdg}&limit=${limit}`
+        ).pipe(
+            map(response => response.tags),
+            catchError(e => {
+                console.error('failed to fetch data', e);
+                return of([])
+            }),
+            shareReplay(1)
+        )
     }
 
     public getNews(shownDate: Date, sdg: string): Observable<NewsItem[]> {
@@ -57,7 +55,7 @@ export class NewsService {
                 headers: new HttpHeaders({
                     'Content-Type': 'application/json',
                     'Authorization': 'Basic ' + environment.api.news.auth,
-                }),
+                })
             }).pipe(
             map(response => response.hits.hits),
             catchError(e => {
