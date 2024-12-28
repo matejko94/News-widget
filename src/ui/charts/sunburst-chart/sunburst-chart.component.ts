@@ -71,7 +71,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
         <section class="flex items-center justify-center w-full mt-20 relative">
             <div #chartContainer class="flex justify-center flex-1">
                 @if (activePercentage()) {
-                    <div class="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-2xl text-center text-gray-600">
+                    <div class="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-2xl
+                        text-center text-gray-600 max-w-[30%] pr-16">
                         {{ activePercentage() }}
                         <br/>
                         of visits begin with this sequence of pages
@@ -184,7 +185,7 @@ export class SunburstChartComponent implements AfterViewInit {
 
         path.on("mouseover", null);
         path.transition()
-            .duration(1000)
+            .duration(200)
             .style("opacity", 1)
             .on("end", () => path.on("mouseover", (_, node) => this.mouseover(node, path)));
     }
