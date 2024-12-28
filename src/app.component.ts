@@ -18,6 +18,6 @@ import { RouterOutlet } from "@angular/router";
 })
 export class AppComponent {
     constructor() {
-        console.log('Version: 1.0.0');
+        console.log('Version: 1.0.1');
     }
 }
