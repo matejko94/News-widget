@@ -2,7 +2,7 @@ export const environment = {
     isProduction: false,
     api: {
         news: {
-            url:'https://midas.ijs.si/elasticsearch-sgd/media/_search',
+            url:'https://midas.ijs.si/elasticsearch-sgd/media_12_2024/_search',
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
         },
         science: {
@@ -18,7 +18,7 @@ export const environment = {
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
         },
         media_count: {
-            url:'https://midas.ijs.si/elasticsearch-sgd/media/_count',
+            url:'https://midas.ijs.si/elasticsearch-sgd/media_12_2024/_count',
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
         },
         policy_count: {

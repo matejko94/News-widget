@@ -2,7 +2,7 @@ export const environment = {
     isProduction: true,
     api: {
         news: {
-            url:'https://midas.ijs.si/elasticsearch-sgd/media/_search',
+            url:'https://midas.ijs.si/elasticsearch-sgd/media_12_2024/_search',
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
         },
         science: {
@@ -18,7 +18,7 @@ export const environment = {
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
         },
         media_count: {
-            url:'https://midas.ijs.si/elasticsearch-sgd/media/_count',
+            url:'https://midas.ijs.si/elasticsearch-sgd/media_12_2024/_count',
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
         },
         policy_count: {
@@ -26,11 +26,10 @@ export const environment = {
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
         },
         googleMaps: {
-            // TODO: change this to your own API key
-            apiKey: 'AIzaSyB1zNBJl3y5xfGP5wJ8ZSfrbvj8cX6FkEc'
+            apiKey: 'AIzaSyCdtOGarihoROHd5RzK4jBXdr6b8g6xit4'
         },
         tags: {
-            url: 'https://news-widget.pages.dev/tags'
+            url: 'https://news-widget.pages.dev/api/news/tags'
         }
     }
 }
