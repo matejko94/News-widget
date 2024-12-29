@@ -9,6 +9,7 @@ export const onRequestGet: PagesFunction<Env> = async ({request, env}) => {
     const endDate = new Date(searchParams.get('endDate'));
     const sdg = searchParams.get('sdg');
     const limit = searchParams.get('limit');
+    console.log('Requesting tags: ', {startDate, endDate, sdg, limit});
 
     if (!startDate || !endDate || !sdg || !limit) {
         return new Response('Missing one of queryParameters: startDate, endDate, sdg, limit', {status: 400});
