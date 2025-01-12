@@ -1,10 +1,10 @@
 import { AsyncPipe, DatePipe, SlicePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { BehaviorSubject, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs';
-import { NewsItem } from '../../domain/news/types/news-item.interface';
 import { NewsService } from '../../domain/news/service/news.service';
+import { NewsItem } from '../../domain/news/types/news-item.interface';
 import { HeatmapComponent } from '../../ui/charts/heatmap/heatmap.component';
 import { SentimentMeterComponent } from '../../ui/sentiment-meter/sentiment-meter.component';
 import { BasePage } from '../base.page';
@@ -100,7 +100,7 @@ import { BasePage } from '../base.page';
                     </div>
                 } @empty {
                     <div class="flex flex-col justify-center items-center h-full text-xl font-semibold text-gray-600">
-                        No news found
+                        No news today
                     </div>
                 }
             </div>
