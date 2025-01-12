@@ -1,6 +1,7 @@
 export const environment = {
     isProduction: false,
     api: {
+        url: 'https://angular-visualisation.midas.ijs.si',
         news: {
             url:'https://midas.ijs.si/elasticsearch-sgd/media_12_2024/_search',
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
@@ -26,7 +27,6 @@ export const environment = {
             auth: btoa('elastic_searchpoint:dOYHbCMqM16+JKUPqFM4')
         },
         googleMaps: {
-            // TODO: change this to your own API key
             apiKey: 'AIzaSyCdtOGarihoROHd5RzK4jBXdr6b8g6xit4'
         },
         tags: {
@@ -35,6 +35,5 @@ export const environment = {
         topics: {
             url: 'http://localhost:4000/api/news/topics'
         }
-
     }
 }

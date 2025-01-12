@@ -1,4 +1,4 @@
-import {Route} from "@angular/router";
+import { Route } from '@angular/router';
 
 export const ROUTES: Route[] = [
     {
@@ -20,5 +20,15 @@ export const ROUTES: Route[] = [
         path: 'radial-policies',
         loadComponent: () => import('./app/pages/radial-policies/radial-policies.page'),
         title: 'Radial Policies'
+    },
+    {
+        path: 'bar-code',
+        loadComponent: () => import('./app/pages/bar-code/bar-code.page'),
+        title: 'Barcode'
+    },
+    {
+        path: 'policy/timeline',
+        loadComponent: () => import('./app/pages/timeline/timeline.page'),
+        title: 'Policy Timeline'
     }
 ];

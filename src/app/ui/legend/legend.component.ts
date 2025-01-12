@@ -5,7 +5,7 @@ import { Component, computed, input, Signal } from '@angular/core';
     template: `
         <ul class="flex flex-col gap-1 mt-4 p-2">
             @for (entry of entries(); track entry.name) {
-                <li class="px-3 py-1 w-full text-xs sm:text-base text-center text-white rounded"
+                <li class="px-3 py-1 w-full text-xs sm:text-base md:font-medium text-center text-white rounded"
                     [style.background-color]="entry.color">
                     {{ entry.name }}
                 </li>

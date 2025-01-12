@@ -1,8 +1,8 @@
-import {AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, input, viewChild} from '@angular/core';
-import {arc, ScaleBand, scaleBand, scaleLinear, scaleOrdinal, select, Selection, Series, stack} from "d3";
-import {debounceTime, fromEvent, startWith} from "rxjs";
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, input, viewChild } from '@angular/core';
+import { arc, ScaleBand, scaleBand, scaleLinear, scaleOrdinal, select, Selection, Series, stack } from 'd3';
+import { debounceTime, fromEvent, startWith } from 'rxjs';
 import { LegendComponent } from '../../legend/legend.component';
-import {createTooltip, registerTooltip} from "../tooltip/tooltip";
+import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
 export interface RadialStackedData {
     groupLabel: string;
@@ -59,11 +59,13 @@ export interface RadialStackedData {
     `,
     template: `
         <div class="flex justify-center items-center aspect-square w-full relative">
-            <div #chartContainer class="flex-1 w-full aspect-square flex justify-center items-center max-md:mt-8"></div>
-<!--            <ul class="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 flex flex-col p-2">-->
-<!--              -->
-<!--            </ul>-->
-
+            <div #chartContainer
+                 class="flex-1 w-full aspect-square flex justify-center items-center max-md:mt-8 relative">
+                <div class="absolute top-1/2 left-1/2 -translate-y-1/2 translate-x-[-80%]
+                        text-sm md:text-base lg:text-lg xl:text-xl text-center text-gray-600 max-w-[30%]">
+                    <span class="font-semibold text-lg lg:text-xl text-gray-500">SDG</span>
+                </div>
+            </div>
 
             <app-legend [items]="keys()" [colors]="colors()"/>
         </div>
@@ -76,10 +78,11 @@ export class RadialStackedChartComponent implements AfterViewInit {
     public keys = computed<string[]>(() => Array.from(new Set(this.data().flatMap(d => Object.keys(d.items)))));
     private z = computed(() => scaleOrdinal<string>().domain(this.keys()).range(this.colors()));
     private yRange = computed<[number, number]>(() => {
-        const maxVal = Math.max(...this.data().map(({items}) => this.keys().reduce((acc, k) => acc + items[k], 0)));
+        const maxVal = Math.max(...this.data()
+            .map(({ items }) => this.keys().reduce((acc, k) => acc + (items[k] ?? 0), 0))
+        );
         return [0, maxVal];
     });
-    public legendEntries = computed(() => this.keys().map(key => ({key, color: this.z()(key) as string})));
 
     public ngAfterViewInit() {
         fromEvent(window, 'resize').pipe(
@@ -97,11 +100,11 @@ export class RadialStackedChartComponent implements AfterViewInit {
         container.innerHTML = '';
 
         const tooltip = createTooltip(container)
-        const {innerRadius, x, y, stackedSeries} = this.createScalesAndData(size);
-        const {g } = this.createSVG(container, size);
+        const { innerRadius, outerRadius, x, y, stackedSeries } = this.createScalesAndData(size);
+        const { g } = this.createSVG(container, size);
 
         this.drawBars(g, stackedSeries as any, x, y, innerRadius, tooltip);
-        this.drawLabels(g, x, innerRadius);
+        this.drawLabels(g, x, outerRadius);
         this.drawYAxis(g, y);
     }
 
@@ -113,11 +116,12 @@ export class RadialStackedChartComponent implements AfterViewInit {
         const y = (val: number) => scaleLinear().domain(this.yRange()).range([innerRadius, outerRadius])(val);
 
         const stackedInput = this.data().map(d => {
-            const obj: Record<string, number> = {groupLabel: 0 as unknown as number};
-            (obj as any).groupLabel = d.groupLabel;
-            keys.forEach(key => {
+            const obj: Record<string, number | string> = { groupLabel: d.groupLabel };
+
+            this.keys().forEach(key => {
                 obj[key] = d.items[key] ?? 0;
             });
+
             return obj;
         });
 
@@ -177,25 +181,27 @@ export class RadialStackedChartComponent implements AfterViewInit {
     private drawLabels(
         g: Selection<SVGGElement, unknown, null, undefined>,
         x: ScaleBand<string>,
-        innerRadius: number
+        outerRadius: number,
     ) {
+        const labelOffset = 30;
+
         const label = g.append("g")
             .selectAll("g")
             .data(this.data)
             .enter().append("g")
             .attr("text-anchor", "middle")
-            .attr("transform", (d: RadialStackedData) =>
-                `rotate(${(x(d.groupLabel)! + x.bandwidth()! / 2) * 180 / Math.PI - 90})translate(${innerRadius},0)`);
-
-        label.append("line")
-            .attr("x2", -5)
-            .attr("stroke", "#000");
+            .attr('transform', (d: RadialStackedData) => {
+                const angleDeg = (x(d.groupLabel)! + x.bandwidth()! / 2) * 180 / Math.PI - 90;
+                return `rotate(${ angleDeg })translate(${ outerRadius + labelOffset },0)`;
+            });
 
         label.append("text")
-            .attr("transform", (d: RadialStackedData) =>
-                ((x(d.groupLabel)! + x.bandwidth()! / 2 + Math.PI / 2) % (2 * Math.PI)) < Math.PI
+            .attr('transform', (d: RadialStackedData) => {
+                const midAngle = x(d.groupLabel)! + x.bandwidth()! / 2 + Math.PI / 2;
+                return (midAngle % (2 * Math.PI)) < Math.PI
                     ? "rotate(90)translate(0,16)"
-                    : "rotate(-90)translate(0,-9)")
+                    : 'rotate(-90)translate(0,-9)';
+            })
             .text(d => d.groupLabel);
     }
 

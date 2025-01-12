@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, computed, DestroyRef, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { arc, hierarchy, HierarchyNode, HierarchyRectangularNode, partition, select, Selection } from 'd3';
 import { debounceTime, fromEvent, startWith, } from 'rxjs';
@@ -67,10 +67,8 @@ import { SunburstNode } from './sunburst-node.interface';
                         of categories belong
                         <br/>
                         to this topic
-                    } @else {
                     }
                 </div>
-
             </div>
             <app-legend [items]="topLevelNodes()" [colors]="colors()"/>
         </section>
@@ -109,8 +107,6 @@ export class SunburstChartComponent implements AfterViewInit {
     }
 
     private renderChart(data: SunburstNode, colors: string[]): void {
-        console.log('rendering chart');
-
         const chartEl = this.chartContainer().nativeElement;
         const size = chartEl!.getBoundingClientRect().width * 0.8;
         const root = hierarchy(data).sum(d => d.size ?? 0);
