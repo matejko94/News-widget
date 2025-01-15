@@ -51,11 +51,11 @@ export default class BarCodePage extends BasePage implements OnInit {
 
         this.data$ = this.policyService.getIntersectingSdgPolicies(+this.sdg(), 20).pipe(
             map(intersection => intersection
-                .sort((a, b) => sortBySdg(a.topic, b.topic))
-                .flatMap(policy => policy.sdg_intersections.map(sdg => ({
-                    sdg: policy.topic,
-                    policy: sdg.key,
-                    count: sdg.value
+                .sort((a, b) => sortBySdg(a.sdg, b.sdg))
+                .flatMap(({ sdg, sdg_intersections }) => sdg_intersections.map(({ key, value }) => ({
+                    sdg: sdg,
+                    policy: key,
+                    count: value
                 }))))
         );
     }

@@ -1,5 +1,5 @@
 export interface IntersectingPolicyDto {
-    topic: string,
+    sdg: string,
     total_count: number,
     sdg_intersections: SdgIntersection[]
 }

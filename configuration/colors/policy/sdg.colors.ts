@@ -20,109 +20,92 @@ export const SDG_COLORS = {
     ]
 }
 
-function hexToHsl(hex: string): { h: number; s: number; l: number } {
-    hex = hex.replace(/^#/, '');
-
-    const bigint = parseInt(hex, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-
-    const rNorm = r / 255;
-    const gNorm = g / 255;
-    const bNorm = b / 255;
-    const max = Math.max(rNorm, gNorm, bNorm);
-    const min = Math.min(rNorm, gNorm, bNorm);
-    let h = 0;
-    let s = 0;
-    const l = (max + min) / 2;
-
-    const delta = max - min;
-
-    if (delta !== 0) {
-        s = l < 0.5 ? delta / (max + min) : delta / (2 - max - min);
-
-        if (max === rNorm) {
-            h = (gNorm - bNorm) / delta + (gNorm < bNorm ? 6 : 0);
-        } else if (max === gNorm) {
-            h = (bNorm - rNorm) / delta + 2;
-        } else {
-            h = (rNorm - gNorm) / delta + 4;
-        }
-        h /= 6;
-    }
-
-    return {
-        h: h * 360,
-        s,
-        l,
-    };
-}
-
-function hslToHex(h: number, s: number, l: number): string {
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const m = l - c / 2;
-
-    let r = 0, g = 0, b = 0;
-
-    if (0 <= h && h < 60) {
-        r = c;
-        g = x;
-        b = 0;
-    } else if (60 <= h && h < 120) {
-        r = x;
-        g = c;
-        b = 0;
-    } else if (120 <= h && h < 180) {
-        r = 0;
-        g = c;
-        b = x;
-    } else if (180 <= h && h < 240) {
-        r = 0;
-        g = x;
-        b = c;
-    } else if (240 <= h && h < 300) {
-        r = x;
-        g = 0;
-        b = c;
-    } else {
-        r = c;
-        g = 0;
-        b = x;
-    }
-
-    const to255 = (val: number) => Math.round((val + m) * 255);
-    const rVal = to255(r);
-    const gVal = to255(g);
-    const bVal = to255(b);
-
-    const toHex = (val: number) => {
-        const hexString = val.toString(16);
-        return hexString.length === 1 ? '0' + hexString : hexString;
-    };
-
-    return `#${ toHex(rVal) }${ toHex(gVal) }${ toHex(bVal) }`.toUpperCase();
-}
-
 function generateShades(
-    baseHex: string,
-    numberOfShades: number,
+    hexColor: string,
+    shades: number,
     minLightness: number,
     maxLightness: number
 ): string[] {
-    const { h, s } = hexToHsl(baseHex);
-    const shades: string[] = [];
+    // Helper function to convert hex to HSL
+    function hexToHsl(hex: string): { h: number; s: number; l: number } {
+        let r = parseInt(hex.substring(1, 3), 16) / 255;
+        let g = parseInt(hex.substring(3, 5), 16) / 255;
+        let b = parseInt(hex.substring(5, 7), 16) / 255;
 
-    for (let i = 0; i < numberOfShades; i++) {
-        const t = i / (numberOfShades - 1);
-        const newLightness = minLightness + t * (maxLightness - minLightness);
-        shades.push(hslToHex(h, s, newLightness));
+        let max = Math.max(r, g, b);
+        let min = Math.min(r, g, b);
+        let delta = max - min;
+
+        let h = 0;
+        if (delta !== 0) {
+            if (max === r) {
+                h = ((g - b) / delta) % 6;
+            } else if (max === g) {
+                h = (b - r) / delta + 2;
+            } else {
+                h = (r - g) / delta + 4;
+            }
+        }
+        h = Math.round(h * 60);
+        if (h < 0) h += 360;
+
+        let l = (max + min) / 2;
+        let s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+        return { h, s: s * 100, l: l * 100 };
     }
 
-    return shades.reverse();
+    // Helper function to convert HSL to hex
+    function hslToHex(h: number, s: number, l: number): string {
+        s /= 100;
+        l /= 100;
+
+        const c = (1 - Math.abs(2 * l - 1)) * s;
+        const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        const m = l - c / 2;
+
+        let r = 0, g = 0, b = 0;
+        if (h >= 0 && h < 60) {
+            r = c;
+            g = x;
+        } else if (h >= 60 && h < 120) {
+            r = x;
+            g = c;
+        } else if (h >= 120 && h < 180) {
+            g = c;
+            b = x;
+        } else if (h >= 180 && h < 240) {
+            g = x;
+            b = c;
+        } else if (h >= 240 && h < 300) {
+            r = x;
+            b = c;
+        } else if (h >= 300 && h < 360) {
+            r = c;
+            b = x;
+        }
+
+        r = Math.round((r + m) * 255);
+        g = Math.round((g + m) * 255);
+        b = Math.round((b + m) * 255);
+
+        return `#${ ((1 << 24) + (r << 16) + (g << 8) + b)
+            .toString(16)
+            .slice(1)
+            .toUpperCase() }`;
+    }
+
+    const hsl = hexToHsl(hexColor);
+    const shadesArray: string[] = [];
+    const lightnessStep = (maxLightness - minLightness) / (shades - 1);
+
+    for (let i = 0; i < shades; i++) {
+        const currentLightness = minLightness + lightnessStep * i;
+        shadesArray.push(hslToHex(hsl.h, hsl.s, currentLightness));
+    }
+
+    return shadesArray;
 }
 
 export const SDG_COLOR_SHADES = {
-    colors: SDG_COLORS.colors.map((baseColor) => generateShades(baseColor, 10, 0.95, 0.3))
+    colors: SDG_COLORS.colors.map((baseColor) => generateShades(baseColor, 10, 20, 85))
 };

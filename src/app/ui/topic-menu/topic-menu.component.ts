@@ -12,7 +12,7 @@ import { map } from 'rxjs';
         <p-select
             [options]="options()"
             [ngModel]="selected()" (ngModelChange)="onChange($event)"
-            placeholder="Select topic" class="w-56"
+            placeholder="Select topic" class="w-48 border border-gray-300"
         />
     `
 })

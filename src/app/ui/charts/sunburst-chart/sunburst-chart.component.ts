@@ -11,11 +11,9 @@ import { SunburstNode } from './sunburst-node.interface';
     styles: `
         :host {
             display: flex;
-            flex-direction: column;
-            justify-items: center;
-            align-items: center;
             width: 100%;
             height: 100%;
+            position: relative;
         }
 
         .chart path {
@@ -40,10 +38,15 @@ import { SunburstNode } from './sunburst-node.interface';
                 clip-path: polygon(0 0, calc(100% - $clip-width) 0, 100% 50%, calc(100% - $clip-width) 100%, 0 100%);
                 border-radius: 4px 0 0 4px;
             }
+
+            @media (max-width: 768px) {
+                font-size: 0.75rem;
+                padding: 2px 10px;
+            }
         }
     `,
     template: `
-        <div class="absolute top-0 left-0 flex gap-1 items-center mt-4 min-h-10 w-full">
+        <div class="absolute top-0 left-0 flex gap-1 items-center mt-2 min-h-10 w-full">
             <ul class="flex">
                 @for (node of hoveredSequence(); track node; let first = $first) {
                     <li class="px-2 py-1 text-white breadcrumb" [style.background-color]="getNodeColor(node, colors())">
@@ -57,10 +60,10 @@ import { SunburstNode } from './sunburst-node.interface';
                 </div>
             }
         </div>
-        <section class="flex items-center justify-center w-full mt-20 relative">
-            <div #chartContainer class="flex justify-center flex-1">
-                <div class="absolute top-1/2 left-1/2 -translate-y-1/2 translate-x-[-80%]
-                        text-sm md:text-base lg:text-lg xl:text-xl text-center text-gray-600 max-w-[30%]">
+        <section class="flex flex-col md:flex-row items-center justify-center w-full h-full relative">
+            <div #chartContainer class="flex justify-center items-center flex-1 max-md:w-full md:h-full relative">
+                <div class="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2
+                            text-sm md:text-base lg:text-lg xl:text-xl text-center text-gray-600 max-w-[30%]">
                     @if (activePercentage()) {
                         <span class="font-semibold text-lg lg:text-xl text-gray-500">{{ activePercentage() }}</span>
                         <br/>
@@ -108,7 +111,8 @@ export class SunburstChartComponent implements AfterViewInit {
 
     private renderChart(data: SunburstNode, colors: string[]): void {
         const chartEl = this.chartContainer().nativeElement;
-        const size = chartEl!.getBoundingClientRect().width * 0.8;
+        const { width, height } = chartEl.getBoundingClientRect();
+        const size = Math.min(width, height) * 0.8;
         const root = hierarchy(data).sum(d => d.size ?? 0);
 
         const radius = size / 2;

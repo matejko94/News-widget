@@ -28,11 +28,11 @@ import { BasePage } from '../base.page';
         }
     `,
     template: `
-        <app-topic-menu [options]="topicOptions()" class="absolute right-6 top-6 z-10"/>
+        <app-topic-menu [options]="topicOptions()" class="absolute right-3 top-14 z-10"/>
 
         @if (node$ | async; as node) {
             @if (node.children?.length) {
-                <app-sunburst-chart [data]="node" [colors]="colors"/>
+                <app-sunburst-chart [data]="node" [colors]="colors" class="block h-full pt-16 md:pt-8"/>
             } @else {
                 <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
                     No data available

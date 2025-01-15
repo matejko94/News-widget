@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+<div class="w-full mx-auto">
+    <div class="mb-4">
+        <label for="sdg-select" class="block text-sm font-medium text-gray-700">Select SDG Number:</label>
+        <select id="sdg-select"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+            <!-- Options will be populated by script -->
+        </select>
+    </div>
+    <div class="mb-4">
+        <label for="widget-select" class="block text-sm font-medium text-gray-700">Select Widget:</label>
+        <select id="widget-select"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+            <!-- Options will be populated by script -->
+        </select>
+    </div>
+    <iframe id="widget-iframe" class="w-2/3 h-[500px] border border-gray-300 rounded-md mx-auto mt-20" src=""></iframe>
+</div>
+<script>
+    const sdgSelect = document.getElementById('sdg-select');
+    const widgetSelect = document.getElementById('widget-select');
+    const iframe = document.getElementById('widget-iframe');
+
+    const config = {
+        sdgs: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ],
+        widgets: {
+            'News widget': '/news',
+            'Sunburst': '/news/sunburst',
+            'Radial': '/education/radial',
+            'Barcode': '/policy/heatmap',
+            'Timeline': '/policy/timeline',
+        }
+    };
+
+    config.sdgs.forEach(sdg => {
+        const option = document.createElement('option');
+        option.value = sdg;
+        option.textContent = `SDG ${ sdg }`;
+        sdgSelect.appendChild(option);
+    });
+
+    Object.keys(config.widgets).forEach(widget => {
+        const option = document.createElement('option');
+        option.value = config.widgets[widget];
+        option.textContent = widget;
+        widgetSelect.appendChild(option);
+    });
+
+    function updateIframe() {
+        const sdg = sdgSelect.value;
+        const widgetPath = widgetSelect.value;
+        iframe.contentWindow.location.replace(`http://localhost:4200${ widgetPath }?sdg=${ sdg }`);
+    }
+
+    sdgSelect.addEventListener('change', updateIframe);
+    widgetSelect.addEventListener('change', updateIframe);
+    updateIframe();
+</script>
+</body>
+</html>

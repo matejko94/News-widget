@@ -12,17 +12,17 @@ export const ROUTES: Route[] = [
         title: 'SDG | NEWS | IRCAI SDG OBSERVATORY'
     },
     {
-        path: 'sunburst',
+        path: 'news/sunburst',
         loadComponent: () => import('./app/pages/sunburst/sunburst.page'),
         title: 'Sunburst'
     },
     {
-        path: 'radial-policies',
+        path: 'education/radial',
         loadComponent: () => import('./app/pages/radial-policies/radial-policies.page'),
         title: 'Radial Policies'
     },
     {
-        path: 'bar-code',
+        path: 'policy/heatmap',
         loadComponent: () => import('./app/pages/bar-code/bar-code.page'),
         title: 'Barcode'
     },

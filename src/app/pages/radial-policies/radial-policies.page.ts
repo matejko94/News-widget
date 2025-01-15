@@ -2,6 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
+import { createSdgObject } from '../../common/utility/sdg-object';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { IntersectingPolicyDto } from '../../domain/policy/types/intersecting-policy.dto';
 import { RadialStackedChartComponent, RadialStackedData } from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
@@ -48,7 +49,7 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
         const topicSdgMap = new Map<string, RadialStackedData>();
 
         policies
-            .flatMap(({ topic: sdg, sdg_intersections }) => sdg_intersections.map(({ key: topic, value }) => ({
+            .flatMap(({ sdg, sdg_intersections }) => sdg_intersections.map(({ key: topic, value }) => ({
                 topic,
                 sdg,
                 value
@@ -57,7 +58,7 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
                 if (!topicSdgMap.has(topic)) {
                     topicSdgMap.set(topic, {
                         groupLabel: topic,
-                        items: {}
+                        items: createSdgObject(0)
                     });
                 }
 
@@ -68,8 +69,6 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
                 }
             });
 
-        return Array.from(topicSdgMap.values())
-            .sort((a, b) => Object.values(b.items).reduce((acc, value) => acc + value, 0) - Object.values(a.items).reduce((acc, value) => acc + value, 0))
-            .slice(0, limit);
+        return Array.from(topicSdgMap.values()).slice(0, limit);
     }
 }

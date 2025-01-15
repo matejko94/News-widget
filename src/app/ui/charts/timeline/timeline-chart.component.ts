@@ -1,18 +1,21 @@
-import { AfterViewInit, Component, ElementRef, input, viewChild } from '@angular/core';
+import { AfterViewInit, Component, computed, ElementRef, input, viewChild } from '@angular/core';
 import { axisBottom, axisTop, max, min, pointer, scaleBand, ScaleBand, scaleLinear, ScaleLinear, select, Selection } from 'd3';
 import { debounceTime, fromEvent, startWith } from 'rxjs';
+import { LegendComponent } from '../../legend/legend.component';
+import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
 export interface TimelineRow {
     name: string;
+    sdg: number;
     years: number[];
     color: string;
 }
 
 @Component({
     selector: 'app-timeline-chart',
-    template: `
-        <div #chartContainer class="w-full h-full"></div>
-    `,
+    imports: [
+        LegendComponent
+    ],
     styles: [ `
         :host {
             display: block;
@@ -20,16 +23,46 @@ export interface TimelineRow {
             width: 100%;
             height: 100%;
         }
-    ` ]
+
+        svg {
+            overflow: visible;
+        }
+
+        .row-label {
+            font-size: 12px;
+
+            @media (max-width: 768px) {
+                font-size: 11px;
+            }
+
+            @media (max-width: 640px) {
+                font-size: 10px;
+            }
+
+            @media (max-width: 480px) {
+                font-size: 9px;
+            }
+        }
+    ` ],
+    template: `
+        <div class="flex flex-col md:flex-row justify-center items-center aspect-square w-full h-full relative">
+            <div class="pl-28 xs:pl-32 sm:pl-36 flex-1 flex justify-center items-center w-full md:w-auto md:h-full">
+                <div #chartContainer class="w-full h-full relative"></div>
+            </div>
+            <app-legend [items]="keys()" [colors]="colors()"/>
+        </div>
+    `
 })
 export class TimelineChartComponent implements AfterViewInit {
     public chartContainer = viewChild.required<ElementRef<HTMLDivElement>>('chartContainer');
     public data = input.required<TimelineRow[]>();
-    private width = 800;
-    private height = 500;
+    public legend = input.required<{ label: string, color: string }[]>();
+    public keys = computed(() => this.legend().map(({ label }) => label));
+    public colors = computed(() => this.legend().map(({ color }) => color));
     private margin = { top: 70, right: 20, bottom: 40, left: 40 };
     private svg?: Selection<SVGSVGElement, unknown, null, undefined>;
     private line?: Selection<SVGLineElement, unknown, null, undefined>;
+    private tooltip?: Selection<HTMLDivElement, unknown, null, undefined>;
     private g?: Selection<SVGGElement, unknown, null, undefined>;
     private xScale!: ScaleLinear<number, number>;
     private yScale!: ScaleBand<string>;
@@ -46,92 +79,110 @@ export class TimelineChartComponent implements AfterViewInit {
             return;
         }
 
-        console.log('Rendering chart with data:', this.data());
-
         const container = this.chartContainer().nativeElement;
         container.innerHTML = '';
-        const containerRect = container.getBoundingClientRect();
-        const width = containerRect.width || this.width;
-        const height = containerRect.height || this.height;
+        const { width, height } = container.getBoundingClientRect();
 
-        // 3) Create the SVG
         this.svg = select(container)
             .append('svg')
             .attr('width', width)
             .attr('height', height);
-
-        // 4) Main group offset by margins
         this.g = this.svg
             .append('g')
             .attr('transform', `translate(${ this.margin.left }, ${ this.margin.top })`);
+        this.tooltip = createTooltip(container);
 
-        // 5) Prepare the domain for xScale and yScale
-        //    - xScale domain: min/max of all years
+        this.drawScales(width, height);
+        this.drawRows();
+        this.drawRowLabels();
+        this.drawAxes(height);
+        this.drawVerticalLine(height, width);
+    }
+
+    private drawScales(width: number, height: number): void {
         const allYears = this.data().flatMap((d) => d.years);
-        const xMin = min(allYears) ?? 0;
-        const xMax = max(allYears) ?? 100;
+        const xMin = min(allYears)!;
+        const xMax = max(allYears)! + 1;
 
         this.xScale = scaleLinear()
             .domain([ xMin, xMax ])
             .range([ 0, width - this.margin.left - this.margin.right ]);
 
-        //    - yScale domain: unique names
-        const names = Array.from(new Set(this.data().map((d) => d.name)));
         this.yScale = scaleBand()
-            .domain(names)
+            .domain(Array.from(new Set(this.data().map((d) => d.name))))
             .range([ 0, height - this.margin.top - this.margin.bottom ])
             .paddingInner(0.2);
+    }
 
-        // 6) Bind data to 'g' elements for each row (civilization)
-        const groups = this.g
+    private drawRows(): void {
+        const groups = this.g!
             .selectAll('g.civ')
-            .data(this.data)
+            .data(this.data())
             .enter()
             .append('g')
             .attr('class', 'civ')
-            .attr('transform', (d) => {
-                return `translate(0, ${ this.yScale(d.name) || 0 })`;
-            });
+            .attr('transform', (d) => `translate(0, ${ this.yScale(d.name) || 0 })`);
 
-        // 7) Draw rectangles (or your shape) for each row
-        //    Here we assume row.years = [start, end]
-        groups
+        const rects = groups
+            .selectAll('rect')
+            .data((d) => d.years.map((year) => ({ year, color: d.color, name: d.name, sdg: d.sdg })))
+            .enter()
             .append('rect')
-            .attr('x', (d) => this.xScale(d.years[0]))
+            .attr('x', (d) => this.xScale(d.year))
             .attr('y', 0)
-            .attr('width', (d) => {
-                // For safety, handle multiple array lengths, but assume [start, end]
-                if (d.years.length < 2) return 0;
-                const [ start, end ] = d.years;
-                return this.xScale(Math.max(start, end)) - this.xScale(Math.min(start, end));
-            })
+            .attr('width', this.xScale(1) - this.xScale(0)) // Adjust for year granularity
             .attr('height', this.yScale.bandwidth())
             .attr('fill', (d) => d.color);
 
-        // 8) Draw axes on top and bottom
-        //    - Top axis
+        registerTooltip(
+            rects as any,
+            this.tooltip!,
+            this.chartContainer().nativeElement,
+            (d) => {
+                console.log(d);
+                // @ts-ignore
+                return `<strong>${ d.name }</strong><br>Years: ${ d.year }<br>SDG: ${ d.sdg }`
+            }
+        );
+    }
+
+    private drawAxes(height: number): void {
         this.svg
-            .append('g')
+            ?.append('g')
             .attr('transform', `translate(${ this.margin.left }, ${ this.margin.top - 10 })`)
             .call(axisTop(this.xScale).ticks(5));
 
-        //    - Bottom axis
         this.svg
-            .append('g')
+            ?.append('g')
             .attr('transform', `translate(${ this.margin.left }, ${ height - this.margin.bottom })`)
             .call(axisBottom(this.xScale).ticks(5));
+    }
 
-        // 9) (Optional) A vertical line to track mouse
+    private drawRowLabels(): void {
+        this.g!
+            .selectAll('text.row-label')
+            .data(this.data())
+            .enter()
+            .append('text')
+            .attr('class', 'row-label')
+            .attr('x', -10)
+            .attr('y', (d) => (this.yScale(d.name) || 0) + this.yScale.bandwidth() / 2)
+            .attr('text-anchor', 'end')
+            .attr('dominant-baseline', 'middle')
+            .style('fill', '#333')
+            .text(d => d.name);
+    }
+
+    private drawVerticalLine(height: number, width: number): void {
         this.line = this.svg
-            .append('line')
+            ?.append('line')
             .attr('y1', this.margin.top - 10)
             .attr('y2', height - this.margin.bottom)
             .attr('stroke', 'rgba(0,0,0,0.2)')
             .style('pointer-events', 'none')
-            .style('opacity', 0); // hidden by default
+            .style('opacity', 0);
 
-        // 10) Mousemove for line (and potential tooltip)
-        this.svg.on('mousemove', (event) => {
+        this.svg!.on('mousemove', (event) => {
             const [ mx, my ] = pointer(event);
 
             // Only show the line if within the chart area

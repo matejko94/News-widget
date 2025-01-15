@@ -1,4 +1,4 @@
 export interface TopTopicsPerYear {
     year: number;
-    topics: { key: string, value: number }[];
+    topics: { key: string, SDG: string, value: number }[];
 }

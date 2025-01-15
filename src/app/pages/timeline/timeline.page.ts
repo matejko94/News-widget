@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { SCIENCE_TIMELINE_COLORS } from '../../../../configuration/colors/science/science-timeline.colors';
+import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { TopTopicsPerYear } from '../../domain/science/types/topic-timespan.interface';
 import { TimelineChartComponent, TimelineRow } from '../../ui/charts/timeline/timeline-chart.component';
@@ -27,7 +27,7 @@ import { BasePage } from '../base.page';
     template: `
         @if (data$ | async; as data) {
             @if (data?.length) {
-                <app-timeline-chart [data]="data"/>
+                <app-timeline-chart [data]="data" [legend]="legend()"/>
             } @else {
                 <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
                     No data available
@@ -40,7 +40,8 @@ export default class TimelinePage extends BasePage implements OnInit {
     private scienceService = inject(ScienceService);
 
     public data$!: Observable<TimelineRow[]>;
-    public colors = SCIENCE_TIMELINE_COLORS.colors;
+    public sdgColors = SDG_COLORS.colors;
+    public legend = signal<{ label: string, color: string }[]>([]);
 
     public override ngOnInit() {
         super.ngOnInit();
@@ -56,23 +57,30 @@ export default class TimelinePage extends BasePage implements OnInit {
 
     private mapTopicsToRows(years: TopTopicsPerYear[]): TimelineRow[] {
         const topicTopYears = new Map<string, number[]>();
-        console.log(years);
+        const topicSdg = new Map<string, number>();
 
         years.forEach(({ year, topics }) => {
-            topics.forEach(({ key: topic }) => {
+            topics.forEach(({ key: topic, SDG }) => {
                 if (!topicTopYears.has(topic)) {
                     topicTopYears.set(topic, []);
+                }
+
+                if (!topicSdg.has(topic)) {
+                    topicSdg.set(topic, +(SDG.split(' ')[1]));
                 }
 
                 topicTopYears.get(topic)!.push(year);
             });
         });
 
+        this.legend.set(this.sdgColors.map((color, index) => ({ label: `SDG ${ index + 1 }`, color })));
+
         return Array.from(topicTopYears.entries())
-            .map(([ name, topYears ], index) => ({
+            .map(([ name, topYears ]) => ({
                 name,
+                sdg: topicSdg.get(name)!,
                 years: topYears.sort(),
-                color: this.colors[index % this.colors.length]
+                color: this.sdgColors[topicSdg.get(name)! - 1]
             }));
     }
 }

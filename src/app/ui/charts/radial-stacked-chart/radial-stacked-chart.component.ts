@@ -24,8 +24,24 @@ export interface RadialStackedData {
             height: 100%;
         }
 
-        ::ng-deep svg.radial-bar-chart {
+        svg.radial-bar-chart {
             overflow: visible;
+        }
+
+        .bar-label {
+            font-size: 12px;
+
+            @media (max-width: 768px) {
+                font-size: 11px;
+            }
+
+            @media (max-width: 640px) {
+                font-size: 10px;
+            }
+
+            @media (max-width: 480px) {
+                font-size: 9px;
+            }
         }
 
         text {
@@ -45,28 +61,11 @@ export interface RadialStackedData {
         path {
             transition: opacity 0.3s;
         }
-
-        .tooltip {
-            position: absolute;
-            pointer-events: none;
-            background: #fff;
-            border: 1px solid #ccc;
-            padding: 4px 8px;
-            font-size: 10px;
-            border-radius: 3px;
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-        }
     `,
     template: `
-        <div class="flex justify-center items-center aspect-square w-full relative">
+        <div class="flex flex-col md:flex-row justify-center items-center aspect-square w-full h-full relative">
             <div #chartContainer
-                 class="flex-1 w-full aspect-square flex justify-center items-center max-md:mt-8 relative">
-                <div class="absolute top-1/2 left-1/2 -translate-y-1/2 translate-x-[-80%]
-                        text-sm md:text-base lg:text-lg xl:text-xl text-center text-gray-600 max-w-[30%]">
-                    <span class="font-semibold text-lg lg:text-xl text-gray-500">SDG</span>
-                </div>
-            </div>
-
+                 class="flex-1 w-full md:w-auto md:h-full flex justify-center items-center relative"></div>
             <app-legend [items]="keys()" [colors]="colors()"/>
         </div>
     `,
@@ -89,8 +88,8 @@ export class RadialStackedChartComponent implements AfterViewInit {
             startWith(null),
             debounceTime(25),
         ).subscribe(() => {
-            const {width} = this.chartContainer().nativeElement.getBoundingClientRect();
-            this.renderChart(width * 0.9);
+            const { width, height } = this.chartContainer().nativeElement.getBoundingClientRect();
+            this.renderChart(Math.min(width, height) * 0.8);
         })
     }
 
@@ -169,7 +168,7 @@ export class RadialStackedChartComponent implements AfterViewInit {
             .enter().append("path")
             .attr("d", d => arcGen(d));
 
-        registerTooltip(paths, tooltip, (d, event) => {
+        registerTooltip(paths, tooltip, this.chartContainer().nativeElement, (d, event) => {
             const data = event.currentTarget.__data__;
             const [hoveredMin, hoveredMax]= data;
             const range = hoveredMax - hoveredMin;
@@ -187,7 +186,7 @@ export class RadialStackedChartComponent implements AfterViewInit {
 
         const label = g.append("g")
             .selectAll("g")
-            .data(this.data)
+            .data(this.data())
             .enter().append("g")
             .attr("text-anchor", "middle")
             .attr('transform', (d: RadialStackedData) => {
@@ -202,6 +201,7 @@ export class RadialStackedChartComponent implements AfterViewInit {
                     ? "rotate(90)translate(0,16)"
                     : 'rotate(-90)translate(0,-9)';
             })
+            .attr('class', 'bar-label')
             .text(d => d.groupLabel);
     }
 

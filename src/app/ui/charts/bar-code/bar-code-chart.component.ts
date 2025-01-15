@@ -23,7 +23,7 @@ interface Data {
         }
     `,
     template: `
-        <div #chartContainer></div>
+        <div #chartContainer class="h-full w-full overflow-hidden flex justify-center items-center"></div>
     `,
 })
 export class BarcodeChartComponent implements AfterViewInit {
@@ -35,16 +35,17 @@ export class BarcodeChartComponent implements AfterViewInit {
     private width = 928;
     private height = 500;
     private marginTop = 70;
-    private marginRight = 20;
+    private marginRight = 10;
     private marginBottom = 40;
-    private marginLeft = 40;
+    private marginLeft = 10;
 
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
-    private series!: Series<Data[][], string>[];
+    private series!: Series<Map<string, number>[], string>[];
     private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
     private xScale!: ScaleBand<string>;
     private yScale!: ScaleLinear<number, number>;
     private colors = SDG_COLOR_SHADES.colors;
+    private groupedData: Record<string, Map<string, number>> = {};
 
     constructor() {
         effect(() => {
@@ -65,6 +66,18 @@ export class BarcodeChartComponent implements AfterViewInit {
     private renderChart(data: Data[]): void {
         const container = this.chartContainer().nativeElement;
         container.innerHTML = '';
+        const { width, height } = container.getBoundingClientRect();
+
+        if (height < width * 0.55) {
+            console.log({ actualHeight: height, calculatedHeight: width * 0.55 })
+            this.height = height;
+            this.width = height / 0.55;
+        } else {
+            this.width = width;
+            this.height = width * 0.55;
+        }
+
+        console.log({ width: this.width, height: this.height })
 
         this.buildStackedSeries(data);
         this.defineScales(data);
@@ -77,7 +90,7 @@ export class BarcodeChartComponent implements AfterViewInit {
     }
 
     private buildStackedSeries(data: Data[]): void {
-        const groupedData = data.reduce((acc, d) => {
+        this.groupedData = data.reduce((acc, d) => {
             if (!acc[d.sdg]) {
                 acc[d.sdg] = new Map();
             }
@@ -85,14 +98,11 @@ export class BarcodeChartComponent implements AfterViewInit {
             return acc;
         }, {} as Record<string, Map<string, number>>);
 
-        // @ts-ignore
-        this.series = stack()
+        this.series = stack<Map<string, number>[]>()
             .keys(Array.from(new Set(data.map(d => d.policy))))
+            .value(([ _, map ], key) => map.get(key) ?? 0)
             // @ts-ignore
-            .value(([ , map ], key) => map.get(key) ?? 0)
-            .offset(stackOffsetExpand)
-            // @ts-ignore
-            (Object.entries(groupedData));
+            .offset(stackOffsetExpand)(Object.entries(this.groupedData));
     }
 
     private defineScales(data: Data[]): void {
@@ -124,8 +134,8 @@ export class BarcodeChartComponent implements AfterViewInit {
             .data(this.series)
             .join('g');
 
-        let total = 0;
-        const totalGroups = 17;
+        const totalSdgs = 17;
+        const sdgPolicyCount = new Map<string, number>();
         const rects = g
             .selectAll('rect')
             .data(D => D.map(d => {
@@ -137,19 +147,28 @@ export class BarcodeChartComponent implements AfterViewInit {
             .attr('y', d => this.yScale(d[1]))
             .attr('width', this.xScale.bandwidth())
             .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
-            .attr('fill', () => {
-                const schemeIndex = total % totalGroups;
-                const colorIndex = Math.floor(total / 55);
-                console.log({
-                    colorIndex,
-                    color: this.colors[schemeIndex][colorIndex]
-                });
-                const color = this.colors[schemeIndex][colorIndex];
-                total++;
-                return color;
+            .attr('fill', (d) => {
+                const key: string = (d as any).key;
+                const sdg = d.data[0] as unknown as string;
+
+                if (!sdgPolicyCount.has(sdg)) {
+                    sdgPolicyCount.set(sdg, 0);
+                }
+
+                const policyCount = sdgPolicyCount.get(sdg)! ?? 0;
+                const schemeIndex = [ ...sdgPolicyCount.keys() ].indexOf(sdg);
+                const colorIndex = policyCount % totalSdgs;
+
+                if (!this.groupedData[sdg].has(key)) {
+                    return 'white';
+                }
+
+                sdgPolicyCount.set(sdg, policyCount + 1);
+
+                return this.colors[schemeIndex][colorIndex];
             });
 
-        registerTooltip(rects as any, this.tooltip, (d) => {
+        registerTooltip(rects as any, this.tooltip, this.chartContainer().nativeElement, (d) => {
             const [ sdg, map ] = d.data;
             const key = (d as any).key;
             return `SDG: ${ sdg }<br>Policy: ${ key }<br>Count: ${ map?.get(key) ?? 0 }`;
