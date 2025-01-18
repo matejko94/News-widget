@@ -29,6 +29,9 @@ export const environment = {
         googleMaps: {
             apiKey: 'AIzaSyCdtOGarihoROHd5RzK4jBXdr6b8g6xit4'
         },
+        topics: {
+            url: '/api/news/topics'
+        },
         tags: {
             url: 'https://news-widget.pages.dev/api/news/tags'
         }
