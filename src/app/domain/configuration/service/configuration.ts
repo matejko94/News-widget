@@ -63,6 +63,4 @@ export class Configuration {
                 throw new Error(`No configuration found for SDG ${sdg}`);
         }
     }
-
-
 }

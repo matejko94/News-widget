@@ -1,10 +1,11 @@
-import {bootstrapApplication} from "@angular/platform-browser";
-import {provideHttpClient, withJsonpSupport} from "@angular/common/http";
+import { provideHttpClient, withJsonpSupport } from '@angular/common/http';
+import { provideAppInitializer } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { providePrimeNG } from 'primeng/config';
-import {AppComponent} from "./app.component";
-import {provideRouter, withComponentInputBinding} from "@angular/router";
-import {ROUTES} from "./routes";
+import { AppComponent } from './app.component';
+import { ROUTES } from './routes';
 import { MyPreset } from './styles/theme/theme';
 
 bootstrapApplication(AppComponent, {
@@ -23,6 +24,7 @@ bootstrapApplication(AppComponent, {
                     }
                 }
             }
-        })
+        }),
+        provideAppInitializer(() => console.log('Version: 1.0.3'))
     ]
 }).catch(err => console.error(err));
