@@ -1,7 +1,6 @@
 import { select, Selection, Series, SeriesPoint } from 'd3';
 
 export function createTooltip(container: HTMLElement) {
-    // Force absolute positioning and initial off-screen placement
     return select(container)
         .append('div')
         .attr('class', 'tooltip')
