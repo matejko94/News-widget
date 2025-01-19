@@ -22,25 +22,27 @@ export interface TimelineRow {
             position: relative;
             width: 100%;
             height: 100%;
-        }
 
-        svg {
-            overflow: visible;
-        }
+            ::ng-deep {
+                .row-label {
+                    font-size: 12px;
 
-        .row-label {
-            font-size: 12px;
+                    @media (max-width: 768px) {
+                        font-size: 11px;
+                    }
 
-            @media (max-width: 768px) {
-                font-size: 11px;
-            }
+                    @media (max-width: 640px) {
+                        font-size: 10px;
+                    }
 
-            @media (max-width: 640px) {
-                font-size: 10px;
-            }
+                    @media (max-width: 480px) {
+                        font-size: 9px;
+                    }
+                }
 
-            @media (max-width: 480px) {
-                font-size: 9px;
+                svg.timeline-chart {
+                    overflow: visible;
+                }
             }
         }
     ` ],
@@ -86,7 +88,8 @@ export class TimelineChartComponent implements AfterViewInit {
         this.svg = select(container)
             .append('svg')
             .attr('width', width)
-            .attr('height', height);
+            .attr('height', height)
+            .attr('class', 'timeline-chart');
         this.g = this.svg
             .append('g')
             .attr('transform', `translate(${ this.margin.left }, ${ this.margin.top })`);
@@ -139,7 +142,6 @@ export class TimelineChartComponent implements AfterViewInit {
             this.tooltip!,
             this.chartContainer().nativeElement,
             (d) => {
-                console.log(d);
                 // @ts-ignore
                 return `<strong>${ d.name }</strong><br>Years: ${ d.year }<br>SDG: ${ d.sdg }`
             }
