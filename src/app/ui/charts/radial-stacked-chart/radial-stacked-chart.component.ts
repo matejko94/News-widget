@@ -22,44 +22,46 @@ export interface RadialStackedData {
             position: relative;
             width: 100%;
             height: 100%;
-        }
 
-        svg.radial-bar-chart {
-            overflow: visible;
-        }
+          ::ng-deep {
+            svg.radial-bar-chart {
+              overflow: visible;
+            }
 
-        .bar-label {
-            font-size: 12px;
+            .bar-label {
+              font-size: 12px;
 
-            @media (max-width: 768px) {
+              @media (max-width: 768px) {
                 font-size: 11px;
-            }
+              }
 
-            @media (max-width: 640px) {
+              @media (max-width: 640px) {
                 font-size: 10px;
-            }
+              }
 
-            @media (max-width: 480px) {
+              @media (max-width: 480px) {
                 font-size: 9px;
+              }
             }
-        }
 
-        text {
-            font-family: sans-serif;
-            font-size: 10px;
-        }
+            text {
+              font-family: sans-serif;
+              font-size: 10px;
+            }
 
-        line {
-            stroke: #000;
-        }
+            line {
+              stroke: #000;
+            }
 
-        circle {
-            fill: none;
-            stroke: #000;
-        }
+            circle {
+              fill: none;
+              stroke: #000;
+            }
 
-        path {
-            transition: opacity 0.3s;
+            path {
+              transition: opacity 0.3s;
+            }
+          }
         }
     `,
     template: `
