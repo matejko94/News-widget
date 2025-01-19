@@ -17,52 +17,52 @@ export interface RadialStackedData {
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     styles: `
-        :host {
-            display: block;
-            position: relative;
-            width: 100%;
-            height: 100%;
+      :host {
+        display: block;
+        position: relative;
+        width: 100%;
+        height: 100%;
 
-          ::ng-deep {
-            svg.radial-bar-chart {
-              overflow: visible;
+        ::ng-deep {
+          svg.radial-bar-chart {
+            overflow: visible;
+          }
+
+          .bar-label {
+            font-size: 12px;
+
+            @media (max-width: 768px) {
+              font-size: 11px;
             }
 
-            .bar-label {
-              font-size: 12px;
-
-              @media (max-width: 768px) {
-                font-size: 11px;
-              }
-
-              @media (max-width: 640px) {
-                font-size: 10px;
-              }
-
-              @media (max-width: 480px) {
-                font-size: 9px;
-              }
-            }
-
-            text {
-              font-family: sans-serif;
+            @media (max-width: 640px) {
               font-size: 10px;
             }
 
-            line {
-              stroke: #000;
-            }
-
-            circle {
-              fill: none;
-              stroke: #000;
-            }
-
-            path {
-              transition: opacity 0.3s;
+            @media (max-width: 480px) {
+              font-size: 9px;
             }
           }
+
+          text {
+            font-family: sans-serif;
+            font-size: 10px;
+          }
+
+          line {
+            stroke: #000;
+          }
+
+          circle {
+            fill: none;
+            stroke: #000;
+          }
+
+          path {
+            transition: opacity 0.3s;
+          }
         }
+      }
     `,
     template: `
         <div class="flex flex-col md:flex-row justify-center items-center aspect-square w-full h-full relative">

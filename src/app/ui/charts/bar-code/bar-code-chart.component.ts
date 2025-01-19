@@ -20,6 +20,10 @@ interface Data {
             align-items: center;
             width: 100%;
             height: 100%;
+
+            ::ng-deep svg {
+                overflow: hidden
+            }
         }
     `,
     template: `
@@ -61,6 +65,8 @@ export class BarcodeChartComponent implements AfterViewInit {
             startWith(null),
             takeUntilDestroyed(this.destroyRef),
         ).subscribe(() => this.renderChart(this.data()));
+
+        setTimeout(() => this.renderChart(this.data()), 0);
     }
 
     private renderChart(data: Data[]): void {
@@ -69,15 +75,12 @@ export class BarcodeChartComponent implements AfterViewInit {
         const { width, height } = container.getBoundingClientRect();
 
         if (height < width * 0.55) {
-            console.log({ actualHeight: height, calculatedHeight: width * 0.55 })
             this.height = height;
             this.width = height / 0.55;
         } else {
             this.width = width;
             this.height = width * 0.55;
         }
-
-        console.log({ width: this.width, height: this.height })
 
         this.buildStackedSeries(data);
         this.defineScales(data);
@@ -146,7 +149,7 @@ export class BarcodeChartComponent implements AfterViewInit {
             .attr('x', d => this.xScale(d.data[0] as any)!)
             .attr('y', d => this.yScale(d[1]))
             .attr('width', this.xScale.bandwidth())
-            .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
+            .attr('height', d => Math.max(0, this.yScale(d[0]) - this.yScale(d[1])))
             .attr('fill', (d) => {
                 const key: string = (d as any).key;
                 const sdg = d.data[0] as unknown as string;
@@ -171,7 +174,7 @@ export class BarcodeChartComponent implements AfterViewInit {
         registerTooltip(rects as any, this.tooltip, this.chartContainer().nativeElement, (d) => {
             const [ sdg, map ] = d.data;
             const key = (d as any).key;
-            return `SDG: ${ sdg }<br>Policy: ${ key }<br>Count: ${ map?.get(key) ?? 0 }`;
+            return `${ sdg }<br>Policy: ${ key }<br>Count: ${ map?.get(key) ?? 0 }`;
         });
     }
 
