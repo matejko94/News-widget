@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, input, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, input, viewChild } from '@angular/core';
 import { arc, ScaleBand, scaleBand, scaleLinear, scaleOrdinal, select, Selection, Series, stack } from 'd3';
 import { debounceTime, fromEvent, startWith } from 'rxjs';
 import { LegendComponent } from '../../legend/legend.component';
@@ -73,6 +73,8 @@ export interface RadialStackedData {
     `,
 })
 export class RadialStackedChartComponent implements AfterViewInit {
+    private destroyRef = inject(DestroyRef);
+
     private chartContainer = viewChild.required<ElementRef<HTMLElement>>('chartContainer');
     public data = input.required<RadialStackedData[]>();
     public colors = input.required<string[]>();
@@ -93,6 +95,11 @@ export class RadialStackedChartComponent implements AfterViewInit {
             const { width, height } = this.chartContainer().nativeElement.getBoundingClientRect();
             this.renderChart(Math.min(width, height) * 0.8);
         })
+
+        setTimeout(() => {
+            const { width, height } = this.chartContainer().nativeElement.getBoundingClientRect();
+            this.renderChart(Math.min(width, height) * 0.8);
+        }, 250)
     }
 
     private renderChart(size: number) {

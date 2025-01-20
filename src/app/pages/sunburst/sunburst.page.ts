@@ -6,7 +6,7 @@ import { NewsService } from '../../domain/news/service/news.service';
 import { TopicDto } from '../../domain/news/types/topic.dto';
 import { SunburstChartComponent } from '../../ui/charts/sunburst-chart/sunburst-chart.component';
 import { SunburstNode } from '../../ui/charts/sunburst-chart/sunburst-node.interface';
-import { TopicMenuComponent } from '../../ui/topic-menu/topic-menu.component';
+import { MenuComponent } from '../../ui/menu/menu.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -15,7 +15,7 @@ import { BasePage } from '../base.page';
     imports: [
         SunburstChartComponent,
         AsyncPipe,
-        TopicMenuComponent
+        MenuComponent
     ],
     styles: `
         :host {
@@ -28,7 +28,8 @@ import { BasePage } from '../base.page';
         }
     `,
     template: `
-        <app-topic-menu [options]="topicOptions()" class="absolute right-3 top-14 z-10"/>
+        <app-menu queryParam="topic" label="Select topic" [options]="topicOptions()"
+                  class="absolute right-3 top-14 z-10"/>
 
         @if (node$ | async; as node) {
             @if (node.children?.length) {

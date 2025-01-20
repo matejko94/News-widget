@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from "@angular/router";
+import { RouterOutlet } from '@angular/router';
 
 @Component({
     selector: 'news-widget',
@@ -7,11 +7,13 @@ import { RouterOutlet } from "@angular/router";
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ RouterOutlet ],
     styles: `
-      :host {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
+        :host {
+            display: block;
+            max-width: 1080px;
+            margin: auto;
+            width: 100%;
+            height: 100%;
+        }
     `,
     template: `<router-outlet/>`,
 })

@@ -30,5 +30,10 @@ export const ROUTES: Route[] = [
         path: 'policy/timeline',
         loadComponent: () => import('./app/pages/timeline/timeline.page'),
         title: 'Policy Timeline'
+    },
+    {
+        path: 'policy/radar',
+        loadComponent: () => import('./app/pages/radar/radar.page'),
+        title: 'Policy Radar'
     }
 ];

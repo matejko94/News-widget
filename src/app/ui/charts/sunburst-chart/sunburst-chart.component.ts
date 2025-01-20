@@ -107,6 +107,8 @@ export class SunburstChartComponent implements AfterViewInit {
             startWith(null),
             takeUntilDestroyed(this.destroyRef),
         ).subscribe(() => this.renderChart(this.data(), this.colors()));
+
+        setTimeout(() => this.renderChart(this.data(), this.colors()), 0);
     }
 
     private renderChart(data: SunburstNode, colors: string[]): void {

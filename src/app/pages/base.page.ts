@@ -1,6 +1,7 @@
-import { computed, Directive, inject, Injector, input, OnInit, signal } from '@angular/core';
+import { computed, Directive, inject, input, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { distinctUntilChanged, map, Observable, tap } from 'rxjs';
+import { distinctUntilChanged, map, Observable } from 'rxjs';
+import { WorldBankRegions } from '../../../configuration/regions/world-regions';
 import { Configuration } from '../domain/configuration/service/configuration';
 import { Topic } from '../domain/configuration/types/topic.interface';
 
@@ -12,7 +13,8 @@ export abstract class BasePage implements OnInit {
     public sdg = input.required<string>();
     public topic = input.required<string>();
     public availableTopics = signal<Topic[]>([]);
-    public topicOptions = computed(() => this.availableTopics().map(t => t.name));
+    public topicOptions = computed(() => this.availableTopics().map(t => ({ label: t.name, value: t.name })));
+    public worldRegionOptions = WorldBankRegions;
     public selectedTopic$!: Observable<Topic>;
 
     public ngOnInit() {

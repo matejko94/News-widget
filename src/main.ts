@@ -18,12 +18,13 @@ bootstrapApplication(AppComponent, {
                 preset: MyPreset,
                 options: {
                     darkModeSelector: false,
-                    cssLayer: {
-                        name: 'primeng',
-                        order: 'tailwind-base, primeng, tailwind-utilities'
-                    }
-                }
-            }
+                    // cssLayer: {
+                    //     name: 'primeng',
+                    //     order: 'tailwind-base, primeng, tailwind-utilities'
+                    // },
+                },
+            },
+
         }),
         provideAppInitializer(() => console.log('Version: 1.0.3'))
     ]

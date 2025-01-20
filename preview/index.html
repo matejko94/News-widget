@@ -14,14 +14,18 @@
         <label for="sdg-select" class="block text-sm font-medium text-gray-700">Select SDG Number:</label>
         <select id="sdg-select"
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-            <!-- Options will be populated by script -->
         </select>
     </div>
     <div class="mb-4">
         <label for="widget-select" class="block text-sm font-medium text-gray-700">Select Widget:</label>
         <select id="widget-select"
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-            <!-- Options will be populated by script -->
+        </select>
+    </div>
+    <div class="mb-4">
+        <label for="environment-select" class="block text-sm font-medium text-gray-700">Select Environment:</label>
+        <select id="environment-select"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
         </select>
     </div>
     <iframe id="widget-iframe" class="w-2/3 h-[500px] border border-gray-300 rounded-md mx-auto mt-20" src=""></iframe>
@@ -29,6 +33,7 @@
 <script>
     const sdgSelect = document.getElementById('sdg-select');
     const widgetSelect = document.getElementById('widget-select');
+    const environmentSelect = document.getElementById('environment-select');
     const iframe = document.getElementById('widget-iframe');
 
     const config = {
@@ -39,6 +44,11 @@
             'Radial': '/education/radial',
             'Barcode': '/policy/heatmap',
             'Timeline': '/policy/timeline',
+            'Radar': '/policy/radar',
+        },
+        environment: {
+            'Local': 'http://localhost:4200',
+            'Production': 'https://news-widget.pages.dev'
         }
     };
 
@@ -56,14 +66,23 @@
         widgetSelect.appendChild(option);
     });
 
+    Object.keys(config.environment).forEach(env => {
+        const option = document.createElement('option');
+        option.value = config.environment[env];
+        option.textContent = env;
+        environmentSelect.appendChild(option);
+    });
+
     function updateIframe() {
         const sdg = sdgSelect.value;
         const widgetPath = widgetSelect.value;
-        iframe.contentWindow.location.replace(`http://localhost:4200${ widgetPath }?sdg=${ sdg }`);
+        const environment = environmentSelect.value;
+        iframe.contentWindow.location.replace(`${ environment }${ widgetPath }?sdg=${ sdg }`);
     }
 
     sdgSelect.addEventListener('change', updateIframe);
     widgetSelect.addEventListener('change', updateIframe);
+    environmentSelect.addEventListener('change', updateIframe);
     updateIframe();
 </script>
 </body>
