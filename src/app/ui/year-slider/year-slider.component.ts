@@ -9,6 +9,9 @@ import { debounceTime, fromEvent, startWith } from 'rxjs';
 
 @Component({
     selector: 'app-year-slider',
+    imports: [
+        Button
+    ],
     styles: `
         :host {
             display: block;
@@ -20,11 +23,8 @@ import { debounceTime, fromEvent, startWith } from 'rxjs';
             <div>Year:</div>
             <p-button [label]="interval !== undefined ? 'Stop' : 'Continue'" (click)="toggleAutoIncrement()"/>
         </div>
-        <div #slider id="slider" class="w-full"></div>
-    `,
-    imports: [
-        Button
-    ]
+        <div #slider id="slider" class="w-full overflow-hidden"></div>
+    `
 })
 export class YearSliderComponent implements AfterViewInit, OnDestroy {
     private router = inject(Router);

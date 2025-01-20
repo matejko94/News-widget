@@ -1,7 +1,8 @@
-import { AfterViewInit, Component, ElementRef, input, viewChild } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, ElementRef, inject, input, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { axisBottom, axisLeft, ScaleBand, scaleBand, ScaleLinear, scaleLinear, select, Selection } from 'd3';
-import { fromEvent } from 'rxjs';
 import { debounceTime, startWith } from 'rxjs/operators';
+import { fromResize } from '../../../common/utility/from-resize';
 
 export interface LollipopChartData {
     xValue: number;
@@ -61,6 +62,8 @@ export interface LollipopChartData {
         <div #chartContainer class="w-full h-full"></div>`
 })
 export class LineChartComponent implements AfterViewInit {
+    private destroyRef = inject(DestroyRef);
+
     private chartContainer = viewChild.required<ElementRef>('chartContainer');
     public data = input.required<LollipopChartData[]>();
 
@@ -71,12 +74,11 @@ export class LineChartComponent implements AfterViewInit {
     private y!: ScaleBand<string>;
 
     public ngAfterViewInit(): void {
-        fromEvent(window, 'resize').pipe(
+        fromResize(this.chartContainer().nativeElement).pipe(
             debounceTime(10),
             startWith(null),
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe(() => this.renderChart());
-
-        setTimeout(() => this.renderChart(), 0);
     }
 
     private renderChart(): void {

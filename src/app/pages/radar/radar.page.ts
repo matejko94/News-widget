@@ -38,7 +38,7 @@ import { BasePage } from '../base.page';
         <!--        @if (data$ | async; as data) {-->
         @if (data?.length) {
             <div class="flex max-md:flex-col justify-between max-md:justify-start w-full h-full max-md:h-fit
-                overflow-y-hidden">
+                md:overflow-y-hidden">
                 <app-radar-chart [data]="radarData" class="md:max-w-[46%]"/>
                 <app-lollipop-chart [data]="data" class="md:mt-8 md:max-w-[46%]"/>
             </div>

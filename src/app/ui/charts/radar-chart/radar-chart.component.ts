@@ -1,7 +1,8 @@
-import { AfterViewInit, Component, ElementRef, input, viewChild } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, ElementRef, inject, input, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { curveLinearClosed, line, scaleLinear, select, Selection } from 'd3';
-import { fromEvent } from 'rxjs';
 import { debounceTime, startWith } from 'rxjs/operators';
+import { fromResize } from '../../../common/utility/from-resize';
 
 export interface RadarChartData {
     axis: string;
@@ -59,9 +60,10 @@ export interface RadarChartData {
         <div #chartContainer class="w-full h-full flex flex-col items-center"></div>`
 })
 export class RadarChartComponent implements AfterViewInit {
-    private chartContainer = viewChild.required<ElementRef>('chartContainer');
-    public data = input.required<RadarChartData[]>();
+    private destroyRef = inject(DestroyRef);
 
+    private chartContainer = viewChild.required<ElementRef<HTMLDivElement>>('chartContainer');
+    public data = input.required<RadarChartData[]>();
     private margin = { top: 50, right: 50, bottom: 50, left: 50 };
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
     private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
@@ -71,12 +73,11 @@ export class RadarChartComponent implements AfterViewInit {
     private chartGroup!: Selection<SVGGElement, unknown, null, undefined>;
 
     public ngAfterViewInit(): void {
-        fromEvent(window, 'resize').pipe(
+        fromResize(this.chartContainer().nativeElement).pipe(
             debounceTime(10),
             startWith(null),
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe(() => this.renderChart());
-
-        setTimeout(() => this.renderChart(), 0);
     }
 
     private renderChart(): void {
