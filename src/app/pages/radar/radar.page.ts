@@ -3,14 +3,22 @@ import { map, Observable } from 'rxjs';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { TopTopicsPerYear } from '../../domain/science/types/topic-timespan.interface';
-import { LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
+import { LineChartComponent, LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
+import { RadarChartComponent } from '../../ui/charts/radar-chart/radar-chart.component';
 import { TimelineRow } from '../../ui/charts/timeline/timeline-chart.component';
+import { MultiMenuComponent } from '../../ui/multi-menu/multi-menu.component';
+import { YearSliderComponent } from '../../ui/year-slider/year-slider.component';
 import { BasePage } from '../base.page';
 
 @Component({
     selector: 'radar-page',
     standalone: true,
-    imports: [],
+    imports: [
+        RadarChartComponent,
+        LineChartComponent,
+        YearSliderComponent,
+        MultiMenuComponent
+    ],
     styles: `
         :host {
             display: flex;

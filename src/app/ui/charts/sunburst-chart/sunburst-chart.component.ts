@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { arc, hierarchy, HierarchyNode, HierarchyRectangularNode, partition, select, Selection } from 'd3';
+import { PillLegendComponent } from '../../legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 
 export interface SunburstNode {
@@ -11,7 +12,9 @@ export interface SunburstNode {
 @Component({
     selector: 'app-sunburst-chart',
     standalone: true,
-    imports: [],
+    imports: [
+        PillLegendComponent
+    ],
     styles: `
         :host {
             display: flex;

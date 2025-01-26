@@ -1,5 +1,6 @@
 import { Component, input } from '@angular/core';
 import { axisBottom, axisTop, max, min, pointer, scaleBand, ScaleBand, scaleLinear, ScaleLinear, select, Selection } from 'd3';
+import { PillLegendComponent } from '../../legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -12,7 +13,9 @@ export interface TimelineRow {
 
 @Component({
     selector: 'app-timeline-chart',
-    imports: [],
+    imports: [
+        PillLegendComponent
+    ],
     styles: [ `
         :host {
             display: block;
