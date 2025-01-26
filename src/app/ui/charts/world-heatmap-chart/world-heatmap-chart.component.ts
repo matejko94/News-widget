@@ -1,5 +1,5 @@
 import { Component, effect, input } from '@angular/core';
-import { geoMercator, geoPath, json, max, select, Selection } from 'd3';
+import { geoMercator, geoPath, json, select, Selection } from 'd3';
 import { FeatureCollection } from 'geojson';
 import { feature } from 'topojson-client';
 import { Chart } from '../chart.abstract';
@@ -90,8 +90,6 @@ export class WorldMapComponent extends Chart {
             .center([ 0, 20 ])
             .translate([ this.width / 2, this.height / 2 ]);
         const pathGenerator = geoPath().projection(projection);
-        const counts = this.data().map(d => d.count);
-        const maxCount = max(counts) || 1;
 
         return this.svg
             .append('g')
