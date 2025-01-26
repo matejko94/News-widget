@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { curveLinearClosed, line, scaleLinear, select, Selection } from 'd3';
 import { Chart } from '../chart.abstract';
+import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
 export interface RadarChartData {
     axis: string;
@@ -77,9 +78,9 @@ export class RadarChartComponent extends Chart {
         this.createSvg(container, size);
         this.createScales(size);
         this.createAxes();
-        this.createTooltip(container);
+        this.tooltip = createTooltip(container);
         this.createRadarArea();
-        this.createDots();
+        this.createDots(container);
     }
 
     private clearChart(container: HTMLElement): void {
@@ -162,13 +163,6 @@ export class RadarChartComponent extends Chart {
             .text(d => d);
     }
 
-    private createTooltip(container: HTMLElement): void {
-        this.tooltip = select(container)
-            .append('div')
-            .attr('class', 'tooltip')
-            .style('opacity', 0);
-    }
-
     private createRadarArea(): void {
         const radarLine = line<RadarChartData>()
             .x((d, i) => this.rScale(d.value)! as number * Math.cos(this.angleSlice * i - Math.PI / 2))
@@ -185,25 +179,8 @@ export class RadarChartComponent extends Chart {
             .style('stroke-width', '2px');
     }
 
-    private createDots(): void {
-        const showTooltip = (event: MouseEvent, d: RadarChartData) => {
-            this.tooltip.transition().duration(200).style('opacity', 1);
-            this.tooltip.html(`${ d.axis }<br>Value: ${ d.value }`)
-                .style('left', `${ event.pageX + 15 }px`)
-                .style('top', `${ event.pageY + 15 }px`);
-        };
-
-        const moveTooltip = (event: MouseEvent) => {
-            this.tooltip
-                .style('left', `${ event.pageX + 15 }px`)
-                .style('top', `${ event.pageY + 15 }px`);
-        };
-
-        const hideTooltip = () => {
-            this.tooltip.transition().duration(200).style('opacity', 0);
-        };
-
-        this.chartGroup
+    private createDots(container: HTMLElement): void {
+        const circles = this.chartGroup
             .selectAll('.radarCircle')
             .data(this.data())
             .enter()
@@ -213,9 +190,10 @@ export class RadarChartComponent extends Chart {
             .attr('cx', (d, i) => this.rScale(d.value)! as number * Math.cos(this.angleSlice * i - Math.PI / 2))
             .attr('cy', (d, i) => this.rScale(d.value)! as number * Math.sin(this.angleSlice * i - Math.PI / 2))
             .style('fill', '#69b3a2')
-            .style('fill-opacity', 0.8)
-            .on('mouseover', showTooltip)
-            .on('mousemove', moveTooltip)
-            .on('mouseleave', hideTooltip);
+            .style('fill-opacity', 0.8);
+
+        registerTooltip(circles, this.tooltip, container, (d) => {
+            return `<strong>${ d.axis }</strong><br/>Value: ${ d.value }`;
+        });
     }
 }
