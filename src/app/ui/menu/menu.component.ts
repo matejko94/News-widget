@@ -16,7 +16,7 @@ export interface Option {
     template: `
         <p-select
             [options]="options()" [ngModel]="selected()" (ngModelChange)="onChange($event)"
-            optionLabel="label" optionValue="value"
+            optionLabel="label" optionValue="value" appendTo="body"
             [placeholder]="label()" class="w-48 border border-gray-300"
         />
     `

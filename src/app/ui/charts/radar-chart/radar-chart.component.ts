@@ -23,18 +23,14 @@ export interface RadarChartData {
                 }
 
                 .label {
-                    font-size: 12px;
-
-                    @media (max-width: 768px) {
-                        font-size: 11px;
-                    }
+                    font-size: 14px;
 
                     @media (max-width: 640px) {
-                        font-size: 10px;
+                        font-size: 12px;
                     }
 
                     @media (max-width: 480px) {
-                        font-size: 9px;
+                        font-size: 11px;
                     }
                 }
             }
@@ -55,11 +51,14 @@ export interface RadarChartData {
         }
     ` ],
     template: `
-        <div #chartContainer class="w-full h-full flex flex-col items-center"></div>`
+        <div class="flex flex-col justify-center items-center aspect-square w-full h-full relative">
+            <div #chartContainer class="w-full h-full flex flex-col items-center"></div>
+        </div>
+    `
 })
 export class RadarChartComponent extends Chart {
     public data = input.required<RadarChartData[]>();
-    private margin = { top: 50, right: 50, bottom: 50, left: 50 };
+    private margin = { top: 50, right: 75, bottom: 50, left: 75 };
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
     private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
     private radius = 0;
@@ -72,7 +71,7 @@ export class RadarChartComponent extends Chart {
 
         const container = this.chartContainer().nativeElement;
         const { height, width } = container.getBoundingClientRect();
-        const size = Math.min(height, width) * 0.8;
+        const size = Math.min(height, width) * 0.75;
 
         this.clearChart(container);
         this.createSvg(container, size);
@@ -143,10 +142,9 @@ export class RadarChartComponent extends Chart {
 
         axis.append('text')
             .attr('class', 'legend')
-            .style('font-size', '11px')
             .attr('text-anchor', 'middle')
             .attr('dy', '0.35em')
-            .attr('x', (d, i) => this.rScale(Math.max(...this.data().map(d => d.value)) * 1.1) as number * Math.cos(this.angleSlice * i - Math.PI / 2))
+            .attr('x', (d, i) => this.rScale(Math.max(...this.data().map(d => d.value)) * 1.2) as number * Math.cos(this.angleSlice * i - Math.PI / 2))
             .attr('y', (d, i) => this.rScale(Math.max(...this.data().map(d => d.value)) * 1.1) as number * Math.sin(this.angleSlice * i - Math.PI / 2))
             .attr('class', 'label')
             .text(d => d.axis);

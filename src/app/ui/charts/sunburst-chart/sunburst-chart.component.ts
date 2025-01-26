@@ -1,15 +1,17 @@
 import { ChangeDetectorRef, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { arc, hierarchy, HierarchyNode, HierarchyRectangularNode, partition, select, Selection } from 'd3';
-import { LegendComponent } from '../../legend/legend.component';
 import { Chart } from '../chart.abstract';
-import { SunburstNode } from './sunburst-node.interface';
+
+export interface SunburstNode {
+    name: string;
+    size?: number;
+    children?: SunburstNode[];
+}
 
 @Component({
     selector: 'app-sunburst-chart',
     standalone: true,
-    imports: [
-        LegendComponent
-    ],
+    imports: [],
     styles: `
         :host {
             display: flex;
@@ -75,7 +77,7 @@ import { SunburstNode } from './sunburst-node.interface';
                     }
                 </div>
             </div>
-            <app-legend [items]="topLevelNodes()" [colors]="colors()"/>
+            <app-pill-legend [items]="legendItems()"/>
         </section>
     `
 })
@@ -89,6 +91,10 @@ export class SunburstChartComponent extends Chart {
     private hoveredNode = signal<HierarchyNode<SunburstNode> | undefined>(undefined);
     public hoveredSequence = computed(() => this.hoveredNode() ? this.getAncestors(this.hoveredNode()!) : []);
     public topLevelNodes = computed(() => this.data().children?.map(d => d.name) ?? []);
+    public legendItems = computed(() => this.topLevelNodes().map((label, i) => ({
+        label,
+        color: this.colors()[i % this.colors().length]
+    })));
 
     constructor() {
         super();

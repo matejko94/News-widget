@@ -16,7 +16,8 @@ export interface LollipopChartData {
             align-items: center;
             flex-direction: column;
             width: 100%;
-            padding-left: 3rem;
+            padding-left: 4rem;
+            padding-bottom: 1rem;
             overflow: hidden;
 
             ::ng-deep {
@@ -24,19 +25,15 @@ export interface LollipopChartData {
                     overflow: visible;
                 }
 
-                .label {
-                    font-size: 12px;
-
-                    @media (max-width: 768px) {
-                        font-size: 11px;
-                    }
+                .tick {
+                    font-size: 14px;
 
                     @media (max-width: 640px) {
-                        font-size: 10px;
+                        font-size: 12px;
                     }
 
                     @media (max-width: 480px) {
-                        font-size: 9px;
+                        font-size: 10px;
                     }
                 }
             }
@@ -61,7 +58,7 @@ export interface LollipopChartData {
 })
 export class LineChartComponent extends Chart {
     public data = input.required<LollipopChartData[]>();
-    private margin = { top: 10, right: 30, bottom: 40, left: 100 };
+    private margin = { top: 10, right: 30, bottom: 60, left: 100 };
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
     private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
     private x!: ScaleLinear<number, number>;

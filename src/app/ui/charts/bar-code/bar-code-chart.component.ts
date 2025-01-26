@@ -20,8 +20,19 @@ interface Data {
             width: 100%;
             height: 100%;
 
-            ::ng-deep svg {
-                overflow: hidden
+            ::ng-deep {
+                svg {
+                    overflow: hidden
+                }
+
+                .axis-label {
+                    font-weight: 600;
+                    font-size: 14px;
+
+                    @media (max-width: 480px) {
+                        font-size: 11px;
+                    }
+                }
             }
         }
     `,
@@ -35,7 +46,7 @@ export class BarcodeChartComponent extends Chart {
     private height = 500;
     private marginTop = 70;
     private marginRight = 10;
-    private marginBottom = 40;
+    private marginBottom = 100;
     private marginLeft = 10;
 
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
@@ -108,7 +119,7 @@ export class BarcodeChartComponent extends Chart {
         this.xScale = scaleBand()
             .domain(sdgs)
             .range([ this.marginLeft, this.width - this.marginRight ])
-            .padding(0.05);
+            .padding(0.1);
 
         this.yScale = scaleLinear()
             .domain(yDomain)
@@ -174,9 +185,13 @@ export class BarcodeChartComponent extends Chart {
     private drawAxes(): void {
         this.svg.append('g')
             .attr('transform', `translate(0, ${ this.height - this.marginBottom })`)
-            .call(axisBottom(this.xScale))
+            .call(axisBottom(this.xScale).tickPadding(10))
             .selectAll('text')
-            .attr('transform', 'rotate(-45)')
-            .style('text-anchor', 'end');
+            .attr('class', 'axis-label')
+            .style('text-anchor', 'middle')
+            .attr('dy', '1.5em')
+            .attr('transform', 'rotate(90) translate(40, -30)');
+
+
     }
 }

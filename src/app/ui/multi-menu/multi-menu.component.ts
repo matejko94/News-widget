@@ -25,6 +25,7 @@ export interface Option {
             [options]="options()" [ngModel]="selected()" (ngModelChange)="onChange($event)"
             optionLabel="label" optionValue="value" [maxSelectedLabels]="2" [filter]="false"
             [placeholder]="label()" display="chip" class="w-80 border border-gray-300"
+            [showToggleAll]="false" [showClear]="true"
         />
     `
 })
@@ -35,7 +36,7 @@ export class MultiMenuComponent implements OnInit {
 
     public queryParam = input.required<string>();
     public label = input.required<string>();
-    public options = input.required<Option[] | undefined>();
+    public options = input.required<Option[]>();
     public selected!: Signal<string[] | undefined>;
 
     public ngOnInit() {
@@ -51,7 +52,7 @@ export class MultiMenuComponent implements OnInit {
         this.router.navigate([], {
             relativeTo: this.route,
             queryParams: {
-                [this.queryParam()]: values.length ? values.join(',') : null
+                [this.queryParam()]: values?.length ? values.join(',') : null
             },
             queryParamsHandling: 'merge'
         });

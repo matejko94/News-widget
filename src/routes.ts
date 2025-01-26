@@ -46,4 +46,9 @@ export const ROUTES: Route[] = [
         loadComponent: () => import('./app/pages/intensity/intensity.page'),
         title: 'Intensity'
     },
+    {
+        path: 'innovations/collaboration',
+        loadComponent: () => import('./app/pages/collaboration/collaboration.page'),
+        title: 'Collaboration'
+    }
 ];

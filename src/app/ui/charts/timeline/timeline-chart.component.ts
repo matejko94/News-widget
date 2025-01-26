@@ -1,6 +1,5 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { axisBottom, axisTop, max, min, pointer, scaleBand, ScaleBand, scaleLinear, ScaleLinear, select, Selection } from 'd3';
-import { LegendComponent } from '../../legend/legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -13,9 +12,7 @@ export interface TimelineRow {
 
 @Component({
     selector: 'app-timeline-chart',
-    imports: [
-        LegendComponent
-    ],
+    imports: [],
     styles: [ `
         :host {
             display: block;
@@ -48,18 +45,16 @@ export interface TimelineRow {
     ` ],
     template: `
         <div class="flex flex-col md:flex-row justify-center items-center aspect-square w-full h-full relative">
+            <app-pill-legend [items]="legend()"/>
             <div class="pl-28 xs:pl-32 sm:pl-36 flex-1 flex justify-center items-center w-full md:w-auto md:h-full">
                 <div #chartContainer class="w-full h-full relative"></div>
             </div>
-            <app-legend [items]="keys()" [colors]="colors()"/>
         </div>
     `
 })
 export class TimelineChartComponent extends Chart {
     public data = input.required<TimelineRow[]>();
     public legend = input.required<{ label: string, color: string }[]>();
-    public keys = computed(() => this.legend().map(({ label }) => label));
-    public colors = computed(() => this.legend().map(({ color }) => color));
     private margin = { top: 70, right: 20, bottom: 40, left: 40 };
     private svg?: Selection<SVGSVGElement, unknown, null, undefined>;
     private line?: Selection<SVGLineElement, unknown, null, undefined>;

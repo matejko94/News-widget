@@ -3,22 +3,14 @@ import { map, Observable } from 'rxjs';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { TopTopicsPerYear } from '../../domain/science/types/topic-timespan.interface';
-import { LineChartComponent, LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
-import { RadarChartComponent } from '../../ui/charts/radar-chart/radar-chart.component';
+import { LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
 import { TimelineRow } from '../../ui/charts/timeline/timeline-chart.component';
-import { MultiMenuComponent } from '../../ui/multi-menu/multi-menu.component';
-import { YearSliderComponent } from '../../ui/year-slider/year-slider.component';
 import { BasePage } from '../base.page';
 
 @Component({
     selector: 'radar-page',
     standalone: true,
-    imports: [
-        LineChartComponent,
-        RadarChartComponent,
-        MultiMenuComponent,
-        YearSliderComponent,
-    ],
+    imports: [],
     styles: `
         :host {
             display: flex;
@@ -29,7 +21,7 @@ import { BasePage } from '../base.page';
         }
     `,
     template: `
-        <div class="w-full mb-10">
+        <div class="w-full">
             <app-year-slider [min]="2000" [max]="2021" autoIncrement/>
             <app-multi-menu queryParam="region" label="Select region" [options]="worldRegionOptions"
                             class="ml-auto mr-4"/>

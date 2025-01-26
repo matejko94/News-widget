@@ -4,18 +4,14 @@ import { map, Observable, switchMap } from 'rxjs';
 import { NEWS_CATEGORIES_COLORS } from '../../../../configuration/colors/news/categories.colors';
 import { NewsService } from '../../domain/news/service/news.service';
 import { TopicDto } from '../../domain/news/types/topic.dto';
-import { SunburstChartComponent } from '../../ui/charts/sunburst-chart/sunburst-chart.component';
-import { SunburstNode } from '../../ui/charts/sunburst-chart/sunburst-node.interface';
-import { MenuComponent } from '../../ui/menu/menu.component';
+import { SunburstNode } from '../../ui/charts/sunburst-chart/sunburst-chart.component';
 import { BasePage } from '../base.page';
 
 @Component({
     selector: 'sunburst-page',
     standalone: true,
     imports: [
-        SunburstChartComponent,
-        AsyncPipe,
-        MenuComponent
+        AsyncPipe
     ],
     styles: `
         :host {

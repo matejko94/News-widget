@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { arc, ScaleBand, scaleBand, scaleLinear, scaleOrdinal, select, Selection, Series, stack } from 'd3';
-import { LegendComponent } from '../../legend/legend.component';
+import { PillLegendComponent } from '../../legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -13,7 +13,7 @@ export interface RadialStackedData {
 
 @Component({
     selector: 'app-radial-stacked-chart',
-    imports: [ LegendComponent ],
+    imports: [ PillLegendComponent ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     styles: `
@@ -29,10 +29,10 @@ export interface RadialStackedData {
                 }
 
                 .bar-label {
-                    font-size: 12px;
+                    font-size: 14px;
 
                     @media (max-width: 768px) {
-                        font-size: 11px;
+                        font-size: 12px;
                     }
 
                     @media (max-width: 640px) {
@@ -68,14 +68,18 @@ export interface RadialStackedData {
         <div class="flex flex-col md:flex-row justify-center items-center aspect-square w-full h-full relative">
             <div #chartContainer
                  class="flex-1 w-full md:w-auto md:h-full flex justify-center items-center relative"></div>
-            <app-legend [items]="keys()" [colors]="colors()"/>
+            <app-pill-legend [items]="legendItems()"/>
         </div>
     `,
 })
 export class RadialStackedChartComponent extends Chart {
     public data = input.required<RadialStackedData[]>();
     public colors = input.required<string[]>();
-    public keys = computed<string[]>(() => Array.from(new Set(this.data().flatMap(d => Object.keys(d.items)))));
+    public keys = computed(() => Array.from(new Set(this.data().flatMap(d => Object.keys(d.items)))));
+    public legendItems = computed(() => this.keys().map((label, i) => ({
+        label,
+        color: this.colors()[i % this.colors().length]
+    })));
     private z = computed(() => scaleOrdinal<string>().domain(this.keys()).range(this.colors()));
     private yRange = computed<[ number, number ]>(() => {
         const maxVal = Math.max(...this.data()
@@ -232,7 +236,9 @@ export class RadialStackedChartComponent extends Chart {
         yAxis.append('text')
             .attr('y', -y(yTicks.pop()!))
             .attr('dy', '-1em')
-            .text('Policies');
+            .style('font-size', '12px')
+            .style('font-weight', 'bold')
+            .text('Documents');
     }
 
     private format(val: number) {
