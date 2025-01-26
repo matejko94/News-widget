@@ -35,5 +35,15 @@ export const ROUTES: Route[] = [
         path: 'policy/radar',
         loadComponent: () => import('./app/pages/radar/radar.page'),
         title: 'Policy Radar'
-    }
+    },
+    {
+        path: 'indicator/bubbles',
+        loadComponent: () => import('./app/pages/bubble/bubble.page'),
+        title: 'Bubble'
+    },
+    {
+        path: 'news/intensity',
+        loadComponent: () => import('./app/pages/intensity/intensity.page'),
+        title: 'Intensity'
+    },
 ];

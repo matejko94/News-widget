@@ -1,8 +1,7 @@
-import { AfterViewInit, Component, DestroyRef, effect, ElementRef, inject, input, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { axisBottom, scaleBand, ScaleBand, scaleLinear, ScaleLinear, select, Selection, Series, stack, stackOffsetExpand } from 'd3';
-import { debounceTime, fromEvent, startWith } from 'rxjs';
+import { Component, effect, input } from '@angular/core';
+import { axisBottom, scaleBand, ScaleBand, scaleLinear, ScaleLinear, select, Selection, Series, SeriesPoint, stack, stackOffsetExpand } from 'd3';
 import { SDG_COLOR_SHADES } from '../../../../../configuration/colors/policy/sdg.colors';
+import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
 interface Data {
@@ -30,12 +29,8 @@ interface Data {
         <div #chartContainer class="h-full w-full overflow-hidden flex justify-center items-center"></div>
     `,
 })
-export class BarcodeChartComponent implements AfterViewInit {
-    private destroyRef = inject(DestroyRef);
-
-    public chartContainer = viewChild.required<ElementRef>('chartContainer');
+export class BarcodeChartComponent extends Chart {
     public data = input.required<Data[]>();
-
     private width = 928;
     private height = 500;
     private marginTop = 70;
@@ -52,24 +47,22 @@ export class BarcodeChartComponent implements AfterViewInit {
     private groupedData: Record<string, Map<string, number>> = {};
 
     constructor() {
+        super();
+
         effect(() => {
             if (this.data()) {
-                this.renderChart(this.data());
+                this.renderChart();
             }
         });
     }
 
-    public ngAfterViewInit(): void {
-        fromEvent(window, 'resize').pipe(
-            debounceTime(25),
-            startWith(null),
-            takeUntilDestroyed(this.destroyRef),
-        ).subscribe(() => this.renderChart(this.data()));
+    protected override renderChart(): void {
+        const data = this.data();
 
-        setTimeout(() => this.renderChart(this.data()), 0);
-    }
+        if (!data) {
+            return;
+        }
 
-    private renderChart(data: Data[]): void {
         const container = this.chartContainer().nativeElement;
         container.innerHTML = '';
         const { width, height } = container.getBoundingClientRect();
@@ -169,9 +162,9 @@ export class BarcodeChartComponent implements AfterViewInit {
                 sdgPolicyCount.set(sdg, policyCount + 1);
 
                 return this.colors[schemeIndex][colorIndex];
-            });
+            }) as Selection<SVGRectElement, SeriesPoint<Map<string, number>[]>, SVGGElement, Series<Map<string, number>[], string>>;
 
-        registerTooltip(rects as any, this.tooltip, this.chartContainer().nativeElement, (d) => {
+        registerTooltip(rects, this.tooltip, this.chartContainer().nativeElement, (d) => {
             const [ sdg, map ] = d.data;
             const key = (d as any).key;
             return `${ sdg }<br>Policy: ${ key }<br>Count: ${ map?.get(key) ?? 0 }`;

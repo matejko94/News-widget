@@ -1,8 +1,6 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, inject, input, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, input } from '@angular/core';
 import { axisBottom, axisLeft, ScaleBand, scaleBand, ScaleLinear, scaleLinear, select, Selection } from 'd3';
-import { debounceTime, startWith } from 'rxjs/operators';
-import { fromResize } from '../../../common/utility/from-resize';
+import { Chart } from '../chart.abstract';
 
 export interface LollipopChartData {
     xValue: number;
@@ -61,27 +59,15 @@ export interface LollipopChartData {
     template: `
         <div #chartContainer class="w-full h-full"></div>`
 })
-export class LineChartComponent implements AfterViewInit {
-    private destroyRef = inject(DestroyRef);
-
-    private chartContainer = viewChild.required<ElementRef>('chartContainer');
+export class LineChartComponent extends Chart {
     public data = input.required<LollipopChartData[]>();
-
     private margin = { top: 10, right: 30, bottom: 40, left: 100 };
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
     private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
     private x!: ScaleLinear<number, number>;
     private y!: ScaleBand<string>;
 
-    public ngAfterViewInit(): void {
-        fromResize(this.chartContainer().nativeElement).pipe(
-            debounceTime(10),
-            startWith(null),
-            takeUntilDestroyed(this.destroyRef)
-        ).subscribe(() => this.renderChart());
-    }
-
-    private renderChart(): void {
+    protected override renderChart(): void {
         if (!this.data().length) return;
 
         const container = this.chartContainer().nativeElement;

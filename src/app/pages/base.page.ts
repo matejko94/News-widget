@@ -1,5 +1,5 @@
-import { computed, Directive, inject, input, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { computed, Directive, inject, Injector, input, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, Observable } from 'rxjs';
 import { WorldBankRegions } from '../../../configuration/regions/world-regions';
 import { Configuration } from '../domain/configuration/service/configuration';
@@ -7,8 +7,10 @@ import { Topic } from '../domain/configuration/types/topic.interface';
 
 @Directive()
 export abstract class BasePage implements OnInit {
+    private router = inject(Router);
     private route = inject(ActivatedRoute);
     private configuration = inject(Configuration);
+    private injector = inject(Injector);
 
     public sdg = input.required<string>();
     public topic = input.required<string>();
@@ -31,5 +33,12 @@ export abstract class BasePage implements OnInit {
                 }
             }),
         );
+    }
+
+    protected setQueryParam(key: string, value: string) {
+        return this.router.navigate([], {
+            queryParams: { [key]: value },
+            queryParamsHandling: 'merge',
+        });
     }
 }

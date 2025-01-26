@@ -26,7 +26,7 @@ export class MenuComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private injector = inject(Injector);
 
-    public queryParam = input.required<'topic' | 'region'>();
+    public queryParam = input.required<'topic' | 'region' | 'paramX' | 'paramY' | 'paramZ'>();
     public label = input.required<string>();
     public options = input.required<Option[] | undefined>();
     public selected!: Signal<string | undefined>;

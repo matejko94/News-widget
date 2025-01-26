@@ -6,6 +6,7 @@ import { CloudTagResponse } from '../../../../../functions/api/news/tags/interfa
 import { Tag } from '../../../../../functions/api/news/tags/interface/tag.interface';
 import { NewsDto } from '../types/news-dto.interface';
 import { NewsItem } from '../types/news-item.interface';
+import { NewsOnDateDto } from '../types/news-on-date.dto';
 import { TopicDto } from '../types/topic.dto';
 
 @Injectable({
@@ -80,6 +81,29 @@ export class NewsService {
                 return of([])
             }),
             shareReplay(1)
+        );
+    }
+
+    public getNewsIntensity(sdg: string, topic: string) {
+        return this.http.get<NewsOnDateDto[]>(
+            `${ environment.api.url }/news/intensity/${ sdg }?topic=${ topic }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch news intensity', e);
+                return of([])
+            })
+        );
+
+    }
+
+    public getNewsIntensityPerYear(sdg: string, topic: string, year: number) {
+        return this.http.get<{ year: string, country: string, value: number }[]>(
+            `${ environment.api.url }/news/intensity/yearly/${ sdg }?topic=${ topic }&year=${ year }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch news intensity per year', e);
+                return of([])
+            })
         );
     }
 }

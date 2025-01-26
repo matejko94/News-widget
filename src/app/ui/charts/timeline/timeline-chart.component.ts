@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, computed, ElementRef, input, viewChild } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { axisBottom, axisTop, max, min, pointer, scaleBand, ScaleBand, scaleLinear, ScaleLinear, select, Selection } from 'd3';
-import { debounceTime, fromEvent, startWith } from 'rxjs';
 import { LegendComponent } from '../../legend/legend.component';
+import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
 export interface TimelineRow {
@@ -55,8 +55,7 @@ export interface TimelineRow {
         </div>
     `
 })
-export class TimelineChartComponent implements AfterViewInit {
-    public chartContainer = viewChild.required<ElementRef<HTMLDivElement>>('chartContainer');
+export class TimelineChartComponent extends Chart {
     public data = input.required<TimelineRow[]>();
     public legend = input.required<{ label: string, color: string }[]>();
     public keys = computed(() => this.legend().map(({ label }) => label));
@@ -69,14 +68,7 @@ export class TimelineChartComponent implements AfterViewInit {
     private xScale!: ScaleLinear<number, number>;
     private yScale!: ScaleBand<string>;
 
-    public ngAfterViewInit(): void {
-        fromEvent(window, 'resize').pipe(
-            startWith(null),
-            debounceTime(25),
-        ).subscribe(() => this.renderChart())
-    }
-
-    private renderChart(): void {
+    protected override renderChart(): void {
         if (!this.data() || !this.data().length) {
             return;
         }

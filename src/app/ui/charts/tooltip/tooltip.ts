@@ -1,4 +1,4 @@
-import { select, Selection, Series, SeriesPoint } from 'd3';
+import { select, Selection } from 'd3';
 
 export function createTooltip(container: HTMLElement) {
     return select(container)
@@ -11,11 +11,11 @@ export function createTooltip(container: HTMLElement) {
         .style('top', '-9999px');
 }
 
-export function registerTooltip(
-    path: Selection<SVGPathElement, SeriesPoint<any>, SVGElement, Series<any, unknown>>,
+export function registerTooltip<PathElement extends Element, Data, Series>(
+    path: Selection<PathElement, Data, SVGElement, Series>,
     tooltip: Selection<HTMLDivElement, unknown, null, undefined>,
     container: HTMLElement,
-    render: (d: SeriesPoint<any>, event: any) => string
+    render: (d: Data, event: any) => string
 ) {
     path
         .on('mouseover', (event, d) => {

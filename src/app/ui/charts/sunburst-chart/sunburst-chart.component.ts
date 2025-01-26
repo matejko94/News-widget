@@ -1,13 +1,15 @@
-import { AfterViewInit, ChangeDetectorRef, Component, computed, DestroyRef, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectorRef, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { arc, hierarchy, HierarchyNode, HierarchyRectangularNode, partition, select, Selection } from 'd3';
-import { debounceTime, fromEvent, startWith, } from 'rxjs';
 import { LegendComponent } from '../../legend/legend.component';
+import { Chart } from '../chart.abstract';
 import { SunburstNode } from './sunburst-node.interface';
 
 @Component({
     selector: 'app-sunburst-chart',
     standalone: true,
+    imports: [
+        LegendComponent
+    ],
     styles: `
         :host {
             display: flex;
@@ -75,16 +77,11 @@ import { SunburstNode } from './sunburst-node.interface';
             </div>
             <app-legend [items]="topLevelNodes()" [colors]="colors()"/>
         </section>
-    `,
-    imports: [
-        LegendComponent
-    ]
+    `
 })
-export class SunburstChartComponent implements AfterViewInit {
-    private destroyRef = inject(DestroyRef);
+export class SunburstChartComponent extends Chart {
     private cdr = inject(ChangeDetectorRef);
 
-    public chartContainer = viewChild.required<ElementRef<HTMLElement>>('chartContainer');
     public data = input.required<SunburstNode>();
     public colors = input.required<string[]>();
     public activePercentage = signal<string | undefined>(undefined);
@@ -94,24 +91,20 @@ export class SunburstChartComponent implements AfterViewInit {
     public topLevelNodes = computed(() => this.data().children?.map(d => d.name) ?? []);
 
     constructor() {
+        super();
         effect(() => {
             if (this.data() && this.colors()) {
-                this.renderChart(this.data(), this.colors());
+                this.renderChart();
             }
         });
     }
 
-    public ngAfterViewInit(): void {
-        fromEvent(window, 'resize').pipe(
-            debounceTime(25),
-            startWith(null),
-            takeUntilDestroyed(this.destroyRef),
-        ).subscribe(() => this.renderChart(this.data(), this.colors()));
+    protected override renderChart(): void {
+        const data = this.data();
+        const colors = this.colors();
 
-        setTimeout(() => this.renderChart(this.data(), this.colors()), 0);
-    }
+        if (!data || !colors) return;
 
-    private renderChart(data: SunburstNode, colors: string[]): void {
         const chartEl = this.chartContainer().nativeElement;
         const { width, height } = chartEl.getBoundingClientRect();
         const size = Math.min(width, height) * 0.8;

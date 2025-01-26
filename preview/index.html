@@ -28,13 +28,14 @@
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
         </select>
     </div>
-    <iframe id="widget-iframe" class="w-2/3 h-[500px] border border-gray-300 rounded-md mx-auto mt-20" src=""></iframe>
+    <iframe id="widget-iframe" class="w-2/3 h-[600px] border border-gray-300 rounded-md mx-auto mt-20" src=""></iframe>
     <button id="copyUrl"
             class="block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-auto mt-6 w-fit">
         Copy URL
     </button>
 </div>
 <script>
+    let currentUrl = undefined;
     const sdgSelect = document.getElementById('sdg-select');
     const widgetSelect = document.getElementById('widget-select');
     const environmentSelect = document.getElementById('environment-select');
@@ -50,6 +51,8 @@
             'Barcode': '/policy/heatmap',
             'Timeline': '/policy/timeline',
             'Radar': '/policy/radar',
+            'Bubble': '/indicator/bubbles',
+            'Intensity': '/news/intensity',
         },
         environment: {
             'Local': 'http://localhost:4200',
@@ -79,18 +82,14 @@
     });
 
     function updateIframe() {
-        const sdg = sdgSelect.value;
-        const widgetPath = widgetSelect.value;
-        const environment = environmentSelect.value;
-        iframe.contentWindow.location.replace(`${ environment }${ widgetPath }?sdg=${ sdg }`);
+        currentUrl = `${ environmentSelect.value }${ widgetSelect.value }?sdg=${ sdgSelect.value }`;
+        iframe.contentWindow.location.replace(currentUrl);
     }
 
     sdgSelect.addEventListener('change', updateIframe);
     widgetSelect.addEventListener('change', updateIframe);
     environmentSelect.addEventListener('change', updateIframe);
-    copyUrl.addEventListener('click', () => {
-        navigator.clipboard.writeText(iframe.contentWindow.location.href);
-    });
+    copyUrl.addEventListener('click', () => navigator.clipboard.writeText(currentUrl));
     updateIframe();
 </script>
 </body>

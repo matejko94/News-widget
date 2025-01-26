@@ -1,8 +1,6 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, inject, input, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, input } from '@angular/core';
 import { curveLinearClosed, line, scaleLinear, select, Selection } from 'd3';
-import { debounceTime, startWith } from 'rxjs/operators';
-import { fromResize } from '../../../common/utility/from-resize';
+import { Chart } from '../chart.abstract';
 
 export interface RadarChartData {
     axis: string;
@@ -59,10 +57,7 @@ export interface RadarChartData {
     template: `
         <div #chartContainer class="w-full h-full flex flex-col items-center"></div>`
 })
-export class RadarChartComponent implements AfterViewInit {
-    private destroyRef = inject(DestroyRef);
-
-    private chartContainer = viewChild.required<ElementRef<HTMLDivElement>>('chartContainer');
+export class RadarChartComponent extends Chart {
     public data = input.required<RadarChartData[]>();
     private margin = { top: 50, right: 50, bottom: 50, left: 50 };
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
@@ -72,15 +67,7 @@ export class RadarChartComponent implements AfterViewInit {
     private rScale!: ReturnType<typeof scaleLinear>;
     private chartGroup!: Selection<SVGGElement, unknown, null, undefined>;
 
-    public ngAfterViewInit(): void {
-        fromResize(this.chartContainer().nativeElement).pipe(
-            debounceTime(10),
-            startWith(null),
-            takeUntilDestroyed(this.destroyRef)
-        ).subscribe(() => this.renderChart());
-    }
-
-    private renderChart(): void {
+    protected override renderChart(): void {
         if (!this.data().length) return;
 
         const container = this.chartContainer().nativeElement;
