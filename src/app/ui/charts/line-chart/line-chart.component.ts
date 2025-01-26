@@ -1,8 +1,8 @@
-import { NgStyle } from '@angular/common';
 import { Component, computed, effect, input, signal, Signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { axisBottom, axisLeft, line, ScaleLinear, scaleLinear, select, Selection } from 'd3';
 import { Checkbox } from 'primeng/checkbox';
+import { BoxLegendComponent, LegendItem } from '../../legend/box-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -16,13 +16,6 @@ export interface LineChartData {
     }[];
 }
 
-interface YLegend {
-    id: string;
-    label: string;
-    color: string;
-    hidden: WritableSignal<boolean>;
-}
-
 interface GroupLegend {
     label: string;
     hidden: WritableSignal<boolean>;
@@ -30,7 +23,7 @@ interface GroupLegend {
 
 @Component({
     selector: 'app-line-chart',
-    imports: [ NgStyle, Checkbox, FormsModule ],
+    imports: [ FormsModule, BoxLegendComponent, Checkbox ],
     styles: `
         :host {
             display: flex;
@@ -79,17 +72,9 @@ interface GroupLegend {
                  class="flex-1 w-full h-full flex justify-center items-center relative"></div>
             <div class="flex flex-col gap-1">
                 <div class="font-medium">{{ xAxisLabel() }}</div>
-                @for (item of yLegend(); track item.id) {
-                    <div class="flex items-center cursor-pointer text-xs md:text-sm"
-                         (click)="item.hidden.set(!item.hidden())">
-                        <span class="w-2.5 md:w-3.5 aspect-square mr-1 md:mr-2 rounded"
-                              [ngStyle]="{ 'background': item.color }"></span>
-                        <span class="{{ item.hidden() ? 'line-through' : '' }}">{{ item.label }}</span>
-                    </div>
-                }
+                <app-box-legend [items]="yLegend()" toggleable class="w-full"/>
 
                 <div class="font-medium mt-3">{{ groupLabel() }}</div>
-
                 @for (item of groupLegend(); track item.label) {
                     <div class="flex items-center cursor-pointer text-xs md:text-sm gap-1">
                         <p-checkbox [(ngModel)]="item.hidden" binary="true" size="small"/>
@@ -103,7 +88,7 @@ interface GroupLegend {
 export class LineChartComponent extends Chart {
     public data = input.required<LineChartData[]>();
     private visibleData: Signal<LineChartData[]>;
-    public yLegend: Signal<YLegend[]>;
+    public yLegend: Signal<LegendItem[]>;
     public groupLegend: Signal<GroupLegend[]>;
     public xAxisLabel = input.required<string>();
     public yAxisLabel = input.required<string>();
@@ -121,7 +106,7 @@ export class LineChartComponent extends Chart {
             hidden: signal(false)
         })));
         this.visibleData = computed(() => {
-            const hiddenLabels = new Set(this.yLegend().filter(l => l.hidden()).map(l => l.id));
+            const hiddenLabels = new Set(this.yLegend().filter(l => l.hidden()).map(l => l.label));
             const hiddenGroups = new Set(this.groupLegend().filter(l => l.hidden()).map(l => l.label));
             return this.data().filter(({ label, subLabel }) => !hiddenLabels.has(label) && !hiddenGroups.has(subLabel));
         });

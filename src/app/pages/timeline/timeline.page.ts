@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { ScienceService } from '../../domain/science/service/science.service';
@@ -27,7 +27,7 @@ import { BasePage } from '../base.page';
     template: `
         @if (data$ | async; as data) {
             @if (data?.length) {
-                <app-timeline-chart [data]="data" [legend]="legend()"/>
+                <app-timeline-chart [data]="data" [legend]="legend"/>
             } @else {
                 <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
                     No data available
@@ -41,7 +41,7 @@ export default class TimelinePage extends BasePage implements OnInit {
 
     public data$!: Observable<TimelineRow[]>;
     public sdgColors = SDG_COLORS.colors;
-    public legend = signal<{ label: string, color: string }[]>([]);
+    public legend = this.sdgColors.map((color, index) => ({ label: `SDG ${ index + 1 }`, color }));
 
     public override ngOnInit() {
         super.ngOnInit();
@@ -72,8 +72,6 @@ export default class TimelinePage extends BasePage implements OnInit {
                 topicTopYears.get(topic)!.push(year);
             });
         });
-
-        this.legend.set(this.sdgColors.map((color, index) => ({ label: `SDG ${ index + 1 }`, color })));
 
         return Array.from(topicTopYears.entries())
             .map(([ name, topYears ]) => ({

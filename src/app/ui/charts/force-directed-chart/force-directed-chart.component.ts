@@ -1,5 +1,7 @@
 import { Component, input } from '@angular/core';
 import { D3DragEvent, drag, forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY, scaleOrdinal, schemeCategory10, select, Selection, Simulation } from 'd3';
+import { SDG_COLORS } from '../../../../../configuration/colors/policy/sdg.colors';
+import { PillLegendComponent } from '../../legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -30,6 +32,10 @@ export interface ForceData {
             display: flex;
             width: 100%;
             overflow: hidden;
+
+            ::ng-deep svg {
+                overflow: visible;
+            }
         }
 
         .tooltip {
@@ -46,8 +52,15 @@ export interface ForceData {
             color: white;
         }
     `,
+    imports: [
+        PillLegendComponent
+    ],
     template: `
-        <div #chartContainer class="w-full h-full"></div>
+        <div class="flex flex-col md:flex-row justify-center items-center aspect-square w-full h-full relative">
+            <div #chartContainer
+                 class="flex-1 w-full md:w-auto md:h-full flex justify-center items-center relative"></div>
+            <app-pill-legend [items]="legend"/>
+        </div>
     `
 })
 export class ForceDirectedChartComponent extends Chart {
@@ -56,6 +69,8 @@ export class ForceDirectedChartComponent extends Chart {
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
     private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
     private simulation!: Simulation<ForceNode, ForceLink>;
+    private sdgColors = SDG_COLORS.colors;
+    public legend = this.sdgColors.map((color, index) => ({ label: `SDG ${ index + 1 }`, color }));
     private color = scaleOrdinal(schemeCategory10);
 
     protected override renderChart(): void {

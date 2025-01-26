@@ -1,7 +1,7 @@
 import { NgStyle } from '@angular/common';
 import { booleanAttribute, Component, input, WritableSignal } from '@angular/core';
 
-interface LegendItem {
+export interface LegendItem {
     label: string;
     color: string;
     hidden: WritableSignal<boolean>;
