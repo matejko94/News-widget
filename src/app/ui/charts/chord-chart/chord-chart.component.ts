@@ -1,5 +1,6 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { arc, Arc, Chord, chord, ChordGroup, Chords, descending, formatPrefix, ribbon, RibbonGenerator, select, Selection, sum, tickStep } from 'd3';
+import { BoxLegendComponent } from '../../legend/box-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -38,7 +39,9 @@ interface GroupTick {
             transition: opacity 0.2s;
         }
     ` ],
-    imports: [],
+    imports: [
+        BoxLegendComponent
+    ],
     template: `
         <div class="flex flex-col justify-center items-center aspect-square w-full h-full relative">
             <div #chartContainer class="flex-1 w-full flex justify-center items-center relative"></div>
