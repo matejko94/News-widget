@@ -50,5 +50,10 @@ export const ROUTES: Route[] = [
         path: 'innovations/collaboration',
         loadComponent: () => import('./app/pages/collaboration/collaboration.page'),
         title: 'Collaboration'
+    },
+    {
+        path: 'education/links',
+        loadComponent: () => import('./app/pages/links/links.page'),
+        title: 'Links'
     }
 ];

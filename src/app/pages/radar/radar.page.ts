@@ -106,8 +106,6 @@ export default class RadarPage extends BasePage implements OnInit {
             xValue: Math.floor(Math.random() * 1001),
             yValue: label
         }));
-
-        console.log({ data });
         return data;
     }
 }

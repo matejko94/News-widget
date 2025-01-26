@@ -191,7 +191,5 @@ export class BarcodeChartComponent extends Chart {
             .style('text-anchor', 'middle')
             .attr('dy', '1.5em')
             .attr('transform', 'rotate(90) translate(40, -30)');
-
-
     }
 }
