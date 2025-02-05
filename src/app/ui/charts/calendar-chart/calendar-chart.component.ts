@@ -14,6 +14,7 @@ export interface CalendarData {
         :host {
             display: flex;
             flex-direction: column;
+            align-items: center;
             width: 100%;
             height: 100%;
         }
@@ -35,7 +36,7 @@ export interface CalendarData {
 export class CalendarChartComponent extends Chart {
     public data = input.required<CalendarData[]>();
 
-    private margin = { top: 0, right: 0, bottom: 0, left: 40 };
+    private margin = { top: 0, right: 0, bottom: 0, left: 50 };
     private cellSize = 16;
     private widthMultiplier = 53;
     private heightMultiplier = 7;

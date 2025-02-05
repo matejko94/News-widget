@@ -6,7 +6,7 @@ import { BehaviorSubject, delay, distinctUntilChanged, EMPTY, filter, fromEvent,
 import { NewsService } from '../../domain/news/service/news.service';
 import { NewsItem } from '../../domain/news/types/news-item.interface';
 import { HeatmapComponent } from '../../ui/charts/heatmap/heatmap.component';
-import { SentimentMeterComponent } from '../../ui/sentiment-meter/sentiment-meter.component';
+import { SentimentMeterComponent } from '../../ui/charts/sentiment-meter/sentiment-meter.component';
 import { BasePage } from '../base.page';
 
 @Component({

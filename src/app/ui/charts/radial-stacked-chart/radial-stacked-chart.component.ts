@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { arc, ScaleBand, scaleBand, scaleLinear, scaleOrdinal, select, Selection, Series, stack } from 'd3';
-import { PillLegendComponent } from '../../legend/pill-legend.component';
+import { PillLegendComponent } from '../../components/legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -9,6 +9,15 @@ export interface RadialStackedData {
     items: {
         [key: string]: number;
     }
+}
+
+interface CellData {
+    groupLabel: string;
+    total: number;
+    ranges: {
+        label: string;
+        start: number;
+    }[]
 }
 
 @Component({
@@ -111,14 +120,27 @@ export class RadialStackedChartComponent extends Chart {
         const x = scaleBand().domain(this.data().map(d => d.groupLabel)).range([ 0, 2 * Math.PI ]).align(0);
         const y = (val: number) => scaleLinear().domain(this.yRange()).range([ innerRadius, outerRadius ])(val);
 
-        const stackedInput = this.data().map(d => {
-            const obj: Record<string, number | string> = { groupLabel: d.groupLabel };
+        const stackedInput: CellData[] = this.data().map(({ groupLabel, items }) => {
+            const ranges: CellData['ranges'] = [];
+            let currentTotal = 0;
+
+            for (const [ label, value ] of Object.entries(items)) {
+                const start = currentTotal;
+                currentTotal += value;
+                ranges.push({ label, start });
+            }
+
+            const entries: any = {
+                groupLabel,
+                total: currentTotal,
+                ranges
+            };
 
             this.keys().forEach(key => {
-                obj[key] = d.items[key] ?? 0;
+                entries[key] = items[key] ?? 0;
             });
 
-            return obj;
+            return entries;
         });
 
         const stackedSeries = stack().keys(keys)(stackedInput as any);
@@ -152,7 +174,7 @@ export class RadialStackedChartComponent extends Chart {
             .outerRadius((d: any) => y(d[1]))
             .startAngle((d: any) => x(d.data.groupLabel)!)
             .endAngle((d: any) => x(d.data.groupLabel)! + x.bandwidth()!)
-            .padAngle(0.01)
+            .padAngle(0.04)
             .padRadius(innerRadius);
 
         const paths = g.append('g')
@@ -165,12 +187,13 @@ export class RadialStackedChartComponent extends Chart {
             .enter().append('path')
             .attr('d', d => arcGen(d));
 
-        registerTooltip(paths, tooltip, this.chartContainer().nativeElement, (d, event) => {
-            const data = event.currentTarget.__data__;
+        registerTooltip(paths, tooltip, this.chartContainer().nativeElement, (data) => {
             const [ hoveredMin, hoveredMax ] = data;
-            const range = hoveredMax - hoveredMin;
-            const [ label, value ] = Object.entries(data.data).find(([ _, value ]) => value === range) ?? [];
-            return `Group: ${ d.data.groupLabel }<br>Label: ${ label }<br>Value: ${ value }`;
+            const { total, ranges, groupLabel } = data.data as CellData;
+            const value = hoveredMax - hoveredMin;
+            const label = ranges.find(({ start }) => start === hoveredMin)?.label;
+            const percentage = (value / total * 100).toFixed(2);
+            return `Group: ${ groupLabel }<br>Label: ${ label }<br>Value: ${ value }<br>Percentage: ${ percentage }%`;
         });
     }
 

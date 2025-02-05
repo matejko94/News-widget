@@ -1,13 +1,13 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, filter, map, Observable, switchMap, tap } from 'rxjs';
+import { combineLatest, filter, map, Observable, switchMap } from 'rxjs';
 import { getColorByCountryName } from '../../../../configuration/countries/countries';
 import { NewsService } from '../../domain/news/service/news.service';
 import { CalendarChartComponent, CalendarData } from '../../ui/charts/calendar-chart/calendar-chart.component';
 import { WorldMapComponent, WorldMapData } from '../../ui/charts/world-heatmap-chart/world-heatmap-chart.component';
-import { MenuComponent } from '../../ui/menu/menu.component';
-import { YearSliderComponent } from '../../ui/year-slider/year-slider.component';
+import { MenuComponent } from '../../ui/components/menu/menu.component';
+import { YearSliderComponent } from '../../ui/components/year-slider/year-slider.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -19,7 +19,6 @@ import { BasePage } from '../base.page';
         CalendarChartComponent,
         AsyncPipe,
         WorldMapComponent,
-
     ],
     styles: `
         :host {
@@ -40,7 +39,7 @@ import { BasePage } from '../base.page';
 
         <div class="flex flex-col justify-start w-full h-fit">
             @if (heatmapData$ | async; as heatmapData) {
-                <app-world-heatmap-chart class="h-[50vh]" [data]="heatmapData" countLabel="News"/>
+                <app-world-heatmap-chart [data]="heatmapData" countLabel="News"/>
             }
 
             @if (calendarData$ | async; as calendarData) {
@@ -81,7 +80,6 @@ export default class IntensityPage extends BasePage implements OnInit {
                     color: getColorByCountryName(country)!
                 };
             })),
-            tap(data => console.log({ data }))
         );
     }
 

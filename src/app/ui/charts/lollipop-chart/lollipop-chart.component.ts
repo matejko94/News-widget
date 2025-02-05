@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { axisBottom, axisLeft, ScaleBand, scaleBand, ScaleLinear, scaleLinear, select, Selection } from 'd3';
 import { Chart } from '../chart.abstract';
+import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
 export interface LollipopChartData {
     xValue: number;
@@ -11,14 +12,11 @@ export interface LollipopChartData {
     selector: 'app-lollipop-chart',
     styles: [ `
         :host {
-            display: flex;
-            justify-items: center;
-            align-items: center;
-            flex-direction: column;
+            display: block;
             width: 100%;
-            padding-left: 4rem;
-            padding-bottom: 1rem;
             overflow: hidden;
+            padding-left: 3.5rem;
+            padding-right: 1.5rem;
 
             ::ng-deep {
                 svg {
@@ -54,13 +52,14 @@ export interface LollipopChartData {
         }
     ` ],
     template: `
-        <div #chartContainer class="w-full h-full"></div>`
+        <div class="flex flex-col justify-center items-center w-full h-full relative">
+            <div #chartContainer class="w-full h-full flex flex-col items-center"></div>
+        </div>
+    `
 })
 export class LineChartComponent extends Chart {
     public data = input.required<LollipopChartData[]>();
-    private margin = { top: 10, right: 30, bottom: 60, left: 100 };
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
-    private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
     private x!: ScaleLinear<number, number>;
     private y!: ScaleBand<string>;
 
@@ -75,9 +74,8 @@ export class LineChartComponent extends Chart {
         this.createSvg(container, size);
         this.createScales(size);
         this.createAxes(size);
-        this.createTooltip(container);
         this.createLines();
-        this.createCircles();
+        this.createCircles(container);
     }
 
     private clearChart(container: HTMLElement): void {
@@ -87,11 +85,10 @@ export class LineChartComponent extends Chart {
     private createSvg(container: HTMLElement, size: number): void {
         this.svg = select(container)
             .append('svg')
-            .attr('width', size + this.margin.left + this.margin.right)
-            .attr('height', size + this.margin.top + this.margin.bottom);
+            .attr('width', size)
+            .attr('height', size);
 
         this.svg.append('g')
-            .attr('transform', `translate(${ this.margin.left },${ this.margin.top })`);
     }
 
     private createScales(size: number): void {
@@ -112,13 +109,6 @@ export class LineChartComponent extends Chart {
             .call(axisLeft(this.y));
     }
 
-    private createTooltip(container: HTMLElement): void {
-        this.tooltip = select(container)
-            .append('div')
-            .attr('class', 'tooltip')
-            .style('opacity', 0);
-    }
-
     private createLines(): void {
         this.svg.selectAll('myline')
             .data(this.data())
@@ -131,25 +121,9 @@ export class LineChartComponent extends Chart {
             .attr('stroke', 'grey');
     }
 
-    private createCircles(): void {
-        const showTooltip = (event: any, d: LollipopChartData) => {
-            this.tooltip.transition().duration(200).style('opacity', 1);
-            this.tooltip.html(`${ d.yValue }<br>Value: ${ d.xValue }`)
-                .style('left', `${ event.pageX + 30 }px`)
-                .style('top', `${ event.pageY + 30 }px`);
-        };
-
-        const moveTooltip = (event: any) => {
-            this.tooltip
-                .style('left', `${ event.pageX + 15 }px`)
-                .style('top', `${ event.pageY + 15 }px`);
-        };
-
-        const hideTooltip = () => {
-            this.tooltip.transition().duration(200).style('opacity', 0);
-        };
-
-        this.svg.selectAll('mycircle')
+    private createCircles(container: HTMLElement): void {
+        const tooltip = createTooltip(container);
+        const circles = this.svg.selectAll('mycircle')
             .data(this.data())
             .enter()
             .append('circle')
@@ -157,9 +131,8 @@ export class LineChartComponent extends Chart {
             .attr('cy', d => this.y(d.yValue)!)
             .attr('r', 4)
             .style('fill', '#69b3a2')
-            .attr('stroke', 'black')
-            .on('mouseover', showTooltip)
-            .on('mousemove', moveTooltip)
-            .on('mouseleave', hideTooltip);
+            .attr('stroke', 'black');
+
+        registerTooltip(circles, tooltip, container, (d: LollipopChartData) => `${ d.yValue }<br>Value: ${ d.xValue }`);
     }
 }

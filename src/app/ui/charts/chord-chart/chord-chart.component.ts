@@ -1,6 +1,6 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { arc, Arc, Chord, chord, ChordGroup, Chords, descending, formatPrefix, ribbon, RibbonGenerator, select, Selection, sum, tickStep } from 'd3';
-import { BoxLegendComponent } from '../../legend/box-legend.component';
+import { BoxLegendComponent } from '../../components/legend/box-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -64,7 +64,6 @@ export class ChordChartComponent extends Chart {
         container.innerHTML = '';
 
         const { width, height } = container.getBoundingClientRect();
-        console.log({ width, height });
         const size = Math.min(width, height);
 
         this.createSvg(container, size);

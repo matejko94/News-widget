@@ -6,8 +6,8 @@ import { TopTopicsPerYear } from '../../domain/science/types/topic-timespan.inte
 import { LineChartComponent, LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
 import { RadarChartComponent } from '../../ui/charts/radar-chart/radar-chart.component';
 import { TimelineRow } from '../../ui/charts/timeline/timeline-chart.component';
-import { MultiMenuComponent } from '../../ui/multi-menu/multi-menu.component';
-import { YearSliderComponent } from '../../ui/year-slider/year-slider.component';
+import { MultiMenuComponent } from '../../ui/components/multi-menu/multi-menu.component';
+import { YearSliderComponent } from '../../ui/components/year-slider/year-slider.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -31,7 +31,7 @@ import { BasePage } from '../base.page';
     template: `
         <div class="w-full">
             <app-year-slider [min]="2000" [max]="2021" autoIncrement/>
-            <app-multi-menu queryParam="region" label="Select region" [options]="worldRegionOptions"
+            <app-multi-menu queryParam="regions" label="Select region" [options]="worldRegionOptions"
                             class="ml-auto mr-4"/>
         </div>
 

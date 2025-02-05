@@ -7,8 +7,8 @@ import { TopTopicsPerYear } from '../../domain/science/types/topic-timespan.inte
 import { BubbleChartComponent } from '../../ui/charts/bubble-chart/bubble-chart.component';
 import { LineChartComponent, LineChartData } from '../../ui/charts/line-chart/line-chart.component';
 import { TimelineRow } from '../../ui/charts/timeline/timeline-chart.component';
-import { MenuComponent } from '../../ui/menu/menu.component';
-import { YearSliderComponent } from '../../ui/year-slider/year-slider.component';
+import { MenuComponent } from '../../ui/components/menu/menu.component';
+import { YearSliderComponent } from '../../ui/components/year-slider/year-slider.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -32,15 +32,12 @@ import { BasePage } from '../base.page';
             width: 100%;
             height: 100%;
         }
-
-        .chart {
-            height: 80vh;
-        }
     `,
     template: `
         <div class="w-full">
             <app-year-slider [min]="2000" [max]="2025" autoIncrement/>
         </div>
+
         <div class="flex justify-between items-center w-full max-w-3xl mx-auto mb-5 ">
             <app-menu queryParam="paramX" label="Indicator X" [options]="topicOptions()"/>
             <app-menu queryParam="paramY" label="Indicator Y" [options]="topicOptions()"/>
@@ -49,13 +46,13 @@ import { BasePage } from '../base.page';
 
         <!--        @if (data$ | async; as data) {-->
         @if (data?.length) {
-            <div class="flex flex-col justify-start w-full h-fit">
-                <app-bubble-chart class="chart" [data]="data"
+            <div class="flex flex-col gap-10 justify-start w-full">
+                <app-bubble-chart class="aspect-[2/1]" [data]="data"
                                   [xAxisLabel]="paramX()!"
                                   [yAxisLabel]="paramY()!"
                                   [zAxisLabel]="paramZ()!"
                 />
-                <app-line-chart class="chart" [data]="lineData"
+                <app-line-chart class="aspect-[2/1]" [data]="lineData"
                                 xAxisLabel="Year"
                                 yAxisLabel="Country"
                                 groupLabel="Indicator"

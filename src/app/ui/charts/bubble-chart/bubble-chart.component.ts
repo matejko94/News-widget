@@ -15,11 +15,9 @@ export interface BubbleChartData {
     selector: 'app-bubble-chart',
     styles: [ `
         :host {
-            display: flex;
-            justify-items: center;
-            align-items: center;
-            flex-direction: column;
+            display: block;
             width: 100%;
+            aspect-ratio: 2/1;
 
             ::ng-deep {
                 svg {
@@ -57,24 +55,10 @@ export interface BubbleChartData {
             pointer-events: none;
             color: white;
         }
-
-        .bubble-chart-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .chart-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
     ` ],
     template: `
-        <div class="bubble-chart-container pl-10 pt-10">
-            <div #chartContainer class="chart-container"></div>
+        <div class="flex justify-center items-center h-full w-full pl-10 pt-10">
+            <div #chartContainer class="relative h-full w-full"></div>
         </div>
     `,
 })

@@ -20,6 +20,11 @@ export const SDG_COLORS = {
     ]
 }
 
+export function getSDGColor(sdg: string): string {
+    const sdgNumber = parseInt(sdg.replace('SDG ', ''));
+    return SDG_COLORS.colors[sdgNumber - 1];
+}
+
 function generateShades(
     hexColor: string,
     shades: number,

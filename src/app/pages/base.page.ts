@@ -10,10 +10,12 @@ export abstract class BasePage implements OnInit {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private configuration = inject(Configuration);
-    private injector = inject(Injector);
+    protected injector = inject(Injector);
 
     public sdg = input.required<string>();
-    public topic = input.required<string>();
+    public topic = input<string>();
+    public region = input<string>();
+    public regions = input<string[]>();
     public availableTopics = signal<Topic[]>([]);
     public topicOptions = computed(() => this.availableTopics().map(t => ({ label: t.name, value: t.name })));
     public worldRegionOptions = WorldBankRegions;

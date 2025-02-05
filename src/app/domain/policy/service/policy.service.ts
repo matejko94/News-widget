@@ -10,9 +10,16 @@ import { IntersectingPolicyDto } from '../types/intersecting-policy.dto';
 export class PolicyService {
     private http = inject(HttpClient);
 
-    public getIntersectingSdgPolicies(sdg: number, limit: number): Observable<IntersectingPolicyDto[]> {
+    public getIntersectingSdgPolicies(sdg: number, region: string | undefined, limit: number): Observable<IntersectingPolicyDto[]> {
+        console.log('Fetching intersecting policies for SDG', sdg);
+        const query = new URLSearchParams({ limit: limit.toString() });
+
+        if (region) {
+            query.set('region', region);
+        }
+
         return this.http.get<IntersectingPolicyDto[]>(
-            `${ environment.api.url }/policy/intersection/${ sdg }?limit=${ limit }`
+            `${ environment.api.url }/policy/intersection/${ sdg }?${ query }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch intersecting policies', e);

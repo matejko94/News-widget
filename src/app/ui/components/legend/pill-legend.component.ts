@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 
-interface LegendItem {
+export interface LegendItem {
     label: string;
     color: string;
 }

@@ -5,6 +5,7 @@ import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { TopTopicsPerYear } from '../../domain/science/types/topic-timespan.interface';
 import { TimelineChartComponent, TimelineRow } from '../../ui/charts/timeline/timeline-chart.component';
+import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -12,7 +13,8 @@ import { BasePage } from '../base.page';
     standalone: true,
     imports: [
         AsyncPipe,
-        TimelineChartComponent
+        TimelineChartComponent,
+        SpinnerComponent
     ],
     styles: `
         :host {
@@ -33,6 +35,8 @@ import { BasePage } from '../base.page';
                     No data available
                 </div>
             }
+        } @else {
+            <app-spinner/>
         }
     `
 })

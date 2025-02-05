@@ -6,6 +6,7 @@ import { createSdgObject } from '../../common/utility/sdg-object';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { IntersectingPolicyDto } from '../../domain/policy/types/intersecting-policy.dto';
 import { RadialStackedChartComponent, RadialStackedData } from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
+import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -13,7 +14,8 @@ import { BasePage } from '../base.page';
     standalone: true,
     imports: [
         RadialStackedChartComponent,
-        AsyncPipe
+        AsyncPipe,
+        SpinnerComponent
     ],
     styles: `
         :host {
@@ -27,6 +29,8 @@ import { BasePage } from '../base.page';
     template: `
         @if (sdgPolicies$ | async; as data) {
             <app-radial-stacked-chart [data]="data" [colors]="colors"/>
+        } @else {
+            <app-spinner/>
         }
     `
 })
@@ -39,7 +43,7 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
     public override ngOnInit() {
         super.ngOnInit();
 
-        this.sdgPolicies$ = this.policyService.getIntersectingSdgPolicies(+this.sdg(), 20)
+        this.sdgPolicies$ = this.policyService.getIntersectingSdgPolicies(+this.sdg(), undefined, 20)
             .pipe(
                 map(policies => this.groupBySdg(policies, 10))
             );

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { arc, hierarchy, HierarchyNode, HierarchyRectangularNode, partition, select, Selection } from 'd3';
-import { PillLegendComponent } from '../../legend/pill-legend.component';
+import { PillLegendComponent } from '../../components/legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 
 export interface SunburstNode {
@@ -72,7 +72,7 @@ export interface SunburstNode {
                 <div class="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2
                             text-sm md:text-base lg:text-lg xl:text-xl text-center text-gray-600 max-w-[30%]">
                     @if (activePercentage()) {
-                        <span class="font-semibold text-lg lg:text-xl text-gray-500">{{ activePercentage() }}</span>
+                        <span class="font-semibold text-xl lg:text-2xl text-gray-500">{{ activePercentage() }}</span>
                         <br/>
                         of categories belong
                         <br/>

@@ -18,6 +18,7 @@ export interface WorldMapData {
             display: block;
             width: 100%;
             position: relative;
+            aspect-ratio: 3/1;
         }
 
         .tooltip {
@@ -44,8 +45,6 @@ export class WorldMapComponent extends Chart {
     public countLabel = input.required<string>();
     private dataPerCountry: Map<string, WorldMapData> = new Map();
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
-    private width = 0;
-    private height = 0;
     private countriesGeo: FeatureCollection | null = null;
 
     constructor() {
@@ -63,32 +62,37 @@ export class WorldMapComponent extends Chart {
         container.innerHTML = '';
 
         const { width, height } = container.getBoundingClientRect();
-        this.width = width;
-        this.height = height;
 
-        this.createSvg(container);
+        this.createSvg(container, width, height);
+        await this.loadGeoData();
+        const countryPaths = this.drawMap(this.countriesGeo, width, height);
+        this.addChartTooltip(container, countryPaths);
+    }
 
+    private createSvg(container: HTMLElement, width: number, height: number): void {
+        this.svg = select(container)
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+    }
+
+    private async loadGeoData() {
         if (!this.countriesGeo) {
             const geoJson: any = await json('/assets/world-geojson2.json');
             this.countriesGeo = feature(geoJson, geoJson.objects.countries) as unknown as FeatureCollection;
         }
-
-        const countryPaths = this.drawMap(this.countriesGeo);
-        this.addChartTooltip(container, countryPaths);
     }
 
-    private createSvg(container: HTMLElement): void {
-        this.svg = select(container)
-            .append('svg')
-            .attr('width', this.width)
-            .attr('height', this.height);
-    }
-
-    private drawMap(geoJson: any) {
+    private drawMap(geoJson: any, width: number, height: number) {
+        const scaleValue = width / 12;
         const projection = geoMercator()
-            .scale(70)
-            .center([ 0, 20 ])
-            .translate([ this.width / 2, this.height / 2 ]);
+            .scale(scaleValue)
+            .center([ 0, 40 ])
+            .translate([ width / 2, height / 2 ]);
+        // const projection = geoMercator()
+        //     .scale(70)
+        //     .center([ 0, 20 ])
+        //     .translate([ width / 2, height / 2 ]);
         const pathGenerator = geoPath().projection(projection);
 
         return this.svg
@@ -109,7 +113,6 @@ export class WorldMapComponent extends Chart {
         registerTooltip(selection, tooltip, container, (d: any) => {
             const country = d.properties?.name;
             const count = this.dataPerCountry.get(country)?.count ?? 0;
-            console.log({ country, count })
             return `
                 Country: ${ country }<br/>
                 ${ this.countLabel() }: ${ count }

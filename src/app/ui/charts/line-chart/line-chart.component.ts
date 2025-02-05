@@ -2,7 +2,7 @@ import { Component, computed, effect, input, signal, Signal, WritableSignal } fr
 import { FormsModule } from '@angular/forms';
 import { axisBottom, axisLeft, line, ScaleLinear, scaleLinear, select, Selection } from 'd3';
 import { Checkbox } from 'primeng/checkbox';
-import { BoxLegendComponent, LegendItem } from '../../legend/box-legend.component';
+import { BoxLegendComponent, LegendItem } from '../../components/legend/box-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
@@ -67,11 +67,11 @@ interface GroupLegend {
         }
     `,
     template: `
-        <div class="flex flex-row justify-center items-center aspect-square w-full h-full relative pl-2.5">
+        <div class="flex flex-row justify-center items-center w-full h-full relative pl-2.5">
             <div #chartContainer
                  class="flex-1 w-full h-full flex justify-center items-center relative"></div>
             <div class="flex flex-col gap-1">
-                <div class="font-medium">{{ xAxisLabel() }}</div>
+                <div class="font-medium">{{ yAxisLabel() }}</div>
                 <app-box-legend [items]="yLegend()" toggleable class="w-full"/>
 
                 <div class="font-medium mt-3">{{ groupLabel() }}</div>

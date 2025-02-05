@@ -1,11 +1,13 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { map, Observable, switchMap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { NEWS_CATEGORIES_COLORS } from '../../../../configuration/colors/news/categories.colors';
+import { loadingMap } from '../../common/utility/loading-map';
 import { NewsService } from '../../domain/news/service/news.service';
 import { TopicDto } from '../../domain/news/types/topic.dto';
 import { SunburstChartComponent, SunburstNode } from '../../ui/charts/sunburst-chart/sunburst-chart.component';
-import { MenuComponent } from '../../ui/menu/menu.component';
+import { MenuComponent } from '../../ui/components/menu/menu.component';
+import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -14,7 +16,8 @@ import { BasePage } from '../base.page';
     imports: [
         AsyncPipe,
         SunburstChartComponent,
-        MenuComponent
+        MenuComponent,
+        SpinnerComponent
     ],
     styles: `
         :host {
@@ -38,13 +41,15 @@ import { BasePage } from '../base.page';
                     No data available
                 </div>
             }
+        } @else {
+            <app-spinner/>
         }
     `
 })
 export default class SunburstPage extends BasePage implements OnInit {
     private newsService = inject(NewsService);
 
-    public node$!: Observable<SunburstNode>;
+    public node$!: Observable<SunburstNode | undefined>;
     public colors = NEWS_CATEGORIES_COLORS.colors;
 
     public override ngOnInit() {
@@ -53,10 +58,10 @@ export default class SunburstPage extends BasePage implements OnInit {
         this.node$ = this.setupNodes();
     }
 
-    private setupNodes(): Observable<SunburstNode> {
+    private setupNodes(): Observable<SunburstNode | undefined> {
         return this.selectedTopic$.pipe(
-            switchMap(topics => this.newsService.getTopics(topics.wikiConcepts)),
-            map(topics => this.mapToNode(topics)),
+            loadingMap(topics => this.newsService.getTopics(topics.wikiConcepts)),
+            map(topics => topics ? this.mapToNode(topics) : undefined),
         )
     }
 

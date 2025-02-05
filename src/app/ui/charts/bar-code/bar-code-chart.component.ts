@@ -178,7 +178,10 @@ export class BarcodeChartComponent extends Chart {
         registerTooltip(rects, this.tooltip, this.chartContainer().nativeElement, (d) => {
             const [ sdg, map ] = d.data;
             const key = (d as any).key;
-            return `${ sdg }<br>Policy: ${ key }<br>Count: ${ map?.get(key) ?? 0 }`;
+            const value = map.get(key) ?? 0;
+            const total = Array.from(map.values()).reduce((acc, val) => acc + val, 0);
+            const percentage = value / total * 100;
+            return `${ sdg }<br>Policy: ${ key }<br>Count: ${ value }<br>Percentage: ${ percentage.toFixed(2) }%`;
         });
     }
 

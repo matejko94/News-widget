@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { axisBottom, axisTop, max, min, pointer, scaleBand, ScaleBand, scaleLinear, ScaleLinear, select, Selection } from 'd3';
-import { PillLegendComponent } from '../../legend/pill-legend.component';
+import { PillLegendComponent } from '../../components/legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 

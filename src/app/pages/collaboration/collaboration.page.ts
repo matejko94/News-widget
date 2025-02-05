@@ -1,6 +1,13 @@
-import { Component, input, OnInit } from '@angular/core';
-import { ChordChartComponent } from '../../ui/charts/chord-chart/chord-chart.component';
-import { MenuComponent } from '../../ui/menu/menu.component';
+import { AsyncPipe } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest, map, Observable } from 'rxjs';
+import { getRegionColor } from '../../../../configuration/regions/world-regions';
+import { loadingMap } from '../../common/utility/loading-map';
+import { InnovationsService } from '../../domain/innovations/service/innovations.service';
+import { IndustryCollaborationDto } from '../../domain/innovations/types/industry-collaboration.dto';
+import { ForceData, ForceDirectedChartComponent, ForceLink, ForceNode } from '../../ui/charts/force-directed-chart/force-directed-chart.component';
+import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -8,8 +15,8 @@ import { BasePage } from '../base.page';
     standalone: true,
     imports: [
         MenuComponent,
-        ChordChartComponent,
-
+        ForceDirectedChartComponent,
+        AsyncPipe,
     ],
     styles: `
         :host {
@@ -22,52 +29,81 @@ import { BasePage } from '../base.page';
     `,
     template: `
         <div class="flex justify-end items-center w-full mt-3 mb-5 pr-4">
-            <app-menu queryParam="topic" label="Indicator X" [options]="topicOptions()"/>
+            <app-menu queryParam="topic" label="Topic" [options]="topicOptions()"/>
         </div>
-
-        <app-chord-chart [data]="data" class="w-full flex-1 min-h-0"/>
-    `
+        @if (data$ | async; as data) {
+            <app-force-directed-chart [data]="data" tagLabel="Country" class="w-full flex-1 min-h-0"/>
+        }
+    `,
 })
 export default class CollaborationPage extends BasePage implements OnInit {
+    private innovationsService = inject(InnovationsService);
+    public data$!: Observable<ForceData | undefined>;
+    private linkCounts = new Map<string, number>();
 
-    public data = {
-        matrix: [
-            [ 11975, 5871, 8916, 2868 ],
-            [ 1951, 10048, 2060, 6171 ],
-            [ 8010, 16145, 8090, 8045 ],
-            [ 1013, 990, 940, 6907 ]
-        ],
-        names: [ 'Alpha', 'Beta', 'Gamma', 'Delta' ],
-        colors: [ '#FF5733', '#33C3FF', '#FF33A8', '#33FF57' ]
-    };
-    public year = input<number>();
-
-
-    public override async ngOnInit() {
+    public override ngOnInit() {
         super.ngOnInit();
 
-        if (!this.topic()) {
-            const [ firstTopic ] = this.topicOptions().map(({ value }) => value);
-            await this.setQueryParam('topic', firstTopic);
-        }
+        this.data$ = combineLatest([
+            toObservable(this.sdg, { injector: this.injector }),
+            toObservable(this.topic, { injector: this.injector }),
+        ]).pipe(
+            loadingMap(([ sdg, topic ]) => this.innovationsService.getIndustryCollaborations(+sdg, topic, 100)),
+            map(data => data ? this.mapData(data) : undefined)
+        );
     }
 
-    // private setupHeatMapData(): Observable<WorldMapData[]> {
-    //     return combineLatest([
-    //         toObservable(this.sdg),
-    //         toObservable(this.topic),
-    //         toObservable(this.year)
-    //     ]).pipe(
-    //         filter(([ sdg, topic, year ]) => !!sdg && !!topic && !!year),
-    //         switchMap(([ sdg, topic, year ]) => this.newsService.getNewsIntensityPerYear(sdg, topic!, year!)),
-    //         map(news => news.map(({ country, value }) => {
-    //             return {
-    //                 country,
-    //                 count: value,
-    //                 color: getColorByCountryName(country)!
-    //             };
-    //         })),
-    //         tap(data => console.log({ data }))
-    //     );
-    // }
+    private mapData(data: IndustryCollaborationDto[]): ForceData {
+        this.linkCounts.clear();
+
+        const links = this.mapLinks(data);
+        const nodes = this.mapNodes(data);
+
+        return { nodes, links };
+    }
+
+    private mapNodes(data: IndustryCollaborationDto[]): ForceNode[] {
+        return data.map((evt) => ({
+            id: evt.industry,
+            group: evt.region,
+            tag: evt.country,
+            totalLinks: this.linkCounts.get(evt.industry) ?? 0,
+            color: getRegionColor(evt.region),
+        }));
+    }
+
+    private mapLinks(data: IndustryCollaborationDto[]): ForceLink[] {
+        const industrySdgsMap = new Map<string, Set<string>>();
+        data.forEach((evt) => industrySdgsMap.set(evt.industry, new Set(evt.sdgs)));
+
+        const links: ForceLink[] = [];
+        for (let i = 0; i < data.length; i++) {
+            for (let j = i + 1; j < data.length; j++) {
+                const industryA = data[i].industry;
+                const industryB = data[j].industry;
+                const sdgsA = industrySdgsMap.get(industryA)!;
+                const sdgsB = industrySdgsMap.get(industryB)!;
+
+                const sharedSdgs = [ ...sdgsA ].filter((sdg) => sdgsB.has(sdg));
+                if (sharedSdgs.length) {
+                    sharedSdgs.forEach((sdg) => {
+                        links.push({
+                            source: industryA,
+                            target: industryB,
+                            link: sdg,
+                            value: sharedSdgs.length,
+                        });
+                        this.incrementLinkCount(industryA);
+                        this.incrementLinkCount(industryB);
+                    });
+                }
+            }
+        }
+        return links;
+    }
+
+    private incrementLinkCount(eventKey: string) {
+        const current = this.linkCounts.get(eventKey) || 0;
+        this.linkCounts.set(eventKey, current + 1);
+    }
 }

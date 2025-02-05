@@ -1,4 +1,4 @@
-import { Component, inject, Injector, input, OnInit, Signal } from '@angular/core';
+import { booleanAttribute, Component, inject, Injector, input, OnInit, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,8 +16,8 @@ export interface Option {
     template: `
         <p-select
             [options]="options()" [ngModel]="selected()" (ngModelChange)="onChange($event)"
-            optionLabel="label" optionValue="value" appendTo="body"
-            [placeholder]="label()" class="w-48 border border-gray-300"
+            optionLabel="label" optionValue="value" appendTo="body" [showClear]="showClear()"
+            [placeholder]="label()" class="w-fit min-w-48 border border-gray-300"
         />
     `
 })
@@ -28,6 +28,7 @@ export class MenuComponent implements OnInit {
 
     public queryParam = input.required<'topic' | 'region' | 'paramX' | 'paramY' | 'paramZ'>();
     public label = input.required<string>();
+    public showClear = input(false, { transform: booleanAttribute });
     public options = input.required<Option[] | undefined>();
     public selected!: Signal<string | undefined>;
 
@@ -37,10 +38,10 @@ export class MenuComponent implements OnInit {
         ), { injector: this.injector });
     }
 
-    public onChange(topic: string) {
+    public onChange(value: string) {
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { topic },
+            queryParams: { [this.queryParam()]: value },
             queryParamsHandling: 'merge'
         });
     }

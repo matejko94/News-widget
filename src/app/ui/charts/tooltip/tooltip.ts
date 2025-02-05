@@ -26,41 +26,73 @@ export function registerTooltip<PathElement extends Element, Data, Series>(
                 .html(render(d, event));
 
             tooltip
-                .style('left', calculatePosition(event, tooltip, 'x') + 'px')
-                .style('top', calculatePosition(event, tooltip, 'y') + 'px');
+                .style('left', calculatePositionX(event, tooltip) + 'px')
+                .style('top', calculatePositionY(event, tooltip) + 'px');
         })
-        .on('mousemove', (event) => {
-            tooltip
-                .style('left', calculatePosition(event, tooltip, 'x') + 'px')
-                .style('top', calculatePosition(event, tooltip, 'y') + 'px');
-        })
-        .on('mouseout', () => {
-            tooltip.style('display', 'none');
-        });
+        .on('mousemove', (event, d) => showTooltip(event, d))
+        .on('mouseout', () => tooltip.style('display', 'none'));
 
-    function calculatePosition(
+    function showTooltip(event: MouseEvent, d: Data) {
+        if (tooltip.style('display') !== 'block') {
+            tooltip
+                .style('left', '-9999px')
+                .style('top', '-9999px')
+                .style('display', 'block')
+                .html(render(d, event));
+        }
+
+        tooltip
+            .style('left', calculatePositionX(event, tooltip) + 'px')
+            .style('top', calculatePositionY(event, tooltip) + 'px');
+    }
+
+    function calculatePositionY(
         event: MouseEvent,
         tooltipEl: Selection<HTMLDivElement, unknown, null, undefined>,
-        axis: 'x' | 'y'
     ): number {
         const node = tooltipEl.node();
         if (!node) return 0;
 
-        const {width, height} = node.getBoundingClientRect();
-        const {left, top, width: containerWidth, height: containerHeight} =
-            container.getBoundingClientRect();
-
-        const clientOffset = axis === 'x' ? event.clientX : event.clientY;
-        const containerOffset = axis === 'x' ? left : top;
-        const containerSize = axis === 'x' ? containerWidth : containerHeight;
-        const tooltipSize = axis === 'x' ? width : height;
         const offset = 10;
-
+        const clientOffset = event.clientY;
+        const tooltipHeight = node.getBoundingClientRect().height;
+        const { top: containerOffset, height: containerHeight } = container.getBoundingClientRect();
         const position = clientOffset - containerOffset + offset;
 
-        if (position + tooltipSize > containerSize) {
-            return containerSize - tooltipSize - offset;
-        } else if (position < offset) {
+        // overflow bottom
+        if (position + tooltipHeight > containerHeight) {
+            return containerHeight - tooltipHeight - offset;
+        }
+
+        // overflow top
+        if (position < offset) {
+            return offset;
+        }
+
+        return position;
+    }
+
+    function calculatePositionX(
+        event: MouseEvent,
+        tooltipEl: Selection<HTMLDivElement, unknown, null, undefined>,
+    ): number {
+        const tooltip = tooltipEl.node();
+        if (!tooltip) return 0;
+
+        const offset = 10;
+        const clientOffset = event.clientX;
+        const tooltipWidth = tooltip.getBoundingClientRect().width;
+        const { left: containerLeft, width: containerWidth } = container.getBoundingClientRect();
+
+        const position = clientOffset - containerLeft + offset;
+
+        // overflow right
+        if (position + tooltipWidth > containerWidth) {
+            return containerWidth - tooltipWidth - offset;
+        }
+
+        // overflow left
+        if (position < offset) {
             return offset;
         }
 
