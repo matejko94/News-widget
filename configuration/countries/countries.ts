@@ -1253,12 +1253,13 @@ export const COUNTRIES: Country[] = [
     }
 ];
 
-const colorByCountryName: Map<string, string> = new Map();
-
-COUNTRIES.forEach(country => {
-    colorByCountryName.set(country.name, country.color);
-});
+const colorByCountryName: Map<string, string> = new Map(COUNTRIES.map(country => [ country.name, country.color ]));
+const colorByCountryCode: Map<string, string> = new Map(COUNTRIES.map(country => [ country.iso, country.color ]));
 
 export function getColorByCountryName(countryName: string): string | undefined {
     return colorByCountryName.get(countryName);
+}
+
+export function getColorByCountryCode(code: string): string | undefined {
+    return colorByCountryCode.get(code);
 }

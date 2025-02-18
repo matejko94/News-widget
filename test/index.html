@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+    .links line {
+        stroke: #999;
+        stroke-opacity: 0.6;
+    }
+
+    .nodes circle {
+        stroke: #fff;
+        stroke-width: 1.5px;
+    }
+
+
+    path {
+        opacity: 0.4;
+        stroke-width: 0px;
+        pointer-events: none;
+
+    }
+
+</style>
+<svg width="960" height="600"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+    createSvg();
+
+    var voronoi = d3.voronoi()
+            .x(function (d) {
+                return d.x;
+            })
+            .y(function (d) {
+                return d.y;
+            })
+            .extent([ [ -1, -1 ], [ width + 1, height + 1 ] ]);
+
+    var simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(function (d) {
+                        return d.id;
+                    }).strength(function (link) {
+                        if (link.source.group == link.source.target) {
+                            return 0.5;
+                        } else {
+                            return 0.1
+                        }
+                    })
+            )
+            .force("charge", d3.forceManyBody().strength(-40))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+    var groupSimulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(function (d) {
+                return d.id;
+            }).strength(function (link) {
+                link.value * 2;
+            }))
+            .force("charge", d3.forceManyBody().strength(-10))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+
+    d3.json("data.json", function (error, graph) {
+        if (error) throw error;
+
+        /////////
+        /// Get the data to make a force network of the groups:
+        ///
+
+        var groups = [];
+
+        graph.nodes.forEach(function (d) {
+            if (groups.indexOf(d.group) == -1) groups.push({ id: d.group });
+        })
+
+        var groupLinks = {};
+
+        graph.links.forEach(function (d) {
+            var nodes = graph.nodes;
+
+            var map = d3.map(nodes, function (d) {
+                return d.id;
+            });
+
+            var target = d.target;
+            var source = d.source;
+
+            // ensure links targets and sources are ordered the same way:
+            if (map.get(target).group > map.get(source).group) {
+                var groupTarget = map.get(target).group;
+                var groupSource = map.get(source).group;
+            } else {
+                var groupTarget = map.get(source).group;
+                var groupSource = map.get(target).group;
+            }
+
+            // get the links between each group:
+            if (groupTarget != groupSource) {
+                var property = "_" + groupSource + "-" + groupTarget;
+
+                if (groupLinks[property]) {
+                    groupLinks[property]++;
+                } else {
+                    groupLinks[property] = 1;
+                }
+            }
+        })
+
+        var groupGraph = {};
+
+        groupGraph.nodes = groups;
+        groupGraph.links = [];
+
+        for (var link in groupLinks) {
+            var parts = link.substring(1).split("-");
+            var source = parts[0];
+            var target = parts[1];
+            var value = groupLinks[link];
+
+            groupGraph.links.push({ source: source, target: target, value: value })
+        }
+
+        // start the group simulation
+        groupSimulation
+                .nodes(groupGraph.nodes);
+
+        // append links:
+        var link = svg.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(graph.links)
+                .enter().append("line")
+                .attr("stroke-width", function (d) {
+                    return Math.sqrt(d.value);
+                });
+
+        // append nodes:
+        var node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(graph.nodes)
+                .enter().append("circle")
+                .attr("r", 5)
+                .attr("fill", function (d) {
+                    return color(d.group);
+                })
+                .call(d3.drag()
+                        .on("start", dragstarted)
+                        .on("drag", dragged)
+                        .on("end", dragended));
+
+        node.append("title")
+                .text(function (d) {
+                    return d.id;
+                });
+
+        // main simulation:
+        simulation
+                .nodes(graph.nodes)
+                .on("tick", ticked);
+
+        simulation.force("link")
+                .links(graph.links);
+
+        // set up the voronoi:
+        var cells = svg.selectAll()
+                .data(simulation.nodes())
+                .enter().append("g")
+                .attr("fill", function (d) {
+                    return color(d.group);
+                })
+                .attr("class", function (d) {
+                    return d.group
+                })
+
+        var cell = cells.append("path")
+                .data(voronoi.polygons(simulation.nodes()))
+
+
+        // Tick function:
+        function ticked() {
+            var alpha = this.alpha();
+            var nodes = this.nodes();
+
+            var coords = {};
+            var groups = [];
+
+            var centroids = {};
+
+            // get the centroid of each group based on the groupSimulation
+            groupSimulation.nodes().forEach(function (d) {
+                var cx = d.x;
+                var cy = d.y;
+                centroids[d.id] = { x: cx, y: cy };
+            })
+
+            // minimum distance to apply a correction:
+            var minDistance = 50;
+            if (alpha < 0.2) {
+                minDistance = 50 + (1000 * (0.1 - alpha))
+            }
+
+            // apply a minor correction to each node if needed:
+            node.each(function (d) {
+                var cx = centroids[d.group].x;
+                var cy = centroids[d.group].y;
+                var x = d.x;
+                var y = d.y;
+                var dx = cx - x;
+                var dy = cy - y;
+
+                var r = Math.sqrt(dx * dx + dy * dy)
+
+                if (r > minDistance) {
+                    d.x = x * 0.95 + cx * 0.05;
+                    d.y = y * 0.95 + cy * 0.05;
+                }
+            })
+
+            // update voronoi:
+            cell = cell.data(voronoi.polygons(simulation.nodes())).attr("d", renderCell);
+
+            // update links:
+            link
+                    .attr("x1", function (d) {
+                        return d.source.x;
+                    })
+                    .attr("y1", function (d) {
+                        return d.source.y;
+                    })
+                    .attr("x2", function (d) {
+                        return d.target.x;
+                    })
+                    .attr("y2", function (d) {
+                        return d.target.y;
+                    });
+
+            // update nodes:
+            node
+                    .attr("cx", function (d) {
+                        return d.x;
+                    })
+                    .attr("cy", function (d) {
+                        return d.y;
+                    });
+        }
+    });
+
+    function dragstarted(d) {
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(d) {
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
+    }
+
+    function dragended(d) {
+        if (!d3.event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+
+    function renderCell(d) {
+        return d == null ? null : "M" + d.join("L") + "Z";
+    }
+</script>

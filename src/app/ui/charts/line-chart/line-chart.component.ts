@@ -67,20 +67,23 @@ interface GroupLegend {
         }
     `,
     template: `
-        <div class="flex flex-row justify-center items-center w-full h-full relative pl-2.5">
+        <div class="flex flex-col md:flex-row justify-center items-center w-full h-full relative pl-2.5">
             <div #chartContainer
                  class="flex-1 w-full h-full flex justify-center items-center relative"></div>
-            <div class="flex flex-col gap-1">
-                <div class="font-medium">{{ yAxisLabel() }}</div>
-                <app-box-legend [items]="yLegend()" toggleable class="w-full"/>
-
-                <div class="font-medium mt-3">{{ groupLabel() }}</div>
-                @for (item of groupLegend(); track item.label) {
-                    <div class="flex items-center cursor-pointer text-xs md:text-sm gap-1">
-                        <p-checkbox [(ngModel)]="item.hidden" binary="true" size="small"/>
-                        <span class="mt-1">{{ item.label }}</span>
-                    </div>
-                }
+            <div class="flex flex-col-reverse md:flex-col gap-1">
+                <div>
+                    <div class="font-medium">{{ yAxisLabel() }}</div>
+                    <app-box-legend [items]="yLegend()" toggleable class="w-full"/>
+                </div>
+                <div>
+                    <div class="font-medium mt-3">{{ groupLabel() }}</div>
+                    @for (item of groupLegend(); track item.label) {
+                        <div class="flex items-center cursor-pointer text-xs md:text-sm gap-1">
+                            <p-checkbox [(ngModel)]="item.hidden" binary="true" size="small"/>
+                            <span class="mt-1">{{ item.label }}</span>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     `

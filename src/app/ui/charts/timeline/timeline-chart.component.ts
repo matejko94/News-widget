@@ -47,7 +47,7 @@ export interface TimelineRow {
         }
     ` ],
     template: `
-        <div class="flex flex-col md:flex-row justify-center items-center aspect-square w-full h-full relative">
+        <div class="flex flex-col-reverse md:flex-row justify-center items-center aspect-square w-full h-full relative">
             <app-pill-legend [items]="legend()"/>
             <div class="pl-28 xs:pl-32 sm:pl-36 flex-1 flex justify-center items-center w-full md:w-auto md:h-full">
                 <div #chartContainer class="w-full h-full relative"></div>

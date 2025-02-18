@@ -34,6 +34,26 @@ export class InnovationsService {
             };
         });
 
+        console.log(this.mapTo(data));
+
         return data;
+    }
+
+    private mapTo(collabs: IndustryCollaborationDto[]): {
+        nodes: { id: string, group: string }[],
+        links: { source: string, target: string, value: number }[]
+    } {
+        const nodes = collabs.map(collab => ({
+            id: collab.industry,
+            group: collab.region
+        }));
+
+        const links = collabs.flatMap(collab => collab.sdgs.map(sdg => ({
+            source: collab.industry,
+            target: sdg,
+            value: 1
+        })));
+
+        return { nodes, links };
     }
 }

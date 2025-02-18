@@ -15,7 +15,7 @@ export class PolicyService {
         const query = new URLSearchParams({ limit: limit.toString() });
 
         if (region) {
-            query.set('region', region);
+            query.set('region_code', region);
         }
 
         return this.http.get<IntersectingPolicyDto[]>(
