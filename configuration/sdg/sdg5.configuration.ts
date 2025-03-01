@@ -44,5 +44,37 @@ export const SDG5_CONFIGURATION: SdgConfiguration = {
             name: 'Representation',
             wikiConcepts: ['Transgender', 'Transgender inequality', 'LGBTQ', 'Lesbian', 'Gay'],
         }
+    ],
+    indicators: [
+        {
+            name: 'Demand for family planning satisfied by modern methods',
+        },
+        {
+            name: 'Female share of employment in senior and middle management',
+        },
+        {
+            name: 'Firms with female participation in ownership',
+        },
+        {
+            name: 'Firms with female top manager',
+        },
+        {
+            name: 'Nondiscrimination clause mentions gender in the constitution',
+        },
+        {
+            name: 'Proportion of women subjected to physical/sexual violence (last 12 months)',
+        },
+        {
+            name: 'Women Business and the Law Index Score',
+        },
+        {
+            name: 'Women own decisions on sexual relations, contraceptive use and reproductive health',
+        },
+        {
+            name: 'Women who were first married by age 15',
+        },
+        {
+            name: 'Women who were first married by age 18',
+        },
     ]
 };

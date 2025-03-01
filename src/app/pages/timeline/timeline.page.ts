@@ -64,13 +64,13 @@ export default class TimelinePage extends BasePage implements OnInit {
         const topicSdg = new Map<string, number>();
 
         years.forEach(({ year, topics }) => {
-            topics.forEach(({ key: topic, SDG }) => {
+            topics.forEach(({ key: topic, sdg }) => {
                 if (!topicTopYears.has(topic)) {
                     topicTopYears.set(topic, []);
                 }
 
                 if (!topicSdg.has(topic)) {
-                    topicSdg.set(topic, +(SDG.split(' ')[1]));
+                    topicSdg.set(topic, +(sdg.split(' ')[1]));
                 }
 
                 topicTopYears.get(topic)!.push(year);

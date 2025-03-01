@@ -44,5 +44,28 @@ export const SDG15_CONFIGURATION: SdgConfiguration = {
             name: 'Soil Health',
             wikiConcepts: ['Soil health', 'Soil resilience', 'Soil fertility'],
         }
-      ]
+    ],
+    indicators: [
+        {
+            name: 'Bird species, threatened',
+        },
+        {
+            name: 'Forest area (%)',
+        },
+        {
+            name: 'Forest area (km2)',
+        },
+        {
+            name: 'Forest rents',
+        },
+        {
+            name: 'Mammal species, threatened',
+        },
+        {
+            name: 'Plant species',
+        },
+        {
+            name: 'Terrestrial protected areas',
+        }
+    ]
 };

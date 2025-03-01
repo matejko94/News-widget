@@ -44,5 +44,25 @@ export const SDG16_CONFIGURATION: SdgConfiguration = {
             name: 'Inclusivity',
             wikiConcepts: ['Social exclusion', 'Ostracism', 'Social rejection', 'Social vulnerability'],
         }
-      ]
+    ],
+    indicators: [
+        {
+            name: 'Battle-related deaths',
+        },
+        {
+            name: 'Bribery incidence',
+        },
+        {
+            name: 'Firms expected to give gifts in meetings with tax officials',
+        },
+        {
+            name: 'Intentional homicides',
+        },
+        {
+            name: 'Intentional homicides, female',
+        },
+        {
+            name: 'Intentional homicides, male',
+        }
+    ]
 };

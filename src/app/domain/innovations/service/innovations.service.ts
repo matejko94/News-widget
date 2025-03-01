@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { of } from 'rxjs';
-import { WorldBankRegions } from '../../../../../configuration/regions/world-regions';
-import { IndustryCollaborationDto } from '../types/industry-collaboration.dto';
+import { catchError, of } from 'rxjs';
+import { environment } from '../../../../../environment/environment';
+import { IndustryCollaborationResponseDto } from '../types/industry-collaboration-response.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -10,50 +10,24 @@ import { IndustryCollaborationDto } from '../types/industry-collaboration.dto';
 export class InnovationsService {
     private http = inject(HttpClient);
 
-    public getIndustryCollaborations(sdg: number, topic: string | undefined, limit: number) {
-        return of(this.generateMockCollaborationData(limit));
+    public getIndustryCollaborations(sdg: number, topic: string | undefined) {
+        const params = new URLSearchParams();
+
+        if (topic) {
+            params.set('topic', topic);
+        }
+
+        return this.http.get<IndustryCollaborationResponseDto>(
+            `${ environment.api.url }/innovation/collaborations/${ sdg }` + (params.size ? `?${ params }` : '')
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch industry collaborations', e);
+                return of({ nodes: [], edges: [] })
+            })
+        );
     }
 
-    private generateMockCollaborationData(num: number): IndustryCollaborationDto[] {
-        const data = Array.from({ length: num }).map((_, i) => {
-            const SDGS = Array.from({ length: Math.floor(Math.random() * 17) + 1 }, (_, i) => `SDG ${ i + 1 }`);
-            const randomAmountOfSdgs = Math.floor(Math.random() * 2) + 1;
-            const sdgs = [];
+    public getInnovationIntersections(sdg: number, region: string | undefined) {
 
-            for (let i = 0; i < randomAmountOfSdgs; i++) {
-                sdgs.push(SDGS[Math.floor(Math.random() * SDGS.length)]);
-            }
-
-            const randomRegion = WorldBankRegions[Math.floor(Math.random() * WorldBankRegions.length)];
-
-            return {
-                industry: 'Industry ' + i,
-                country: 'Country ' + i,
-                region: randomRegion.value,
-                sdgs
-            };
-        });
-
-        console.log(this.mapTo(data));
-
-        return data;
-    }
-
-    private mapTo(collabs: IndustryCollaborationDto[]): {
-        nodes: { id: string, group: string }[],
-        links: { source: string, target: string, value: number }[]
-    } {
-        const nodes = collabs.map(collab => ({
-            id: collab.industry,
-            group: collab.region
-        }));
-
-        const links = collabs.flatMap(collab => collab.sdgs.map(sdg => ({
-            source: collab.industry,
-            target: sdg,
-            value: 1
-        })));
-
-        return { nodes, links };
     }
 }

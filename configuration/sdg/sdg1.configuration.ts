@@ -40,5 +40,67 @@ export const SDG1_CONFIGURATION: SdgConfiguration = {
             name: 'Poverty Line',
             wikiConcepts: [ 'Poverty Line', 'Poverty threshold', 'Gini index', 'Universal Basic Income', 'Global Poverty Line' ],
         },
+    ],
+    indicators: [
+        {
+            name: 'Multidimensional poverty headcount ratio',
+        },
+        {
+            name: 'Multidimensional poverty headcount ratio, children',
+        },
+        {
+            name: 'Multidimensional poverty headcount ratio, female',
+        },
+        {
+            name: 'Multidimensional poverty headcount ratio, household',
+        },
+        {
+            name: 'Multidimensional poverty headcount ratio, male',
+        },
+        {
+            name: 'Multidimensional poverty index',
+        },
+        {
+            name: 'Multidimensional poverty index, children',
+        },
+        {
+            name: 'Multidimensional poverty intensity',
+        },
+        {
+            name: 'Population living in slums',
+        },
+        {
+            name: 'Poverty headcount ratio at $1.90 a day',
+        },
+        {
+            name: 'Poverty headcount ratio at national poverty lines',
+        },
+        {
+            name: 'Prevalence of moderate or severe food insecurity in the population',
+        },
+        {
+            name: 'Prevalence of severe food insecurity in the population',
+        },
+        {
+            name: 'Rural poverty headcount ratio at national poverty lines',
+        },
+        {
+            name: 'Total natural resources rents',
+        },
+        {
+            name: 'Total reserves in months of imports',
+        },
+        {
+            name: 'Urban population',
+        },
+        {
+            name: 'Urban population',
+        },
+        {
+            name: 'Urban population growth',
+        },
+        {
+            name: 'Urban poverty headcount ratio at national poverty lines',
+        },
     ]
 }

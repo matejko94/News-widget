@@ -174,7 +174,7 @@ export class RadialStackedChartComponent extends Chart {
             .outerRadius((d: any) => y(d[1]))
             .startAngle((d: any) => x(d.data.groupLabel)!)
             .endAngle((d: any) => x(d.data.groupLabel)! + x.bandwidth()!)
-            .padAngle(0.04)
+            .padAngle(0.06)
             .padRadius(innerRadius);
 
         const paths = g.append('g')

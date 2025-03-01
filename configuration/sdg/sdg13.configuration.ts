@@ -44,5 +44,31 @@ export const SDG13_CONFIGURATION: SdgConfiguration = {
             name: 'Disaster Risk Reduction',
             wikiConcepts: ['Drought', 'Disaster risk reduction', 'Flood', 'Extreme weather'],
         }
+    ],
+    indicators: [
+        {
+            name: 'Adjusted net savings, excluding particulate emission damage',
+        },
+        {
+            name: 'CO2 emissions (% GDP 2010)',
+        },
+        {
+            name: 'CO2 emissions (% GDP 2017)',
+        },
+        {
+            name: 'CO2 emissions (% GDP)',
+        },
+        {
+            name: 'CO2 emissions (tons/capita)',
+        },
+        {
+            name: 'Disaster risk reduction progress score',
+        },
+        {
+            name: 'Droughts, floods, extreme temperatures',
+        },
+        {
+            name: 'Prevalence of wasting, weight for height',
+        }
     ]
 };

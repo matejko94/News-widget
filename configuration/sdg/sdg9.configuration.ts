@@ -44,5 +44,49 @@ export const SDG9_CONFIGURATION: SdgConfiguration = {
             name: 'Digital Transformation',
             wikiConcepts: ['Artificial Intelligence', 'Digital transformation', 'Discovery-driven planning'],
         }
+    ],
+    indicators: [
+        {
+            name: 'Industry',
+        },
+        {
+            name: 'Manufacturing, value added',
+        },
+        {
+            name: 'Manufacturing, value added',
+        },
+        {
+            name: 'Medium and high-tech Industry',
+        },
+        {
+            name: 'Net official development assistance and official aid received',
+        },
+        {
+            name: 'Net official development assistance received (constant)',
+        },
+        {
+            name: 'Net official development assistance received (current)',
+        },
+        {
+            name: 'Net official development assistance received',
+        },
+        {
+            name: 'New business density',
+        },
+        {
+            name: 'Patent applications, nonresidents',
+        },
+        {
+            name: 'Patent applications, residents',
+        },
+        {
+            name: 'Periodicity and timeliness assessment of statistical capacity',
+        },
+        {
+            name: 'Personal remittances, received',
+        },
+        {
+            name: 'Services, value added per worker',
+        },
     ]
 };

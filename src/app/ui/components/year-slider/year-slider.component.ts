@@ -71,6 +71,7 @@ export class YearSliderComponent implements AfterViewInit, OnDestroy {
             .step(1)
             .width(width - 60)
             .displayValue(true)
+            .tickFormat((d: number) => d.toString())
             .on('onchange', (year: number) => {
                 this.router.navigate([], {
                     relativeTo: this.route,
@@ -107,5 +108,4 @@ export class YearSliderComponent implements AfterViewInit, OnDestroy {
             this.slider.value(nextYear > this.max() ? this.min() : nextYear);
         }, this.autoDelay());
     }
-
 }

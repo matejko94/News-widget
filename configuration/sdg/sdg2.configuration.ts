@@ -44,5 +44,19 @@ export const SDG2_CONFIGURATION: SdgConfiguration = {
             name: 'Resilient Agriculture',
             wikiConcepts: [ 'Genetically Modified Food', 'Climate-smart agriculture', 'Genetically Modified Crops', 'Biofortification' ],
         },
+    ],
+    indicators: [
+        {
+            name: 'Agriculture, forestry, and fishing, value added per worker',
+        },
+        {
+            name: 'Capture fisheries production',
+        },
+        {
+            name: 'Cereal yield',
+        },
+        {
+            name: 'Total fisheries production',
+        },
     ]
 }

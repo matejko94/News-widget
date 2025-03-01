@@ -141,6 +141,7 @@ export class BarcodeChartComponent extends Chart {
             .data(this.series)
             .join('g');
 
+        const barGap = 4;
         const totalSdgs = 17;
         const sdgPolicyCount = new Map<string, number>();
         const rects = g
@@ -153,7 +154,10 @@ export class BarcodeChartComponent extends Chart {
             .attr('x', d => this.xScale(d.data[0] as any)!)
             .attr('y', d => this.yScale(d[1]))
             .attr('width', this.xScale.bandwidth())
-            .attr('height', d => Math.max(0, this.yScale(d[0]) - this.yScale(d[1])))
+            .attr('height', d => {
+                const barHeight = Math.max(0, this.yScale(d[0]) - this.yScale(d[1]));
+                return Math.max(0, barHeight - barGap);
+            })
             .attr('fill', (d) => {
                 const key: string = (d as any).key;
                 const sdg = d.data[0] as unknown as string;

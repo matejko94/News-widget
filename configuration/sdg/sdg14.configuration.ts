@@ -44,5 +44,19 @@ export const SDG14_CONFIGURATION: SdgConfiguration = {
             name: 'Coastal Protection',
             wikiConcepts: ['Marine coastal ecosystem', 'Coastal management', 'Coastal erosion'],
         }
+    ],
+    indicators: [
+        {
+            name: 'Aquaculture production',
+        },
+        {
+            name: 'Fish species, threatened',
+        },
+        {
+            name: 'Marine protected areas',
+        },
+        {
+            name: 'Terrestrial and marine protected areas',
+        }
     ]
 };

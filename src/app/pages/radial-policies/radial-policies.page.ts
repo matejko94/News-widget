@@ -1,11 +1,12 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { createSdgObject } from '../../common/utility/sdg-object';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { IntersectingPolicyDto } from '../../domain/policy/types/intersecting-policy.dto';
 import { RadialStackedChartComponent, RadialStackedData } from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
+import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
 import { BasePage } from '../base.page';
 
@@ -15,10 +16,12 @@ import { BasePage } from '../base.page';
     imports: [
         RadialStackedChartComponent,
         AsyncPipe,
-        SpinnerComponent
+        SpinnerComponent,
+        MenuComponent
     ],
     styles: `
         :host {
+            position: relative;
             display: flex;
             justify-items: center;
             align-items: center;
@@ -27,6 +30,9 @@ import { BasePage } from '../base.page';
         }
     `,
     template: `
+        <app-menu queryParam="region" label="Select region" [options]="worldRegionOptions"
+                  showClear class="absolute top-5 right-5 z-10"/>
+
         @if (sdgPolicies$ | async; as data) {
             <app-radial-stacked-chart [data]="data" [colors]="colors"/>
         } @else {
@@ -43,8 +49,9 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
     public override ngOnInit() {
         super.ngOnInit();
 
-        this.sdgPolicies$ = this.policyService.getIntersectingSdgPolicies(+this.sdg(), undefined, 20)
+        this.sdgPolicies$ = this.selectedRegion$
             .pipe(
+                switchMap(region => this.policyService.getIntersectingSdgPolicies(+this.sdg(), region, 20)),
                 map(policies => this.groupBySdg(policies, 10))
             );
     }

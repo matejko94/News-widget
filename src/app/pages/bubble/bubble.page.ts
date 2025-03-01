@@ -42,9 +42,9 @@ import { BasePage } from '../base.page';
         </div>
 
         <div class="flex justify-between items-center w-full max-w-3xl mx-auto mb-5 ">
-            <app-menu queryParam="paramX" label="Indicator X" [options]="topicOptions()"/>
-            <app-menu queryParam="paramY" label="Indicator Y" [options]="topicOptions()"/>
-            <app-menu queryParam="paramZ" label="Indicator Z" [options]="topicOptions()"/>
+            <app-menu queryParam="paramX" label="Indicator X" [options]="indicatorOptions()"/>
+            <app-menu queryParam="paramY" label="Indicator Y" [options]="indicatorOptions()"/>
+            <app-menu queryParam="paramZ" label="Indicator Z" [options]="indicatorOptions()"/>
         </div>
 
         @let bubbleData = bubbleData$ | async;
@@ -75,7 +75,6 @@ export default class BubblePage extends BasePage implements OnInit {
     public year = input<string>();
     public bubbleData$!: Observable<BubbleChartData[]>;
     public lineData$!: Observable<LineChartData[]>;
-    public sdgColors = SDG_COLORS.colors;
     public legend = signal<{ label: string, color: string }[]>([]);
 
     constructor() {
@@ -89,18 +88,17 @@ export default class BubblePage extends BasePage implements OnInit {
         ]).pipe(
             filter(([ x, y, z, year ]) => !!x && !!y && !!z && !!year),
             switchMap(([ x, y, z, year ]) => this.indicatorsService.getIntersections(+this.sdg(), year!, x!, y!, z!)),
-            map(intersections => this.mapBubbleData(intersections))
+            map(intersections => this.mapBubbleData(intersections)),
         );
 
         this.lineData$ = combineLatest([
             toObservable(this.paramX),
             toObservable(this.paramY),
             toObservable(this.paramZ),
-            toObservable(this.year)
         ]).pipe(
-            filter(([ x, y, z, year ]) => !!x && !!y && !!z && !!year),
-            switchMap(([ x, y, z, year ]) => this.indicatorsService.getIntersectionsTimeline(+this.sdg(), year!, x!, y!, z!)),
-            map(intersections => this.mapLineData(intersections))
+            filter(([ x, y, z ]) => !!x && !!y && !!z),
+            switchMap(([ x, y, z ]) => this.indicatorsService.getIntersectionsTimeline(+this.sdg(), x!, y!, z!)),
+            map(intersections => this.mapLineData(intersections)),
         );
     }
 
@@ -126,11 +124,13 @@ export default class BubblePage extends BasePage implements OnInit {
     }
 
     private mapLineData(intersections: IndicatorIntersectionTimeline[]): LineChartData[] {
-        return intersections.map(({ name, code, timeline }) => ({
-            label: name,
-            subLabel: code,
-            color: getColorByCountryCode(code)!,
-            points: timeline.map(({ year, value }) => ({ x: year, y: value }))
-        }));
+        return intersections.flatMap(({ countries, indicator }) =>
+            countries.map(({ name, code, timeline }) => ({
+                label: name,
+                subLabel: indicator,
+                color: getColorByCountryCode(code)!,
+                points: timeline.map(({ year, value }: { year: number, value: number }) => ({ x: year, y: value }))
+            }))
+        );
     }
 }

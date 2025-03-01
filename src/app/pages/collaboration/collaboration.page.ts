@@ -1,11 +1,13 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, tap } from 'rxjs';
 import { getRegionColor } from '../../../../configuration/regions/world-regions';
 import { loadingMap } from '../../common/utility/loading-map';
 import { InnovationsService } from '../../domain/innovations/service/innovations.service';
-import { IndustryCollaborationDto } from '../../domain/innovations/types/industry-collaboration.dto';
+import { IndustryCollaborationResponseDto } from '../../domain/innovations/types/industry-collaboration-response.dto';
+import { IndustryEdgeDto } from '../../domain/innovations/types/industry-edge.dto';
+import { IndustryNodeDto } from '../../domain/innovations/types/industry-node.dto';
 import { ForceData, ForceDirectedChartComponent, ForceLink, ForceNode } from '../../ui/charts/force-directed-chart/force-directed-chart.component';
 import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { BasePage } from '../base.page';
@@ -39,7 +41,6 @@ import { BasePage } from '../base.page';
 export default class CollaborationPage extends BasePage implements OnInit {
     private innovationsService = inject(InnovationsService);
     public data$!: Observable<ForceData | undefined>;
-    private linkCounts = new Map<string, number>();
 
     public override ngOnInit() {
         super.ngOnInit();
@@ -48,62 +49,46 @@ export default class CollaborationPage extends BasePage implements OnInit {
             toObservable(this.sdg, { injector: this.injector }),
             toObservable(this.topic, { injector: this.injector }),
         ]).pipe(
-            loadingMap(([ sdg, topic ]) => this.innovationsService.getIndustryCollaborations(+sdg, topic, 100)),
-            map(data => data ? this.mapData(data) : undefined)
+            loadingMap(([ sdg, topic ]) => this.innovationsService.getIndustryCollaborations(+sdg, topic)),
+            map(data => data ? this.mapData(data) : undefined),
         );
     }
 
-    private mapData(data: IndustryCollaborationDto[]): ForceData {
-        this.linkCounts.clear();
+    private mapData(response: IndustryCollaborationResponseDto): ForceData {
+        const linkCounts = new Map<string, number>();
+        const links = this.mapLinks(response.edges.filter(edge => !edge.source.includes('Other') && !edge.target.includes('Other')), linkCounts);
+        const nodes = this.mapNodes(response.nodes, linkCounts);
 
-        const links = this.mapLinks(data);
-        const nodes = this.mapNodes(data);
+        console.log({ linkCounts, nodes, links });
 
         return { nodes, links };
     }
 
-    private mapNodes(data: IndustryCollaborationDto[]): ForceNode[] {
-        return data.map((evt) => ({
-            id: evt.industry,
-            group: evt.region,
-            tag: evt.country,
-            totalLinks: this.linkCounts.get(evt.industry) ?? 0,
-            color: getRegionColor(evt.region),
+    private mapNodes(data: IndustryNodeDto[], linkCounts: Map<string, number>): ForceNode[] {
+        return data.map(node => ({
+            id: node.industry,
+            group: node.region,
+            tag: node.industry,
+            totalLinks: linkCounts.get(node.industry) ?? 0,
+            color: getRegionColor(node.region),
         }));
     }
 
-    private mapLinks(data: IndustryCollaborationDto[]): ForceLink[] {
-        const industrySdgsMap = new Map<string, Set<string>>();
-        data.forEach((evt) => industrySdgsMap.set(evt.industry, new Set(evt.sdgs)));
+    private mapLinks(data: IndustryEdgeDto[], linkCounts: Map<string, number>): ForceLink[] {
+        return data.map(edge => {
+            this.incrementLinkCount(edge.source.split('_')[0], linkCounts);
+            this.incrementLinkCount(edge.target.split('_')[0], linkCounts);
 
-        const links: ForceLink[] = [];
-        for (let i = 0; i < data.length; i++) {
-            for (let j = i + 1; j < data.length; j++) {
-                const industryA = data[i].industry;
-                const industryB = data[j].industry;
-                const sdgsA = industrySdgsMap.get(industryA)!;
-                const sdgsB = industrySdgsMap.get(industryB)!;
-
-                const sharedSdgs = [ ...sdgsA ].filter((sdg) => sdgsB.has(sdg));
-                if (sharedSdgs.length) {
-                    sharedSdgs.forEach((sdg) => {
-                        links.push({
-                            source: industryA,
-                            target: industryB,
-                            link: sdg,
-                            value: sharedSdgs.length,
-                        });
-                        this.incrementLinkCount(industryA);
-                        this.incrementLinkCount(industryB);
-                    });
-                }
-            }
-        }
-        return links;
+            return {
+                source: edge.source.split('_')[0],
+                target: edge.target.split('_')[0],
+                link: edge.shared_sdgs.toString(),
+                value: edge.shared_sdgs,
+            };
+        });
     }
 
-    private incrementLinkCount(eventKey: string) {
-        const current = this.linkCounts.get(eventKey) || 0;
-        this.linkCounts.set(eventKey, current + 1);
+    private incrementLinkCount(nodeId: string, linkCounts: Map<string, number>) {
+        linkCounts.set(nodeId, (linkCounts.get(nodeId) || 0) + 1);
     }
 }

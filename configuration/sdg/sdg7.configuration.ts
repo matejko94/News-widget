@@ -44,5 +44,37 @@ export const SDG7_CONFIGURATION: SdgConfiguration = {
             name: 'Nuclear Energy',
             wikiConcepts: ['Nuclear power', 'Potential energy', 'Nuclear reactor', 'Nuclear energy policy'],
         }
+    ],
+    indicators: [
+        {
+            name: 'Access to clean fuels and technologies for cooking',
+        },
+        {
+            name: 'Access to electricity',
+        },
+        {
+            name: 'Access to electricity, rural',
+        },
+        {
+            name: 'Access to electricity, urban',
+        },
+        {
+            name: 'Coal rents',
+        },
+        {
+            name: 'Energy intensity level of primary energy',
+        },
+        {
+            name: 'Investment in energy with private participation',
+        },
+        {
+            name: 'Natural gas rents',
+        },
+        {
+            name: 'Oil rents',
+        },
+        {
+            name: 'Renewable electricity output',
+        },
     ]
 };

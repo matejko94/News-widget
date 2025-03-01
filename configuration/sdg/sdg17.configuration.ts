@@ -44,5 +44,28 @@ export const SDG17_CONFIGURATION: SdgConfiguration = {
             name: 'Multilateral Agreements',
             wikiConcepts: ['Partnerships for Goals', 'Multilateralism', 'Multilateral treaty'],
         }
+    ],
+    indicators: [
+        {
+            name: 'Average transaction cost of sending remittances from a specific country',
+        },
+        {
+            name: 'Average transaction cost of sending remittances to a specific country',
+        },
+        {
+            name: 'Foreign direct investment, net inflows (%GDP)',
+        },
+        {
+            name: 'Foreign direct investment, net inflows (BoP $)',
+        },
+        {
+            name: 'Merchandise trade',
+        },
+        {
+            name: 'Methodology assessment of statistical capacity',
+        },
+        {
+            name: 'Source data assessment of statistical capacity',
+        }
       ]
 };

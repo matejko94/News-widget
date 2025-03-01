@@ -1,6 +1,8 @@
 import { computed, Directive, inject, Injector, input, OnInit, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, Observable } from 'rxjs';
+import { transform } from 'topojson-client';
 import { WorldBankRegions } from '../../../configuration/regions/world-regions';
 import { Configuration } from '../domain/configuration/service/configuration';
 import { Topic } from '../domain/configuration/types/topic.interface';
@@ -15,14 +17,19 @@ export abstract class BasePage implements OnInit {
     public sdg = input.required<string>();
     public topic = input<string>();
     public region = input<string>();
-    public regions = input<string[]>();
+    public selectedRegion$ = toObservable(this.region);
+    public regions = input([], { transform: (query: string | undefined) => query?.split(',') ?? [] });
     public availableTopics = signal<Topic[]>([]);
     public topicOptions = computed(() => this.availableTopics().map(t => ({ label: t.name, value: t.name })));
+    public availableIndicators = signal<{ name: string }[]>([]);
+    public indicatorOptions = computed(() => this.availableIndicators().map(i => ({ label: i.name, value: i.name })));
     public worldRegionOptions = WorldBankRegions;
     public selectedTopic$!: Observable<Topic>;
 
     public ngOnInit() {
-        this.availableTopics.set(this.configuration.getTopics(this.sdg()).topics);
+        const configuration = this.configuration.get(this.sdg());
+        this.availableTopics.set(configuration.topics);
+        this.availableIndicators.set(configuration.indicators);
 
         this.selectedTopic$ = this.route.queryParamMap.pipe(
             map(params => params.get('topic')),

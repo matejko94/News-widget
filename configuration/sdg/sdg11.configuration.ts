@@ -44,5 +44,37 @@ export const SDG11_CONFIGURATION: SdgConfiguration = {
             name: 'Sustainable Cities',
             wikiConcepts: ['Sustainable city', 'Smart city', 'Eco-cities'],
         }
+    ],
+    indicators: [
+        {
+            name: 'Air transport, freight',
+        },
+        {
+            name: 'Air transport, passengers carried',
+        },
+        {
+            name: 'Households and NPISHs Final consumption expenditure',
+        },
+        {
+            name: 'Individuals using the Internet',
+        },
+        {
+            name: 'Investment in transport with private participation',
+        },
+        {
+            name: 'PM2.5 air pollution, mean annual exposure',
+        },
+        {
+            name: 'PM2.5 air pollution, population exposed to levels exceeding WHO guideline value',
+        },
+        {
+            name: 'Railways, goods transported',
+        },
+        {
+            name: 'Railways, passengers carried',
+        },
+        {
+            name: 'Statistical Capacity score',
+        }
     ]
 };

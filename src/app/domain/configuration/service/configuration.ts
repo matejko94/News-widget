@@ -23,7 +23,7 @@ import { SdgConfiguration } from '../types/sdg-configuration.interface';
 })
 export class Configuration {
 
-    public getTopics(sdg: string):  SdgConfiguration {
+    public get(sdg: string): SdgConfiguration {
         switch (sdg) {
             case '1':
                 return SDG1_CONFIGURATION;

@@ -22,9 +22,9 @@ export class IndicatorsService {
         );
     }
 
-    public getIntersectionsTimeline(sdg: number, year: string, indicator1: string, indicator2: string, indicator3: string) {
+    public getIntersectionsTimeline(sdg: number, indicator1: string, indicator2: string, indicator3: string) {
         return this.http.get<IndicatorIntersectionTimeline[]>(
-            `${ environment.api.url }/indicators/intersection/linechart/${ sdg }?year=${ year }&indicator1=${ indicator1 }&indicator2=${ indicator2 }&indicator3=${ indicator3 }`
+            `${ environment.api.url }/indicators/intersection/linechart/${ sdg }?indicator1=${ indicator1 }&indicator2=${ indicator2 }&indicator3=${ indicator3 }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch intersecting indicators linechart', e);
