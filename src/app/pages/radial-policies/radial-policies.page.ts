@@ -1,7 +1,8 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { map, Observable, switchMap } from 'rxjs';
+import { map, Observable, switchMap, tap } from 'rxjs';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
+import { loadingMap } from '../../common/utility/loading-map';
 import { createSdgObject } from '../../common/utility/sdg-object';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { IntersectingPolicyDto } from '../../domain/policy/types/intersecting-policy.dto';
@@ -34,7 +35,13 @@ import { BasePage } from '../base.page';
                   showClear class="absolute top-5 right-5 z-10"/>
 
         @if (sdgPolicies$ | async; as data) {
-            <app-radial-stacked-chart [data]="data" [colors]="colors"/>
+            @if (data.length) {
+                <app-radial-stacked-chart [data]="data" [colors]="colors"/>
+            } @else {
+                <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
+                    No data available
+                </div>
+            }
         } @else {
             <app-spinner/>
         }
@@ -43,7 +50,7 @@ import { BasePage } from '../base.page';
 export default class RadialPolicyPage extends BasePage implements OnInit {
     private policyService = inject(PolicyService);
 
-    public sdgPolicies$!: Observable<RadialStackedData[]>
+    public sdgPolicies$!: Observable<RadialStackedData[] | null>
     public colors = SDG_COLORS.colors;
 
     public override ngOnInit() {
@@ -51,8 +58,9 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
 
         this.sdgPolicies$ = this.selectedRegion$
             .pipe(
-                switchMap(region => this.policyService.getIntersectingSdgPolicies(+this.sdg(), region, 20)),
-                map(policies => this.groupBySdg(policies, 10))
+                loadingMap(region => this.policyService.getIntersectingSdgPolicies(+this.sdg(), region, 20)),
+                tap(console.log),
+                map(policies => policies ? this.groupBySdg(policies, 10) : null)
             );
     }
 

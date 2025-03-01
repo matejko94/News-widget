@@ -1,8 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, filter, map, Observable, shareReplay, switchMap, tap } from 'rxjs';
-import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
+import { combineLatest, filter, map, Observable, shareReplay, switchMap } from 'rxjs';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { RadarDto } from '../../domain/policy/types/radar.dto';
 import { LineChartComponent, LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
@@ -32,29 +31,34 @@ import { BasePage } from '../base.page';
     `,
     template: `
         <div class="w-full">
-            <app-year-slider [min]="2000" [max]="2021" autoIncrement/>
+            <app-year-slider [min]="2000" [max]="2025" autoIncrement/>
             <app-multi-menu queryParam="regions" label="Select region" [options]="worldRegionOptions"
                             class="ml-auto mr-4"/>
         </div>
 
-        @let radarData = radarData$ | async;
-        @let lollipopData = lollipopData$ | async;
-        @if (radarData?.length === 0 || lollipopData?.length === 0) {
-            <div class="flex max-md:flex-col justify-between max-md:justify-start w-full h-full max-md:h-fit
+        <div class="flex max-md:flex-col justify-between max-md:justify-start w-full h-full max-md:h-fit
                 md:overflow-y-hidden">
-                @if (radarData) {
+            @if (radarData$ | async; as radarData) {
+                @if (radarData.length) {
                     <app-radar-chart [data]="radarData" class="md:max-w-[46%]"/>
+                } @else {
+                    <div class="flex items-center justify-center w-full my-20 text-2xl text-gray-400">
+                        No data available
+                    </div>
                 }
+            }
 
-                @if (lollipopData) {
+            @if (lollipopData$ | async; as lollipopData) {
+                @if (lollipopData.length) {
                     <app-lollipop-chart [data]="lollipopData" class="md:mt-8 md:max-w-[46%]"/>
+                } @else {
+                    <div class="flex items-center justify-center w-full my-20 text-2xl text-gray-400">
+                        No data available
+                    </div>
                 }
-            </div>
-        } @else {
-            <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
-                No data available
-            </div>
-        }
+            }
+        </div>
+
     `
 })
 export default class RadarPage extends BasePage implements OnInit {

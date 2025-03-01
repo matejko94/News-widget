@@ -2,40 +2,45 @@ import { Option } from '../../src/app/ui/components/menu/menu.component';
 
 export const WorldBankRegions: (Option & { color: string })[] = [
     {
-        label: 'East Asia & Pacific',
-        value: 'WB_EAP',
-        color: '#DF7F2F'
+        label: 'Australia and New Zealand',
+        value: 'Australia and New Zealand',
+        color: '#00857e'
     },
     {
-        label: 'Europe & Central Asia',
-        value: 'WB_ECA',
-        color: '#CE1249'
+        label: 'Central and Southern Asia',
+        value: 'Central and Southern Asia',
+        color: '#588146'
     },
     {
-        label: 'Latin America & Caribbean',
-        value: 'WB_LAC',
-        color: '#3B933B'
+        label: 'Eastern and South-Eastern Asia',
+        value: 'Eastern and South-Eastern Asia',
+        color: '#b26216'
     },
     {
-        label: 'Middle East & North Africa',
-        value: 'WB_MNA',
-        color: '#803E84'
+        label: 'Europe and Northern America',
+        value: 'Europe and Northern America',
+        color: '#4c6a9c'
     },
     {
-        label: 'North America',
-        value: 'WB_NAR',
-        color: '#58585A'
+        label: 'Latin America and the Caribbean',
+        value: 'Latin America and the Caribbean',
+        color: '#873039'
     },
     {
-        label: 'South Asia',
-        value: 'WB_SAR',
-        color: '#2079B5'
+        label: 'Northern Africa and Western Asia',
+        value: 'Northern Africa and Western Asia',
+        color: '#bb8f5b'
+    },
+    {
+        label: 'Oceania',
+        value: 'Oceania',
+        color: '#39aaba'
     },
     {
         label: 'Sub-Saharan Africa',
-        value: 'WB_SSA',
-        color: '#FFCB08'
-    }
+        value: 'Sub-Saharan Africa',
+        color: '#8c4469'
+    },
 ] as const;
 
 export function getRegionColor(region: string) {
