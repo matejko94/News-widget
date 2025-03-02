@@ -1,14 +1,22 @@
-import { Component, input, OnInit } from '@angular/core';
-import { ChordChartComponent } from '../../ui/charts/chord-chart/chord-chart.component';
-import { MenuComponent } from '../../ui/components/menu/menu.component';
+import { AsyncPipe } from '@angular/common';
+import { Component, inject, input, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest, combineLatestWith, filter, map, Observable, switchMap, tap } from 'rxjs';
+import { WorldBankRegions } from '../../../../configuration/regions/world-regions';
+import { InnovationsService } from '../../domain/innovations/service/innovations.service';
+import { InnovationResponseDto } from '../../domain/innovations/types/innovation-response.dto';
+import { ChordChartComponent, ChordChartData } from '../../ui/charts/chord-chart/chord-chart.component';
+import { Option } from '../../ui/components/menu/menu.component';
+import { MultiMenuComponent } from '../../ui/components/multi-menu/multi-menu.component';
 import { BasePage } from '../base.page';
 
 @Component({
     selector: 'collaboration-page',
     standalone: true,
     imports: [
-        MenuComponent,
         ChordChartComponent,
+        AsyncPipe,
+        MultiMenuComponent,
     ],
     styles: `
         :host {
@@ -21,52 +29,74 @@ import { BasePage } from '../base.page';
     `,
     template: `
         <div class="flex justify-end items-center w-full mt-3 mb-5 pr-4">
-            <app-menu queryParam="topic" label="Indicator X" [options]="topicOptions()"/>
+            <app-multi-menu queryParam="industries" label="Industry" [options]="industryOptions()"/>
         </div>
 
-        <app-chord-chart [data]="data" class="w-full flex-1 min-h-0"/>
+        @if (data$ | async; as data) {
+            <app-chord-chart [data]="data" class="w-full flex-1 min-h-0"/>
+        }
     `
 })
-export default class InnovationsPage extends BasePage implements OnInit {
+export default class InnovationsPage extends BasePage {
+    private innovationsService = inject(InnovationsService);
 
-    public data = {
-        matrix: [
-            [ 11975, 5871, 8916, 2868 ],
-            [ 1951, 10048, 2060, 6171 ],
-            [ 8010, 16145, 8090, 8045 ],
-            [ 1013, 990, 940, 6907 ]
-        ],
-        names: [ 'Alpha', 'Beta', 'Gamma', 'Delta' ],
-        colors: [ '#FF5733', '#33C3FF', '#FF33A8', '#33FF57' ]
-    };
-    public year = input<number>();
+    public industries = input(null, { transform: (query: string | null) => query?.split(',') ?? null });
+    public industryOptions = signal<Option[]>([]);
+    public data$: Observable<ChordChartData>;
 
-
-    public override async ngOnInit() {
-        super.ngOnInit();
-
-        if (!this.topic()) {
-            const [ firstTopic ] = this.topicOptions().map(({ value }) => value);
-            await this.setQueryParam('topic', firstTopic);
-        }
+    constructor() {
+        super();
+        this.data$ = this.setupHeatMapData();
     }
 
-    // private setupHeatMapData(): Observable<WorldMapData[]> {
-    //     return combineLatest([
-    //         toObservable(this.sdg),
-    //         toObservable(this.topic),
-    //         toObservable(this.year)
-    //     ]).pipe(
-    //         filter(([ sdg, topic, year ]) => !!sdg && !!topic && !!year),
-    //         switchMap(([ sdg, topic, year ]) => this.newsService.getNewsIntensityPerYear(sdg, topic!, year!)),
-    //         map(news => news.map(({ country, value }) => {
-    //             return {
-    //                 country,
-    //                 count: value,
-    //                 color: getColorByCountryName(country)!
-    //             };
-    //         })),
-    //         tap(data => console.log({ data }))
-    //     );
-    // }
+    private setupHeatMapData(): Observable<ChordChartData> {
+        return combineLatest([
+            toObservable(this.sdg),
+        ]).pipe(
+            filter(([ sdg ]) => !!sdg),
+            switchMap(([ sdg ]) => this.innovationsService.getIntersections(+sdg)),
+            tap(data => this.setIndustryOptions(data)),
+            combineLatestWith(toObservable(this.industries)),
+            map((([ data, industries ]) => this.toChordData(data, industries))),
+        );
+    }
+
+    private toChordData({ links }: InnovationResponseDto, industries: string[] | null): ChordChartData {
+        const groups = WorldBankRegions.map(region => ({
+            name: region.label,
+            color: region.color
+        }));
+
+        const linksData = links
+            .filter(link => {
+                if (!industries?.length) {
+                    return true;
+                }
+
+                const sourceIndustry = link.source.split('|')[0];
+                const targetIndustry = link.target.split('|')[0];
+
+                return industries.includes(sourceIndustry) || industries.includes(targetIndustry);
+            })
+            .map(link => ({
+                source: {
+                    group: link.source.split('|')[1],
+                    subGroup: link.source.split('|')[0]
+                },
+                target: {
+                    group: link.target.split('|')[1],
+                    subGroup: link.target.split('|')[0]
+                },
+                commonValues: link.common_sdgs
+            }));
+
+        return { groups, links: linksData };
+    }
+
+    private setIndustryOptions({ nodes }: InnovationResponseDto) {
+        this.industryOptions.set(nodes.map(node => ({
+            label: node.industry,
+            value: node.industry
+        })));
+    }
 }

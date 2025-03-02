@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, of } from 'rxjs';
 import { environment } from '../../../../../environment/environment';
 import { IndustryCollaborationResponseDto } from '../types/industry-collaboration-response.dto';
+import { InnovationResponseDto } from '../types/innovation-response.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -27,7 +28,14 @@ export class InnovationsService {
         );
     }
 
-    public getInnovationIntersections(sdg: number, region: string | undefined) {
-
+    public getIntersections(sdg: number) {
+        return this.http.get<InnovationResponseDto>(
+            `${ environment.api.url }/innovation/sdg/${ sdg }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch industry collaborations', e);
+                return of({ nodes: [], links: [] })
+            })
+        );
     }
 }

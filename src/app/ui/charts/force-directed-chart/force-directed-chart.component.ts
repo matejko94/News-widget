@@ -104,10 +104,10 @@ export class ForceDirectedChartComponent extends Chart {
 
     private initializeSimulation(width: number, height: number): void {
         this.simulation = forceSimulation(this.data().nodes)
-            .force('link', forceLink<ForceNode, ForceLink>(this.data().links).id(d => d.id).strength(0.05))
-            .force('charge', forceManyBody().strength(-100))
-            .force('center', forceCenter(width / 2, height / 2))
-            .force('collide', forceCollide(20));
+            .force('link', forceLink<ForceNode, ForceLink>(this.data().links).id(d => d.id).strength(0.1))
+            .force('charge', forceManyBody().strength(-50))
+            .force('center', forceCenter(width / 2.5, height / 2.5))
+            .force('collide', forceCollide(15));
     }
 
     private drawLinks() {

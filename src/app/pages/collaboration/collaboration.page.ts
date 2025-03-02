@@ -5,6 +5,7 @@ import { combineLatest, map, Observable, tap } from 'rxjs';
 import { getRegionColor } from '../../../../configuration/regions/world-regions';
 import { loadingMap } from '../../common/utility/loading-map';
 import { InnovationsService } from '../../domain/innovations/service/innovations.service';
+import { IndustryLinkDto } from '../../domain/innovations/types/industr-link.dto';
 import { IndustryCollaborationResponseDto } from '../../domain/innovations/types/industry-collaboration-response.dto';
 import { IndustryEdgeDto } from '../../domain/innovations/types/industry-edge.dto';
 import { IndustryNodeDto } from '../../domain/innovations/types/industry-node.dto';

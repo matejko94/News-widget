@@ -12,7 +12,7 @@ export interface LegendItem {
     imports: [ NgStyle ],
     template: `
         <ul class="flex flex-wrap gap-1 p-2 {{ !horizontal() ? 'md:flex-nowrap md:flex-col' : '' }}">
-            @for (item of items(); track item) {
+            @for (item of items(); track item.label + item.hidden()) {
                 <li class="flex items-center text-xs md:text-sm
                     {{ toggleable() ? 'cursor-pointer' : 'pointer-events-none' }}" (click)="toggle(item)">
                         <span class="w-2.5 md:w-3.5 aspect-square mr-1 md:mr-2 rounded"
@@ -21,7 +21,6 @@ export interface LegendItem {
                 </li>
             }
         </ul>
-
     `
 })
 export class BoxLegendComponent {
