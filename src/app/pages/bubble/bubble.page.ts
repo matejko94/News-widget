@@ -115,9 +115,9 @@ export default class BubblePage extends BasePage implements OnInit {
 
     private mapBubbleData(intersections: IndicatorsIntersections): BubbleChartData[] {
         return Object.values(intersections).map(value => ({
-            xValue: value.indicator1,
-            yValue: value.indicator2,
-            radius: value.indicator3,
+            xValue: value.indicator1_value,
+            yValue: value.indicator2_value,
+            radius: value.indicator3_value,
             country: value.country_name,
             color: getColorByCountryCode(value.country_code)!
         }));
