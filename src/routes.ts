@@ -22,6 +22,11 @@ export const ROUTES: Route[] = [
         title: 'Radial Policies'
     },
     {
+        path: 'science/evolution',
+        loadComponent: () => import('./app/pages/evolution/evolution.page'),
+        title: 'Evolution'
+    },
+    {
         path: 'policy/heatmap',
         loadComponent: () => import('./app/pages/bar-code/bar-code.page'),
         title: 'Barcode'
@@ -51,11 +56,6 @@ export const ROUTES: Route[] = [
         loadComponent: () => import('./app/pages/collaboration/collaboration.page'),
         title: 'Collaboration'
     },
-    // {
-    //     path: 'innovations/collaboration',
-    //     loadComponent: () => import('./app/pages/collaboration/collaboration.page'),
-    //     title: 'Collaboration'
-    // },
     {
         path: 'innovations/relations',
         loadComponent: () => import('./app/pages/innovations/innovations.page'),

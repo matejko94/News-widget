@@ -276,12 +276,12 @@ export class ChordChartComponent extends Chart {
         ribbons: Selection<SVGPathElement, Chord, SVGGElement, unknown>
     ): void {
         ribbons.each((d, i, nodes) => {
-            // registerTooltip(
-            //     select(nodes[i]) as any,
-            //     this.tooltip,
-            //     this.chartContainer().nativeElement,
-            //     () => this.linkTooltipContent(d)
-            // );
+            registerTooltip(
+                select(nodes[i]) as any,
+                this.tooltip,
+                this.chartContainer().nativeElement,
+                () => this.linkTooltipContent(d)
+            );
         });
     }
 

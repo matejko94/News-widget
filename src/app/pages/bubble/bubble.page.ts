@@ -41,10 +41,10 @@ import { BasePage } from '../base.page';
             <app-year-slider [min]="2000" [max]="2025" autoIncrement/>
         </div>
 
-        <div class="flex justify-between items-center w-full max-w-3xl mx-auto mb-5 ">
-            <app-menu queryParam="paramX" label="Indicator X" [options]="indicatorOptions()"/>
-            <app-menu queryParam="paramY" label="Indicator Y" [options]="indicatorOptions()"/>
-            <app-menu queryParam="paramZ" label="Indicator Z" [options]="indicatorOptions()"/>
+        <div class="flex justify-between items-center w-full max-w-3xl mx-auto mb-5 gap-4">
+            <app-menu class="w-1/3" queryParam="paramX" label="Indicator X" [options]="indicatorOptions()"/>
+            <app-menu class="w-1/3" queryParam="paramY" label="Indicator Y" [options]="indicatorOptions()"/>
+            <app-menu class="w-1/3" queryParam="paramZ" label="Indicator Z" [options]="indicatorOptions()"/>
         </div>
 
         @let bubbleData = bubbleData$ | async;
