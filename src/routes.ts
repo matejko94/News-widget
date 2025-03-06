@@ -2,6 +2,11 @@ import { Route } from '@angular/router';
 
 export const ROUTES: Route[] = [
     {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () => import('./app/pages/landing/landing.page'),
+    },
+    {
         path: 'live-reporting',
         loadComponent: () => import('./app/pages/live-reporting/live-reporting.page'),
         title: 'SDG | NEWS | IRCAI SDG OBSERVATORY'
@@ -66,4 +71,8 @@ export const ROUTES: Route[] = [
         loadComponent: () => import('./app/pages/radar/radar.page'),
         title: 'Policy SDG Radar'
     },
+    {
+        path: '**',
+        redirectTo: ''
+    }
 ];

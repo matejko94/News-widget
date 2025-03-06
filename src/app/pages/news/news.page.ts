@@ -106,8 +106,16 @@ import { BasePage } from '../base.page';
             </div>
 
             <div class="overflow-hidden flex flex-col items-center">
-                <angular-tag-cloud [realignOnResize]="true" [data]="(cloudData$ | async) ?? []"
-                                   class="ml-6 cloud" [width]="width()"/>
+                @let cloudData = cloudData$ | async;
+
+                @if (cloudData?.length) {
+                    <angular-tag-cloud [realignOnResize]="true" [data]="cloudData!"
+                                       class="ml-6 cloud" [width]="width()"/>
+                } @else {
+                    <div class="flex flex-col justify-center items-center h-full text-xl font-semibold text-gray-600">
+                        No keywords today
+                    </div>
+                }
 
                 <app-sentiment-meter [value]="sentimentAverage$ | async" class="pl-6"/>
 
