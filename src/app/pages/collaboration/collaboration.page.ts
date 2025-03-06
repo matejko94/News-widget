@@ -1,11 +1,10 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, map, Observable, tap } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import { getRegionColor } from '../../../../configuration/regions/world-regions';
 import { loadingMap } from '../../common/utility/loading-map';
 import { InnovationsService } from '../../domain/innovations/service/innovations.service';
-import { IndustryLinkDto } from '../../domain/innovations/types/industr-link.dto';
 import { IndustryCollaborationResponseDto } from '../../domain/innovations/types/industry-collaboration-response.dto';
 import { IndustryEdgeDto } from '../../domain/innovations/types/industry-edge.dto';
 import { IndustryNodeDto } from '../../domain/innovations/types/industry-node.dto';
@@ -34,6 +33,7 @@ import { BasePage } from '../base.page';
         <div class="flex justify-end items-center w-full mt-3 mb-5 pr-4">
             <app-menu queryParam="topic" label="Topic" [options]="topicOptions()"/>
         </div>
+
         @if (data$ | async; as data) {
             <app-force-directed-chart [data]="data" tagLabel="Country" class="w-full flex-1 min-h-0"/>
         }
@@ -57,7 +57,14 @@ export default class CollaborationPage extends BasePage implements OnInit {
 
     private mapData(response: IndustryCollaborationResponseDto): ForceData {
         const linkCounts = new Map<string, number>();
-        const links = this.mapLinks(response.edges.filter(edge => !edge.source.includes('Other') && !edge.target.includes('Other')), linkCounts);
+        const links = this.mapLinks(
+            response.edges.filter(({
+                                       source,
+                                       target,
+                                       shared_sdgs
+                                   }) => !source.includes('Other') && !target.includes('Other') && shared_sdgs > 2),
+            linkCounts
+        );
         const nodes = this.mapNodes(response.nodes, linkCounts);
 
         console.log({ linkCounts, nodes, links });

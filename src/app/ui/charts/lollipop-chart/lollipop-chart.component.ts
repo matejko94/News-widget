@@ -57,7 +57,7 @@ export interface LollipopChartData {
         </div>
     `
 })
-export class LineChartComponent extends Chart {
+export class LollipopChartComponent extends Chart {
     public data = input.required<LollipopChartData[]>();
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
     private x!: ScaleLinear<number, number>;

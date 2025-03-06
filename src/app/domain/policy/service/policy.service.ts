@@ -13,7 +13,7 @@ export class PolicyService {
 
     public getIntersectingSdgPolicies(sdg: number, region: string | undefined, limit: number): Observable<IntersectingPolicyDto[]> {
         return this.http.get<IntersectingPolicyDto[]>(
-            `${ environment.api.url }/policy/intersection/${ sdg }?region_code=${ region ?? 'All' }&limit=${ limit }`
+            `${ environment.api.url }/policy/intersection?sdg=${ sdg }&region_code=${ region ?? 'All' }&limit=${ limit }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch intersecting policies', e);

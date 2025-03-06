@@ -4,9 +4,11 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, Observable, switchMap } from 'rxjs';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { getColorByCountryCode } from '../../../../configuration/countries/countries';
+import { loadingMap } from '../../common/utility/loading-map';
 import { IndicatorsService } from '../../domain/indicators/service/indicators.service';
 import { IndicatorIntersectionTimeline } from '../../domain/indicators/types/indicator-intersection-timeline.interface';
 import { IndicatorsIntersections } from '../../domain/indicators/types/indicator-intersection.interface';
+import { BarcodeChartComponent } from '../../ui/charts/bar-code/bar-code-chart.component';
 import { BubbleChartComponent, BubbleChartData } from '../../ui/charts/bubble-chart/bubble-chart.component';
 import { LineChartComponent, LineChartData } from '../../ui/charts/line-chart/line-chart.component';
 import { MenuComponent } from '../../ui/components/menu/menu.component';
@@ -26,6 +28,7 @@ import { BasePage } from '../base.page';
         BubbleChartComponent,
         LineChartComponent,
         AsyncPipe,
+        BarcodeChartComponent,
     ],
     styles: `
         :host {
@@ -51,17 +54,30 @@ import { BasePage } from '../base.page';
         @let lineData = lineData$ | async;
 
         @if (bubbleData && lineData) {
-            <div class="flex flex-col gap-10 justify-start w-full">
-                <app-bubble-chart class="aspect-[2/1]" [data]="bubbleData"
-                                  [xAxisLabel]="paramX()!"
-                                  [yAxisLabel]="paramY()!"
-                                  [zAxisLabel]="paramZ()!"
-                />
-                <app-line-chart class="aspect-[2/1]" [data]="lineData"
-                                xAxisLabel="Year"
-                                yAxisLabel="Country"
-                                groupLabel="Indicator"
-                />
+            <div class="flex flex-col gap-10 justify-start w-full px-10">
+                @if (bubbleData.length) {
+                    <app-bubble-chart class="aspect-[2/1]" [data]="bubbleData"
+                                      [xAxisLabel]="paramX()!"
+                                      [yAxisLabel]="paramY()!"
+                                      [zAxisLabel]="paramZ()!"
+                    />
+                } @else {
+                    <div class="flex items-center justify-center w-full py-32 text-2xl text-gray-400">
+                        No bubble chart data available
+                    </div>
+                }
+
+                @if (lineData.length) {
+                    <app-line-chart class="aspect-[2/1]" [data]="lineData"
+                                    xAxisLabel="Year"
+                                    yAxisLabel="Country"
+                                    groupLabel="Indicator"
+                    />
+                } @else {
+                    <div class="flex items-center justify-center w-full py-32 text-2xl text-gray-400">
+                        No line chart data available
+                    </div>
+                }
             </div>
         }
     `
@@ -73,8 +89,8 @@ export default class BubblePage extends BasePage implements OnInit {
     public paramY = input<string>();
     public paramZ = input<string>();
     public year = input<string>();
-    public bubbleData$!: Observable<BubbleChartData[]>;
-    public lineData$!: Observable<LineChartData[]>;
+    public bubbleData$!: Observable<BubbleChartData[] | undefined>;
+    public lineData$!: Observable<LineChartData[] | undefined>;
     public legend = signal<{ label: string, color: string }[]>([]);
 
     constructor() {
@@ -87,8 +103,8 @@ export default class BubblePage extends BasePage implements OnInit {
             toObservable(this.year)
         ]).pipe(
             filter(([ x, y, z, year ]) => !!x && !!y && !!z && !!year),
-            switchMap(([ x, y, z, year ]) => this.indicatorsService.getIntersections(+this.sdg(), year!, x!, y!, z!)),
-            map(intersections => this.mapBubbleData(intersections)),
+            loadingMap(([ x, y, z, year ]) => this.indicatorsService.getIntersections(+this.sdg(), year!, x!, y!, z!)),
+            map(data => data && this.mapBubbleData(data)),
         );
 
         this.lineData$ = combineLatest([
@@ -97,19 +113,25 @@ export default class BubblePage extends BasePage implements OnInit {
             toObservable(this.paramZ),
         ]).pipe(
             filter(([ x, y, z ]) => !!x && !!y && !!z),
-            switchMap(([ x, y, z ]) => this.indicatorsService.getIntersectionsTimeline(+this.sdg(), x!, y!, z!)),
-            map(intersections => this.mapLineData(intersections)),
+            loadingMap(([ x, y, z ]) => this.indicatorsService.getIntersectionsTimeline(+this.sdg(), x!, y!, z!)),
+            map(data => data && this.mapLineData(data)),
         );
     }
 
     public override async ngOnInit() {
         super.ngOnInit();
 
-        if (!this.paramX() || !this.paramY() || !this.paramZ()) {
-            const [ x, y, z ] = this.topicOptions().map(({ value }) => value);
+        if (!this.paramX() && !this.paramY() && !this.paramZ()) {
+            const [ x, y, z ] = this.indicatorOptions().map(({ value }) => value);
             await this.setQueryParam('paramX', x);
             await this.setQueryParam('paramY', y);
             await this.setQueryParam('paramZ', z);
+
+            console.log({
+                x: this.paramX(),
+                y: this.paramY(),
+                z: this.paramZ()
+            })
         }
     }
 

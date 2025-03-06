@@ -5,21 +5,23 @@ import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
 
 export interface ChordChartData {
-    links: {
-        source: {
-            group: string;
-            subGroup: string;
-        };
-        target: {
-            group: string;
-            subGroup: string;
-        };
-        commonValues: string[];
-    }[];
+    links: ChordLink[];
     groups: {
         name: string;
         color: string;
     }[];
+}
+
+interface ChordLink {
+    source: {
+        group: string;
+        subGroup: string;
+    };
+    target: {
+        group: string;
+        subGroup: string;
+    };
+    commonValues: string[];
 }
 
 interface GroupTick {
@@ -40,14 +42,11 @@ interface GroupTick {
         .tooltip {
             position: absolute;
             text-align: center;
-            width: auto;
-            height: auto;
             padding: 8px;
-            font: 12px sans-serif;
+            font-size: 8px;
             background: black;
             color: white;
             border-radius: 4px;
-            pointer-events: none;
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -65,17 +64,13 @@ interface GroupTick {
 export class ChordChartComponent extends Chart {
     public data = input.required<ChordChartData>();
 
-    public legendItems = computed(() =>
-        this.data().groups.map((g) => ({
-            label: g.name,
-            color: g.color,
-            hidden: signal(false)
-        }))
-    );
-
+    public legendItems = computed(() => this.data().groups.map((g) => ({
+        label: g.name,
+        color: g.color,
+        hidden: signal(false)
+    })));
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
     private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
-
     private linkIndexMetadata = new Map<string, {
         sourceGroup: string;
         sourceSubGroup: string;
@@ -87,6 +82,7 @@ export class ChordChartComponent extends Chart {
     protected renderChart(): void {
         const container = this.chartContainer().nativeElement;
         container.innerHTML = '';
+        console.log(this.data())
 
         const { width, height } = container.getBoundingClientRect();
         const size = Math.min(width, height);
@@ -119,12 +115,9 @@ export class ChordChartComponent extends Chart {
             .padAngle(20 / innerRadius)
             .sortSubgroups(descending);
 
-        const chords: Chords = chordLayout(matrix);
-        const arcGen: Arc<unknown, ChordGroup> =
-            arc<ChordGroup>().innerRadius(innerRadius).outerRadius(outerRadius);
-        const ribbonGen: RibbonGenerator<any, Chord, ChordGroup> =
-            ribbon<Chord, ChordGroup>().radius(innerRadius);
-
+        const chords = chordLayout(matrix);
+        const arcGen = arc<ChordGroup>().innerRadius(innerRadius).outerRadius(outerRadius);
+        const ribbonGen = ribbon<Chord, ChordGroup>().radius(innerRadius);
         this.createGroups(chords, arcGen, outerRadius, step, stepMajor, formatValue);
         const ribbons = this.createRibbons(chords, ribbonGen);
         this.registerLinkTooltip(ribbons);
@@ -218,10 +211,7 @@ export class ChordChartComponent extends Chart {
             .text(d => formatValue(d.value));
     }
 
-    private createRibbons(
-        chords: Chords,
-        ribbonGen: RibbonGenerator<any, Chord, ChordGroup>
-    ): Selection<SVGPathElement, Chord, SVGGElement, unknown> {
+    private createRibbons(chords: Chords, ribbonGen: RibbonGenerator<any, Chord, ChordGroup>) {
         return this.svg
             .append('g')
             .attr('fill-opacity', 0.7)
@@ -242,8 +232,7 @@ export class ChordChartComponent extends Chart {
     private linkTooltipContent(d: Chord): string {
         if (d.source.index === d.target.index) {
             const gName = this.data().groups[d.source.index].name;
-            const val = d.source.value?.toLocaleString('en-US') ?? '0';
-            return `Self link for ${ gName }<br>Connections: ${ val }`;
+            return `Self link for ${ gName }<br>Connections: ${ d.source.value }`;
         }
 
         const commonCounts = new Map<string, number>();
@@ -260,11 +249,21 @@ export class ChordChartComponent extends Chart {
             item.commonValues.forEach((val) => commonCounts.set(val, (commonCounts.get(val) || 0) + 1));
         });
 
-        const lines = linkDetails.map((item) => {
-            return `${ item.sourceSubGroup } → ${ item.targetSubGroup } |
-            common: [${ item.commonValues.join(', ') }]
-      `;
-        });
+        const uniqueLinks = new Set<string>();
+        const lines = linkDetails
+            .filter(item => {
+                const key = `${ item.sourceSubGroup }-${ item.targetSubGroup }`;
+                if (uniqueLinks.has(key)) {
+                    return false;
+                } else {
+                    uniqueLinks.add(key);
+                    return true;
+                }
+            })
+            .map((item) => {
+                return `${ item.sourceSubGroup } → ${ item.targetSubGroup } |
+            common: [${ item.commonValues.map(sdg => sdg.split(' ')[1]).join(', ') }]`;
+            });
 
         return [
             `Connections between ${ linkDetails.length } subGroups`,
@@ -272,17 +271,13 @@ export class ChordChartComponent extends Chart {
         ].join('<hr/>');
     }
 
-    private registerLinkTooltip(
-        ribbons: Selection<SVGPathElement, Chord, SVGGElement, unknown>
-    ): void {
-        ribbons.each((d, i, nodes) => {
-            registerTooltip(
-                select(nodes[i]) as any,
-                this.tooltip,
-                this.chartContainer().nativeElement,
-                () => this.linkTooltipContent(d)
-            );
-        });
+    private registerLinkTooltip(ribbons: Selection<SVGPathElement, Chord, SVGGElement, unknown>) {
+        ribbons.each((d, i, nodes) => registerTooltip(
+            select(nodes[i]) as any,
+            this.tooltip,
+            this.chartContainer().nativeElement,
+            () => this.linkTooltipContent(d)
+        ));
     }
 
     private groupTicks(d: ChordGroup, step: number): GroupTick[] {

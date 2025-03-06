@@ -38,6 +38,7 @@ import { BasePage } from '../base.page';
 })
 export default class LinksPage extends BasePage implements OnInit {
     private educationService = inject(EducationService);
+
     public data$!: Observable<ForceData | undefined>;
     private linkCounts = new Map<string, number>();
     public legend = SDG_COLORS.colors.map((color, index) => ({ label: `SDG ${ index + 1 }`, color }));
@@ -50,7 +51,7 @@ export default class LinksPage extends BasePage implements OnInit {
             toObservable(this.topic, { injector: this.injector }),
         ]).pipe(
             loadingMap(([ sdg, topic ]) => this.educationService.getEventSdgs(+sdg, topic, 100)),
-            map((eventSdgs) => (eventSdgs ? this.mapData(eventSdgs) : undefined))
+            map(data => data && this.mapData(data))
         );
     }
 

@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, Observable, shareReplay, switchMap } from 'rxjs';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { RadarDto } from '../../domain/policy/types/radar.dto';
-import { LineChartComponent, LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
+import { LollipopChartComponent, LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
 import { RadarChartComponent, RadarChartData } from '../../ui/charts/radar-chart/radar-chart.component';
 import { MultiMenuComponent } from '../../ui/components/multi-menu/multi-menu.component';
 import { YearSliderComponent } from '../../ui/components/year-slider/year-slider.component';
@@ -15,7 +15,7 @@ import { BasePage } from '../base.page';
     standalone: true,
     imports: [
         RadarChartComponent,
-        LineChartComponent,
+        LollipopChartComponent,
         YearSliderComponent,
         MultiMenuComponent,
         AsyncPipe

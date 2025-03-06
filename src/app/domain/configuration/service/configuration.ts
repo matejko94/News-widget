@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { LANDSLIDES_CONFIGURATION } from '../../../../../configuration/sdg/landslides.configuration';
 import { SDG1_CONFIGURATION } from '../../../../../configuration/sdg/sdg1.configuration';
 import { SDG10_CONFIGURATION } from '../../../../../configuration/sdg/sdg10.configuration';
 import { SDG11_CONFIGURATION } from '../../../../../configuration/sdg/sdg11.configuration';
@@ -25,6 +26,8 @@ export class Configuration {
 
     public get(sdg: string): SdgConfiguration {
         switch (sdg) {
+            case '0':
+                return LANDSLIDES_CONFIGURATION;
             case '1':
                 return SDG1_CONFIGURATION;
             case '2':

@@ -5,10 +5,17 @@ export function createTooltip(container: HTMLElement) {
         .append('div')
         .attr('class', 'tooltip')
         .style('position', 'absolute')
-        .style('pointer-events', 'none')
         .style('display', 'none')
         .style('left', '-9999px')
-        .style('top', '-9999px');
+        .style('top', '-9999px')
+        .style('max-width', '70vw')
+        .style('max-height', '50vh')
+        .style('overflow', 'auto')
+        .style('background', 'rgba(0, 0, 0, 0.8)')
+        .style('color', '#fff')
+        .style('padding', '8px')
+        .style('border-radius', '4px')
+        .style('box-shadow', '0 4px 6px rgba(0, 0, 0, 0.1)');
 }
 
 export function registerTooltip<PathElement extends Element, Data, Series>(
@@ -59,12 +66,10 @@ export function registerTooltip<PathElement extends Element, Data, Series>(
         const { top: containerOffset, height: containerHeight } = container.getBoundingClientRect();
         const position = clientOffset - containerOffset + offset;
 
-        // overflow bottom
         if (position + tooltipHeight > containerHeight) {
             return containerHeight - tooltipHeight - offset;
         }
 
-        // overflow top
         if (position < offset) {
             return offset;
         }
@@ -72,10 +77,7 @@ export function registerTooltip<PathElement extends Element, Data, Series>(
         return position;
     }
 
-    function calculatePositionX(
-        event: MouseEvent,
-        tooltipEl: Selection<HTMLDivElement, unknown, null, undefined>,
-    ): number {
+    function calculatePositionX(event: MouseEvent, tooltipEl: Selection<HTMLDivElement, unknown, null, undefined>): number {
         const tooltip = tooltipEl.node();
         if (!tooltip) return 0;
 
@@ -86,12 +88,10 @@ export function registerTooltip<PathElement extends Element, Data, Series>(
 
         const position = clientOffset - containerLeft + offset;
 
-        // overflow right
         if (position + tooltipWidth > containerWidth) {
             return containerWidth - tooltipWidth - offset;
         }
 
-        // overflow left
         if (position < offset) {
             return offset;
         }

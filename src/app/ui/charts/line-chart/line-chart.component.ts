@@ -18,7 +18,7 @@ export interface LineChartData {
 
 interface GroupLegend {
     label: string;
-    hidden: WritableSignal<boolean>;
+    visible: WritableSignal<boolean>;
 }
 
 @Component({
@@ -67,22 +67,22 @@ interface GroupLegend {
         }
     `,
     template: `
-        <div class="flex flex-col md:flex-row justify-center items-center w-full h-full relative pl-2.5">
+        <div class="flex flex-col justify-center items-center w-full h-full relative pl-2.5">
             <div #chartContainer
-                 class="flex-1 w-full h-full flex justify-center items-center relative"></div>
-            <div class="flex flex-col-reverse md:flex-col gap-1">
-                <div>
-                    <div class="font-medium">{{ yAxisLabel() }}</div>
-                    <app-box-legend [items]="yLegend()" toggleable class="w-full"/>
-                </div>
+                 class="flex-1 w-full h-full aspect-[5/3] flex justify-center items-center relative"></div>
+            <div class="flex flex-col gap-4">
                 <div>
                     <div class="font-medium mt-3">{{ groupLabel() }}</div>
                     @for (item of groupLegend(); track item.label) {
                         <div class="flex items-center cursor-pointer text-xs md:text-sm gap-1">
-                            <p-checkbox [(ngModel)]="item.hidden" binary="true" size="small"/>
+                            <p-checkbox [(ngModel)]="item.visible" binary="true" size="small"/>
                             <span class="mt-1">{{ item.label }}</span>
                         </div>
                     }
+                </div>
+                <div>
+                    <div class="font-medium">{{ yAxisLabel() }}</div>
+                    <app-box-legend [items]="yLegend()" toggleable class="w-full" horizontal/>
                 </div>
             </div>
         </div>
@@ -102,20 +102,29 @@ export class LineChartComponent extends Chart {
     constructor() {
         super();
 
-        this.yLegend = computed(() => this.data().map(series => ({
-            id: series.label,
-            label: series.label,
-            color: series.color,
-            hidden: signal(false)
-        })));
+        this.yLegend = computed(() => {
+            const uniqueItems = new Map();
+
+            this.data().forEach(series => {
+                if (!uniqueItems.has(series.label)) {
+                    uniqueItems.set(series.label, series.color);
+                }
+            });
+
+            return Array.from(uniqueItems.entries()).map(([ label, color ]) => ({
+                label,
+                color,
+                hidden: signal(false)
+            }));
+        });
         this.visibleData = computed(() => {
             const hiddenLabels = new Set(this.yLegend().filter(l => l.hidden()).map(l => l.label));
-            const hiddenGroups = new Set(this.groupLegend().filter(l => l.hidden()).map(l => l.label));
+            const hiddenGroups = new Set(this.groupLegend().filter(l => !l.visible()).map(l => l.label));
             return this.data().filter(({ label, subLabel }) => !hiddenLabels.has(label) && !hiddenGroups.has(subLabel));
         });
         this.groupLegend = computed(() => Array.from(new Set(this.data().flatMap(s => s.subLabel))).map(group => ({
             label: group,
-            hidden: signal(false)
+            visible: signal(true)
         })));
         effect(() => {
             this.visibleData();

@@ -13,7 +13,7 @@ export class ScienceService {
 
     public getTopTopicsPerYear(sdg: number, limit: number): Observable<TopTopicsPerYear[]> {
         return this.http.get<TopTopicsPerYear[]>(
-            `${ environment.api.url }/science/timespan/${ sdg }?limit=${ limit }`
+            `${ environment.api.url }/science/timespan?sdg=${ sdg }&limit=${ limit }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch science top topics per year', e);

@@ -26,7 +26,7 @@ export interface GraphData {
         :host {
             display: block;
             width: 100%;
-            aspect-ratio: 2/1;
+            aspect-ratio: 3/2;
 
             ::ng-deep {
                 svg {
@@ -73,7 +73,7 @@ export class NetworkGraphComponent extends Chart {
     public maxEdgeSize = input<number>(20);
     public minNodeSize = input<number>(5);
     public maxNodeSize = input<number>(20);
-    public forceStrength = input<number>(-200);
+    public forceStrength = input<number>(-500);
     private simulation!: Simulation<GraphNode, GraphLink>;
 
     protected override renderChart(): void {
@@ -188,6 +188,10 @@ export class NetworkGraphComponent extends Chart {
             .force('link', forceLink<GraphNode, GraphLink>(links).id(d => d.id))
             .force('charge', forceManyBody().strength(this.forceStrength()))
             .force('center', forceCenter(width / 2, height / 2))
+            .force(
+                'isolate',
+                this.isolateUnlinkedNodesForce(nodes, links, width / 2, height / 2, 0.1)
+            )
             .on('tick', () => {
                 linkSelection
                     .attr('x1', d => (d.source as any)?.x ?? 0)
@@ -200,5 +204,35 @@ export class NetworkGraphComponent extends Chart {
                     .attr('cy', d => d.y ?? 0);
             });
         this.simulation.alpha(1).restart();
+    }
+
+
+    private isolateUnlinkedNodesForce(
+        nodes: GraphNode[],
+        links: GraphLink[],
+        centerX: number,
+        centerY: number,
+        strength: number = 0.05
+    ) {
+        // Count how many links each node has
+        const linkCount = new Map<string, number>();
+        nodes.forEach(node => linkCount.set(node.id, 0));
+        links.forEach(link => {
+            linkCount.set(String(link.source), (linkCount.get(String(link.source)) || 0) + 1);
+            linkCount.set(String(link.target), (linkCount.get(String(link.target)) || 0) + 1);
+        });
+
+        // Return a force function that the simulation calls on each "tick"
+        return (alpha: number) => {
+            for (const node of nodes) {
+                if (!linkCount.get(node.id)) {
+                    // Node is isolated (no links); gently nudge it toward the center
+                    const vx = (centerX - (node.x ?? 0)) * strength * alpha;
+                    const vy = (centerY - (node.y ?? 0)) * strength * alpha;
+                    node.vx = (node.vx || 0) + vx;
+                    node.vy = (node.vy || 0) + vy;
+                }
+            }
+        };
     }
 }
