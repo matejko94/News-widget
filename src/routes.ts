@@ -45,12 +45,12 @@ export const ROUTES: Route[] = [
         path: 'news/intensity',
         loadComponent: () => import('./app/pages/intensity/intensity.page'),
         title: 'SDG News Intensity'
-    }, // TODO: remove default topic
+    }, // TODO: remove default topic (waiting for API to remove it from required)
     {
         path: 'innovations/collaboration',
         loadComponent: () => import('./app/pages/collaboration/collaboration.page'),
         title: 'SDG Innovation Collaborations'
-    }, // TODO: fix chart
+    }, // TODO: fix chart tooltip
     {
         path: 'science/evolution',
         loadComponent: () => import('./app/pages/evolution/evolution.page'),
@@ -60,7 +60,7 @@ export const ROUTES: Route[] = [
         path: 'education/links',
         loadComponent: () => import('./app/pages/links/links.page'),
         title: 'Education Resources Whitespace'
-    }, // TODO: integrate API
+    }, // TODO: integrate API (can not use current API data)
     {
         path: 'innovations/relations',
         loadComponent: () => import('./app/pages/innovations/innovations.page'),

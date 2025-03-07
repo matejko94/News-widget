@@ -83,7 +83,7 @@ export default class LandingPage {
             'Production': 'https://news-widget.pages.dev'
         }
     };
-    public selectedSdg = signal(this.config.sdgs[0]);
+    public selectedSdg = signal(this.config.sdgs[1]);
     public selectedWidget = signal(Object.values(this.config.widgets)[0]);
     public selectedEnvironment = signal(Object.values((this.config.environment))[0]);
     public currentUrl = signal('');
