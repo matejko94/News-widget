@@ -26,7 +26,7 @@ import { SafeUrlPipe } from '../../common/pipe/safe-url.pipe';
         }
     `,
     template: `
-        <div class="w-full mx-auto">
+        <div class="w-full mx-auto px-8">
             <div class="mb-4">
                 <label for="sdg-select" class="block text-sm font-medium text-gray-700">Select SDG Number:</label>
                 <select id="sdg-select" [(ngModel)]="selectedSdg" (change)="updateIframe()">
@@ -48,7 +48,7 @@ import { SafeUrlPipe } from '../../common/pipe/safe-url.pipe';
                     <option *ngFor="let env of environmentKeys" [value]="config.environment[env]">{{ env }}</option>
                 </select>
             </div>
-            <iframe #iframe class="w-full h-[600px] border border-gray-300 rounded-md mx-auto mt-20"
+            <iframe #iframe class="w-full h-[800px] border border-gray-300 rounded-md mx-auto mt-20"
                     [src]="currentUrl() | safeUrl"></iframe>
             <button (click)="copyUrl()"
                     class="block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-auto mt-6 w-fit">
@@ -101,7 +101,6 @@ export default class LandingPage {
     }
 
     updateIframe() {
-        console.log(this.selectedEnvironment(), this.selectedWidget(), this.selectedSdg());
         this.currentUrl.set(`${ this.selectedEnvironment() }${ this.selectedWidget() }?sdg=${ this.selectedSdg() }`);
     }
 

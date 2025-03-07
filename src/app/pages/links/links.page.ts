@@ -32,7 +32,13 @@ import { BasePage } from '../base.page';
             <app-menu queryParam="topic" label="Topic" [options]="topicOptions()"/>
         </div>
         @if (data$ | async; as data) {
-            <app-force-directed-chart [data]="data" tagLabel="SDG" [legend]="legend" class="w-full flex-1 min-h-0"/>
+            @if (data.nodes.length) {
+                <app-force-directed-chart [data]="data" tagLabel="SDG" [legend]="legend" class="w-full flex-1 min-h-0"/>
+            } @else {
+                <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
+                    No data available
+                </div>
+            }
         }
     `,
 })
@@ -63,20 +69,24 @@ export default class LinksPage extends BasePage implements OnInit {
 
     private mapNodes({ events }: EventSdgsDto): ForceNode[] {
         return events.map((evt) => ({
-            id: evt.id,
+            id: evt.title,
             group: '',
-            tag: evt.title,
+            tag: '',
             totalLinks: 0,
             color: '',
         }));
     }
 
-    private mapLinks({ similarities }: EventSdgsDto): ForceLink[] {
-        return similarities.map(link => ({
-            source: link.source,
-            target: link.target,
-            link: '',
-            value: link.similarity,
-        }));
+    private mapLinks({ similarities, events }: EventSdgsDto): ForceLink[] {
+        const eventNames = new Map<number, string>(events.map((evt) => [ evt.id, evt.title ]));
+
+        return similarities
+            .filter(({ source, target }) => eventNames.has(source) && eventNames.has(target))
+            .map(link => ({
+                source: eventNames.get(link.source)!,
+                target: eventNames.get(link.target)!,
+                link: '',
+                value: link.similarity,
+            }));
     }
 }

@@ -26,6 +26,6 @@ bootstrapApplication(AppComponent, {
             },
 
         }),
-        provideAppInitializer(() => console.log('Version: 1.0.3'))
+        provideAppInitializer(() => console.log('Version: 1.1.0'))
     ]
 }).catch(err => console.error(err));

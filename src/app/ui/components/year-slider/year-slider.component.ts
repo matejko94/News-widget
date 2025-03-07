@@ -103,6 +103,9 @@ export class YearSliderComponent implements AfterViewInit, OnDestroy {
     }
 
     private startAutoIncrement() {
+        const nextYear = this.slider.value() + 1;
+        this.slider.value(nextYear > this.max() ? this.min() : nextYear);
+
         this.interval = setInterval(() => {
             const nextYear = this.slider.value() + 1;
             this.slider.value(nextYear > this.max() ? this.min() : nextYear);

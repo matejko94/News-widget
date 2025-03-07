@@ -38,7 +38,7 @@ import { BasePage } from '../base.page';
             flex-direction: column;
             align-items: center;
             width: 100%;
-            height: 150%;
+            height: 100%;
         }
     `,
     template: `
@@ -47,11 +47,17 @@ import { BasePage } from '../base.page';
         </div>
 
 
-        <div class="flex flex-col gap-10 justify-start w-full relative">
+        <div class="flex flex-col gap-10 justify-start flex-1 w-full relative">
             <app-menu class="absolute top-0 right-10 z-20" queryParam="topic" label="Topic" [options]="topicOptions()"/>
 
             @if (data$ | async; as data) {
-                <app-network-graph [data]="data"/>
+                @if (data.nodes.length) {
+                    <app-network-graph class="h-[150%]" [data]="data"/>
+                } @else {
+                    <div class="flex items-center justify-center flex-1 text-2xl text-gray-400">
+                        No data available
+                    </div>
+                }
             }
         </div>
     `
@@ -72,7 +78,7 @@ export default class EvolutionPage extends BasePage implements OnInit {
             toObservable(this.year),
             toObservable(this.topic)
         ]).pipe(
-            filter(([ year, topic ]) => !!year && !!topic),
+            filter(([ year ]) => !!year),
             loadingMap(([ year, topic ]) => this.getData(+this.sdg(), topic!, +year!)),
         );
     }
@@ -81,7 +87,7 @@ export default class EvolutionPage extends BasePage implements OnInit {
         super.ngOnInit();
 
         if (!this.topic()) {
-            this.setQueryParam('topic', this.topicOptions()[0].value);
+            setTimeout(() => this.setQueryParam('topic', this.topicOptions()[0].value));
         }
     }
 

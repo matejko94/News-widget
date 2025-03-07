@@ -22,7 +22,7 @@ import { BasePage } from '../base.page';
     ],
     styles: `
         .h-container {
-            height: 500px;
+            height: 425px;
 
             &.no-keywords {
                 height: 375px;
@@ -109,21 +109,21 @@ import { BasePage } from '../base.page';
                         </div>
                     </div>
                 } @empty {
-                    <div class="h-full w-fit text-xl font-semibold text-gray-600 my-14 mx-auto">
+                    <div class="h-full w-fit text-xl font-semibold text-gray-600 my-10 mx-auto">
                         No news today
                     </div>
                 }
             </div>
 
-            <div class="overflow-hidden flex flex-col items-center">
+            <div class="overflow-visible flex flex-col items-center">
                 @if (data?.length) {
-                    <angular-tag-cloud [realignOnResize]="true" [data]="data!" class="cloud" [width]="width()"/>
+                    <angular-tag-cloud [height]="250" [realignOnResize]="true" [data]="data!" class="-mt-8 ml-4 cloud"
+                                       [width]="width()"/>
                 } @else {
-                    <div class="h-full w-fit text-xl font-semibold text-gray-600 my-14 mx-auto">
+                    <div class="h-full w-fit text-xl font-semibold text-gray-600 my-10 mx-auto">
                         No keywords today
                     </div>
                 }
-
 
                 @let sentiment = sentimentAverage$ | async;
 

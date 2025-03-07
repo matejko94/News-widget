@@ -119,15 +119,11 @@ export default class BubblePage extends BasePage implements OnInit {
 
         if (!this.paramX() && !this.paramY() && !this.paramZ()) {
             const [ x, y, z ] = this.indicatorOptions().map(({ value }) => value);
-            await this.setQueryParam('paramX', x);
-            await this.setQueryParam('paramY', y);
-            await this.setQueryParam('paramZ', z);
-
-            console.log({
-                x: this.paramX(),
-                y: this.paramY(),
-                z: this.paramZ()
-            })
+            setTimeout(async () => {
+                await this.setQueryParam('paramX', x);
+                await this.setQueryParam('paramY', y);
+                await this.setQueryParam('paramZ', z);
+            });
         }
     }
 

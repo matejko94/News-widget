@@ -22,8 +22,6 @@ export class AppComponent {
     private route = inject(ActivatedRoute);
 
     constructor() {
-        console.log('Version: 1.0.2');
-
         this.route.queryParams.subscribe(params => {
             console.log('Query params:', params);
         });

@@ -136,7 +136,7 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
     }
 
     private drawNodes() {
-        const nodes = this.svg
+        return this.svg
             .append('g')
             .selectAll('circle')
             .data(this.data().nodes)
@@ -149,9 +149,6 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
                     .on('drag', this.dragged.bind(this))
                     .on('end', this.dragEnded.bind(this)) as any
             );
-
-        nodes.append('title').text(d => d.id.toString());
-        return nodes;
     }
 
     private setupSimulationUpdates(

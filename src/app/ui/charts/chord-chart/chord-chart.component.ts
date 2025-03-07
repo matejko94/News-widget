@@ -82,7 +82,6 @@ export class ChordChartComponent extends Chart<ChordChartData> {
     protected renderChart(): void {
         const container = this.chartContainer().nativeElement;
         container.innerHTML = '';
-        console.log(this.data())
 
         const { width, height } = container.getBoundingClientRect();
         const size = Math.min(width, height);

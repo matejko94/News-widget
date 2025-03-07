@@ -23,7 +23,6 @@ export class PolicyService {
     }
 
     public getRadarData(sdg: number, regions: string[] | undefined, year: number): Observable<RadarDto[]> {
-        console.log('Fetching radar data for', sdg, regions, year);
         return this.http.get<RadarDto[]>(
             `${ environment.api.url }/policy/radar?sdg=${ sdg }&region_code=${ regions?.length ? regions.join(',') : 'All' }&year=${ year }`
         ).pipe(

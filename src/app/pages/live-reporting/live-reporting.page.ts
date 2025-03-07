@@ -183,8 +183,6 @@ export default class LiveReportingPage implements AfterViewInit {
                     label: 'Countries',
                     data: data,
                     // backgroundColor: (context) => {
-                    //     // console.log(context.datasetIndex)
-                    //     // console.log(context)
                     //     if (context.dataIndex !== undefined) {
                     //         const value = context.dataset.data[context.dataIndex].value;
                     //         const opacity = (value - 10000) / 10000;
