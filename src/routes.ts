@@ -20,7 +20,7 @@ export const ROUTES: Route[] = [
         path: 'news/sunburst',
         loadComponent: () => import('./app/pages/sunburst/sunburst.page'),
         title: 'Sunburst'
-    }, // TODO: support landslide categories
+    },
     {
         path: 'education/radial',
         loadComponent: () => import('./app/pages/radial-policies/radial-policies.page'),

@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { map, Observable, switchMap, tap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { loadingMap } from '../../common/utility/loading-map';
 import { createSdgObject } from '../../common/utility/sdg-object';
@@ -59,7 +59,6 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
         this.sdgPolicies$ = this.selectedRegion$
             .pipe(
                 loadingMap(region => this.policyService.getIntersectingSdgPolicies(+this.sdg(), region, 20)),
-                tap(console.log),
                 map(policies => policies ? this.groupBySdg(policies, 10) : null)
             );
     }

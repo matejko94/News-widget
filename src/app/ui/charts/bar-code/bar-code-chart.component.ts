@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { axisBottom, scaleBand, ScaleBand, scaleLinear, ScaleLinear, select, Selection, Series, SeriesPoint, stack, stackOffsetExpand } from 'd3';
 import { SDG_COLOR_SHADES } from '../../../../../configuration/colors/policy/sdg.colors';
 import { Chart } from '../chart.abstract';
@@ -40,7 +40,7 @@ interface Data {
         <div #chartContainer class="h-full w-full overflow-hidden flex justify-center items-center"></div>
     `,
 })
-export class BarcodeChartComponent extends Chart {
+export class BarcodeChartComponent extends Chart<Data[]> {
     public data = input.required<Data[]>();
     private width = 928;
     private height = 500;
@@ -56,16 +56,6 @@ export class BarcodeChartComponent extends Chart {
     private yScale!: ScaleLinear<number, number>;
     private colors = SDG_COLOR_SHADES.colors;
     private groupedData: Record<string, Map<string, number>> = {};
-
-    constructor() {
-        super();
-
-        effect(() => {
-            if (this.data()) {
-                this.renderChart();
-            }
-        });
-    }
 
     protected override renderChart(): void {
         const data = this.data();

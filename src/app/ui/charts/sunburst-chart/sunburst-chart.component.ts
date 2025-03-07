@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, computed, inject, input, signal } from '@angular/core';
 import { arc, hierarchy, HierarchyNode, HierarchyRectangularNode, partition, select, Selection } from 'd3';
 import { PillLegendComponent } from '../../components/legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
@@ -84,7 +84,7 @@ export interface SunburstNode {
         </section>
     `
 })
-export class SunburstChartComponent extends Chart {
+export class SunburstChartComponent extends Chart<SunburstNode> {
     private cdr = inject(ChangeDetectorRef);
 
     public data = input.required<SunburstNode>();
@@ -98,15 +98,6 @@ export class SunburstChartComponent extends Chart {
         label,
         color: this.colors()[i % this.colors().length]
     })));
-
-    constructor() {
-        super();
-        effect(() => {
-            if (this.data() && this.colors()) {
-                this.renderChart();
-            }
-        });
-    }
 
     protected override renderChart(): void {
         const data = this.data();

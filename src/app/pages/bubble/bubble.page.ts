@@ -2,13 +2,10 @@ import { AsyncPipe } from '@angular/common';
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, Observable, switchMap } from 'rxjs';
-import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { getColorByCountryCode } from '../../../../configuration/countries/countries';
-import { loadingMap } from '../../common/utility/loading-map';
 import { IndicatorsService } from '../../domain/indicators/service/indicators.service';
 import { IndicatorIntersectionTimeline } from '../../domain/indicators/types/indicator-intersection-timeline.interface';
 import { IndicatorsIntersections } from '../../domain/indicators/types/indicator-intersection.interface';
-import { BarcodeChartComponent } from '../../ui/charts/bar-code/bar-code-chart.component';
 import { BubbleChartComponent, BubbleChartData } from '../../ui/charts/bubble-chart/bubble-chart.component';
 import { LineChartComponent, LineChartData } from '../../ui/charts/line-chart/line-chart.component';
 import { MenuComponent } from '../../ui/components/menu/menu.component';
@@ -28,7 +25,6 @@ import { BasePage } from '../base.page';
         BubbleChartComponent,
         LineChartComponent,
         AsyncPipe,
-        BarcodeChartComponent,
     ],
     styles: `
         :host {
@@ -103,7 +99,7 @@ export default class BubblePage extends BasePage implements OnInit {
             toObservable(this.year)
         ]).pipe(
             filter(([ x, y, z, year ]) => !!x && !!y && !!z && !!year),
-            loadingMap(([ x, y, z, year ]) => this.indicatorsService.getIntersections(+this.sdg(), year!, x!, y!, z!)),
+            switchMap(([ x, y, z, year ]) => this.indicatorsService.getIntersections(+this.sdg(), year!, x!, y!, z!)),
             map(data => data && this.mapBubbleData(data)),
         );
 
@@ -113,7 +109,7 @@ export default class BubblePage extends BasePage implements OnInit {
             toObservable(this.paramZ),
         ]).pipe(
             filter(([ x, y, z ]) => !!x && !!y && !!z),
-            loadingMap(([ x, y, z ]) => this.indicatorsService.getIntersectionsTimeline(+this.sdg(), x!, y!, z!)),
+            switchMap(([ x, y, z ]) => this.indicatorsService.getIntersectionsTimeline(+this.sdg(), x!, y!, z!)),
             map(data => data && this.mapLineData(data)),
         );
     }

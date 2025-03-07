@@ -61,7 +61,7 @@ interface GroupTick {
         </div>
     `
 })
-export class ChordChartComponent extends Chart {
+export class ChordChartComponent extends Chart<ChordChartData> {
     public data = input.required<ChordChartData>();
 
     public legendItems = computed(() => this.data().groups.map((g) => ({

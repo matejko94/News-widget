@@ -57,7 +57,7 @@ export interface RadarChartData {
         </div>
     `
 })
-export class RadarChartComponent extends Chart {
+export class RadarChartComponent extends Chart<RadarChartData[]> {
     public data = input.required<RadarChartData[]>();
     private margin = { top: 50, right: 75, bottom: 50, left: 75 };
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;

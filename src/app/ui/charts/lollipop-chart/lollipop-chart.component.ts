@@ -45,7 +45,7 @@ export interface LollipopChartData {
             padding: 10px;
             font: 12px sans-serif;
             background: black;
-            border: 0px;
+            border: 0;
             border-radius: 5px;
             pointer-events: none;
             color: white;
@@ -57,7 +57,7 @@ export interface LollipopChartData {
         </div>
     `
 })
-export class LollipopChartComponent extends Chart {
+export class LollipopChartComponent extends Chart<LollipopChartData[]> {
     public data = input.required<LollipopChartData[]>();
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
     private x!: ScaleLinear<number, number>;

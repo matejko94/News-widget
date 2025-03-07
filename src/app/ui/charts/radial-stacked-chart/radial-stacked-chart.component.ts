@@ -81,7 +81,7 @@ interface CellData {
         </div>
     `,
 })
-export class RadialStackedChartComponent extends Chart {
+export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
     public data = input.required<RadialStackedData[]>();
     public colors = input.required<string[]>();
     public keys = computed(() => Array.from(new Set(this.data().flatMap(d => Object.keys(d.items)))));

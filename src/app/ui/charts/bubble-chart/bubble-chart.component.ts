@@ -62,7 +62,7 @@ export interface BubbleChartData {
         </div>
     `,
 })
-export class BubbleChartComponent extends Chart {
+export class BubbleChartComponent extends Chart<BubbleChartData[]> {
     public data = input.required<BubbleChartData[]>();
     public xAxisLabel = input.required<string>();
     public yAxisLabel = input.required<string>();

@@ -76,7 +76,7 @@ export interface ForceData {
         </div>
     `
 })
-export class ForceDirectedChartComponent extends Chart {
+export class ForceDirectedChartComponent extends Chart<ForceData> {
     public data = input.required<ForceData>();
     public tagLabel = input.required<string>();
     public legend = input<LegendItem[]>();

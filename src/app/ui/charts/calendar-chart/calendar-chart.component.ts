@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { groups, interpolatePiYG, quantile, ScaleSequential, scaleSequential, select, Selection, utcFormat, utcMonday, utcMonth, utcMonths, utcYear } from 'd3';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
@@ -33,7 +33,7 @@ export interface CalendarData {
         <div class="calendar-chart-container" #chartContainer></div>
     `
 })
-export class CalendarChartComponent extends Chart {
+export class CalendarChartComponent extends Chart<CalendarData[]> {
     public data = input.required<CalendarData[]>();
 
     private margin = { top: 0, right: 0, bottom: 0, left: 50 };
@@ -43,15 +43,6 @@ export class CalendarChartComponent extends Chart {
     private svg!: Selection<SVGSVGElement, unknown, null, unknown>;
     private colorScale!: ScaleSequential<string>;
     private years: [ number, CalendarData[] ][] = [];
-
-    constructor() {
-        super();
-
-        effect(() => {
-            this.data();
-            this.renderChart();
-        });
-    }
 
     protected override renderChart(): void {
         const container = this.chartContainer().nativeElement;

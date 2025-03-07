@@ -55,7 +55,7 @@ export interface TimelineRow {
         </div>
     `
 })
-export class TimelineChartComponent extends Chart {
+export class TimelineChartComponent extends Chart<TimelineRow[]> {
     public data = input.required<TimelineRow[]>();
     public legend = input.required<{ label: string, color: string }[]>();
     private margin = { top: 70, right: 20, bottom: 40, left: 40 };

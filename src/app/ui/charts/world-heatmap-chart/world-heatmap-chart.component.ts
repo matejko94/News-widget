@@ -40,7 +40,7 @@ export interface WorldMapData {
         <div #chartContainer class="w-full h-full relative"></div>
     `
 })
-export class WorldMapComponent extends Chart {
+export class WorldMapComponent extends Chart<WorldMapData[]> {
     public data = input.required<WorldMapData[]>();
     public countLabel = input.required<string>();
     private dataPerCountry: Map<string, WorldMapData> = new Map();

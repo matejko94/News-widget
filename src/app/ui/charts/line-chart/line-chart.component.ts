@@ -88,7 +88,7 @@ interface GroupLegend {
         </div>
     `
 })
-export class LineChartComponent extends Chart {
+export class LineChartComponent extends Chart<LineChartData[]> {
     public data = input.required<LineChartData[]>();
     private visibleData: Signal<LineChartData[]>;
     public yLegend: Signal<LegendItem[]>;

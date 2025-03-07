@@ -67,7 +67,7 @@ export interface GraphData {
         </div>
     `
 })
-export class NetworkGraphComponent extends Chart {
+export class NetworkGraphComponent extends Chart<GraphData> {
     public data = input.required<GraphData>();
     public minEdgeSize = input<number>(2);
     public maxEdgeSize = input<number>(20);
