@@ -55,24 +55,14 @@ export default class IntensityPage extends BasePage implements OnInit {
     public heatmapData$ = this.setupHeatMapData();
     public calendarData$ = this.setupCalendarData();
 
-    public override async ngOnInit() {
-        super.ngOnInit();
-
-        if (!this.topic()) {
-            const [ firstTopic ] = this.topicOptions().map(({ value }) => value);
-            await this.setQueryParam('topic', firstTopic);
-        }
-
-    }
-
     private setupHeatMapData(): Observable<WorldMapData[]> {
         return combineLatest([
             toObservable(this.sdg),
             toObservable(this.topic),
             toObservable(this.year)
         ]).pipe(
-            filter(([ sdg, topic, year ]) => !!sdg && !!topic && !!year),
-            switchMap(([ sdg, topic, year ]) => this.newsService.getNewsIntensityPerYear(sdg, topic!, year!)),
+            filter(([ sdg, _, year ]) => !!sdg && !!year),
+            switchMap(([ sdg, topic, year ]) => this.newsService.getNewsIntensityPerYear(sdg, year!, topic)),
             map(news => news.map(({ country, value }) => {
                 return {
                     country,
@@ -88,8 +78,8 @@ export default class IntensityPage extends BasePage implements OnInit {
             toObservable(this.sdg),
             toObservable(this.topic)
         ]).pipe(
-            filter(([ sdg, topic ]) => !!sdg && !!topic),
-            switchMap(([ sdg, topic ]) => this.newsService.getNewsIntensity(sdg, topic!)),
+            filter(([ sdg ]) => !!sdg),
+            switchMap(([ sdg, topic ]) => this.newsService.getNewsIntensity(sdg, topic)),
             map(news => news.map(({ date, value }) => ({ date: new Date(date), count: value })))
         );
     }

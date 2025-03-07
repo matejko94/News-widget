@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe, SlicePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { BehaviorSubject, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs';
@@ -12,7 +12,6 @@ import { BasePage } from '../base.page';
 @Component({
     selector: 'app-news',
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         TagCloudComponent,
         SentimentMeterComponent,
@@ -23,7 +22,12 @@ import { BasePage } from '../base.page';
     ],
     styles: `
         .h-container {
-            height: 550px;
+            height: 500px;
+
+            &.no-keywords {
+                height: 375px;
+                overflow: hidden;
+            }
         }
 
         ::ng-deep angular-tag-cloud.cloud {
@@ -87,9 +91,15 @@ import { BasePage } from '../base.page';
         <app-heatmap [newsItems]="news$ | async" [zoom]="2" [mapHeight]="'auto'"
                      [location]="{ lat: 40, lng: 0}" [mapCircleRadiusFactor]="1.5"/>
 
-        <div class="grid grid-cols-2 h-container">
-            <div class="overflow-y-auto h-container">
-                @for (newsItem of news$ | async; track newsItem._source.url) {
+        @let news = news$ | async;
+        @let data = cloudData$ | async;
+        <div class="flex gap-2 p-2">
+            <div>Date: <b>{{ loadedDate$ | async | date: 'dd.MM.yyyy' }}</b></div>
+            <div>Total news: <b>{{ news?.length }}</b></div>
+        </div>
+        <div class="grid grid-cols-2 h-container" [class.no-keywords]="data?.length === 0">
+            <div class="overflow-y-auto h-container" [class.no-keywords]="data?.length === 0">
+                @for (newsItem of news; track newsItem._source.url) {
                     <div class="border-b-2 my-3" [title]="(newsItem._source.body | slice:0:100) + '...'">
                         <a class="font-semibold text-lg mb-2" [href]="newsItem._source.url">
                             {{ newsItem._source.title | slice:0:40 }}
@@ -99,34 +109,28 @@ import { BasePage } from '../base.page';
                         </div>
                     </div>
                 } @empty {
-                    <div class="flex flex-col justify-center items-center h-full text-xl font-semibold text-gray-600">
+                    <div class="h-full w-fit text-xl font-semibold text-gray-600 my-14 mx-auto">
                         No news today
                     </div>
                 }
             </div>
 
             <div class="overflow-hidden flex flex-col items-center">
-                @let cloudData = cloudData$ | async;
-
-                @if (cloudData?.length) {
-                    <angular-tag-cloud [realignOnResize]="true" [data]="cloudData!"
-                                       class="ml-6 cloud" [width]="width()"/>
+                @if (data?.length) {
+                    <angular-tag-cloud [realignOnResize]="true" [data]="data!" class="cloud" [width]="width()"/>
                 } @else {
-                    <div class="flex flex-col justify-center items-center h-full text-xl font-semibold text-gray-600">
+                    <div class="h-full w-fit text-xl font-semibold text-gray-600 my-14 mx-auto">
                         No keywords today
                     </div>
                 }
 
-                <app-sentiment-meter [value]="sentimentAverage$ | async" class="pl-6"/>
 
-                <div class="flex justify-between gap-4 ml-6 w-full">
-                    <div class="text-lg">
-                        <div>Showing: <b>{{ loadedDate$ | async | date: 'dd.MM.yyyy' }}</b></div>
-                        <div>
-                            Total: <b>{{ (news$ | async)?.length }}</b> | Sentiment:
-                            <b>{{ sentimentAverage$ | async }}</b>
-                        </div>
-                    </div>
+                @let sentiment = sentimentAverage$ | async;
+
+                <app-sentiment-meter [value]="sentiment" class="pl-6"/>
+
+                <div class="flex justify-center gap-2 w-full text-lg">
+                    Sentiment: <b>{{ sentiment ?? 0 }}</b>
                 </div>
             </div>
         </div>

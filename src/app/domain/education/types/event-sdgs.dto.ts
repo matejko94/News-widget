@@ -1,5 +1,12 @@
 export interface EventSdgsDto {
-    event: string;
-    main_sdg: string;
     sdgs: string[];
+    events: {
+        id: number;
+        title: string;
+    }[],
+    similarities: {
+        source: number;
+        target: number;
+        similarity: number;
+    } []
 }

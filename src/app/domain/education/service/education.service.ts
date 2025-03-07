@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { of } from 'rxjs';
+import { catchError, of } from 'rxjs';
+import { environment } from '../../../../../environment/environment';
+import { NewsOnDateDto } from '../../news/types/news-on-date.dto';
 import { EventSdgsDto } from '../types/event-sdgs.dto';
 
 @Injectable({
@@ -9,28 +11,24 @@ import { EventSdgsDto } from '../types/event-sdgs.dto';
 export class EducationService {
     private http = inject(HttpClient);
 
-    public getEventSdgs(sdg: number, topic: string | undefined, limit: number) {
-        return of(this.generateMockEventData(limit));
-    }
+    public getEventSdgs(sdg: number, topic: string | undefined) {
+        const params = new URLSearchParams({ sdg: sdg.toString() });
 
-    private generateMockEventData(num: number): EventSdgsDto[] {
-        const data = Array.from({ length: num }).map((_, i) => {
-            const SDGS = Array.from({ length: Math.floor(Math.random() * 17) + 1 }, (_, i) => `SDG ${ i + 1 }`);
-            const randomAmountOfSdgs = Math.floor(Math.random() * 2) + 1;
-            const sdgs = [];
+        if (topic) {
+            params.set('topic', topic);
+        }
 
-            for (let i = 0; i < randomAmountOfSdgs; i++) {
-                sdgs.push(SDGS[Math.floor(Math.random() * SDGS.length)]);
-            }
-            const randomMainSdg = sdgs[Math.floor(Math.random() * sdgs.length)];
-
-            return {
-                event: 'Event ' + i,
-                main_sdg: randomMainSdg,
-                sdgs
-            };
-        });
-
-        return data;
+        return this.http.get<EventSdgsDto>(
+            `${ environment.api.url }/education/whitespace?${ params }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch news intensity', e);
+                return of({
+                    events: [],
+                    sdgs: [],
+                    similarities: []
+                })
+            })
+        );
     }
 }

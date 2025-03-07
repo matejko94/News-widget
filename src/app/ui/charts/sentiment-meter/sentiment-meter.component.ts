@@ -46,13 +46,14 @@ export class SentimentMeterComponent {
 
     constructor() {
         effect(() => {
+            const value = this.value() ?? 0;
+
             if (!this.el) {
                 return;
             }
 
             this.el.nativeElement.style.transformOrigin = '10px 162px';
-            this.el.nativeElement.style.transform = `rotate(${ (this.value() ?? 0) * 90 }deg)`;
+            this.el.nativeElement.style.transform = `rotate(${ value * 90 }deg)`;
         })
     }
-
 }

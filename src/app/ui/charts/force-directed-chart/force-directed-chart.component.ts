@@ -32,7 +32,6 @@ export interface ForceNode {
 export interface ForceLink {
     source: string | number | ForceNode;
     target: string | number | ForceNode;
-    link: string;
     value: number;
 }
 

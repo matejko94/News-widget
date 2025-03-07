@@ -84,21 +84,32 @@ export class NewsService {
         );
     }
 
-    public getNewsIntensity(sdg: string, topic: string) {
+    public getNewsIntensity(sdg: string, topic: string | undefined) {
+        const params = new URLSearchParams();
+
+        if (topic) {
+            params.set('topic', topic);
+        }
+
         return this.http.get<NewsOnDateDto[]>(
-            `${ environment.api.url }/news/intensity/${ sdg }?topic=${ topic }`
+            `${ environment.api.url }/news/intensity/${ sdg }?${ params }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch news intensity', e);
                 return of([])
             })
         );
-
     }
 
-    public getNewsIntensityPerYear(sdg: string, topic: string, year: number) {
+    public getNewsIntensityPerYear(sdg: string, year: number, topic: string | undefined) {
+        const params = new URLSearchParams({ year: year.toString() });
+
+        if (topic) {
+            params.set('topic', topic);
+        }
+
         return this.http.get<{ year: string, country: string, value: number }[]>(
-            `${ environment.api.url }/news/intensity/yearly/${ sdg }?topic=${ topic }&year=${ year }`
+            `${ environment.api.url }/news/intensity/yearly/${ sdg }?${ params }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch news intensity per year', e);
