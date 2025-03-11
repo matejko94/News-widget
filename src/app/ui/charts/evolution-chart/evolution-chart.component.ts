@@ -22,45 +22,47 @@ export interface GraphData {
 
 @Component({
     selector: 'app-network-graph',
-    styles: [ `
-        :host {
-            display: block;
-            width: 100%;
-            aspect-ratio: 3/2;
+    styles: [
+        `
+            :host {
+                display: block;
+                width: 100%;
+                aspect-ratio: 3/2;
 
-            ::ng-deep {
-                svg {
-                    overflow: visible;
-                }
+                ::ng-deep {
+                    svg {
+                        overflow: visible;
+                    }
 
-                .link {
-                    stroke: #999;
-                    stroke-opacity: 0.5;
-                }
+                    .link {
+                        stroke: #999;
+                        stroke-opacity: 0.5;
+                    }
 
-                .node {
-                    stroke: #333;
-                    stroke-width: 1;
-                    cursor: pointer;
-                    opacity: 0.6;
+                    .node {
+                        stroke: #333;
+                        stroke-width: 1;
+                        cursor: pointer;
+                        opacity: 0.6;
+                    }
                 }
             }
-        }
 
-        .tooltip {
-            position: absolute;
-            text-align: center;
-            width: auto;
-            height: auto;
-            padding: 10px;
-            font: 12px sans-serif;
-            background: black;
-            border: 0;
-            border-radius: 5px;
-            pointer-events: none;
-            color: white;
-        }
-    ` ],
+            .tooltip {
+                position: absolute;
+                text-align: center;
+                width: auto;
+                height: auto;
+                padding: 10px;
+                font: 12px sans-serif;
+                background: black;
+                border: 0;
+                border-radius: 5px;
+                pointer-events: none;
+                color: white;
+            }
+        `
+    ],
     template: `
         <div class="flex justify-center items-center h-full w-full relative">
             <div #chartContainer class="relative h-full w-full"></div>
@@ -73,7 +75,7 @@ export class NetworkGraphComponent extends Chart<GraphData> {
     public maxEdgeSize = input<number>(20);
     public minNodeSize = input<number>(5);
     public maxNodeSize = input<number>(20);
-    public forceStrength = input<number>(-500);
+    public forceStrength = input<number>(-600);
     private simulation!: Simulation<GraphNode, GraphLink>;
 
     protected override renderChart(): void {
@@ -88,10 +90,13 @@ export class NetworkGraphComponent extends Chart<GraphData> {
         if (!this.data().nodes.length) return;
 
         const linkSelection = this.drawLinks(chartGroup);
-        const nodeSelection = this.drawNodes(chartGroup);
-        nodeSelection.call(this.addDragBehavior());
-        this.addTooltips(container, nodeSelection, linkSelection);
-        this.initForceSimulation(nodeSelection, linkSelection, width, height);
+        const nodeGroupSelection = this.drawNodes(chartGroup);
+
+        // Apply drag behavior to the node group (circles + text)
+        nodeGroupSelection.call(this.addDragBehavior());
+
+        this.addTooltips(container, nodeGroupSelection.select('circle'), linkSelection);
+        this.initForceSimulation(nodeGroupSelection, linkSelection, width, height);
     }
 
     private createSvg(container: HTMLElement, width: number, height: number) {
@@ -99,7 +104,7 @@ export class NetworkGraphComponent extends Chart<GraphData> {
             .append('svg')
             .attr('width', width)
             .attr('height', height)
-            .append('g')
+            .append('g');
     }
 
     private drawLinks(chart: Selection<SVGGElement, unknown, null, undefined>) {
@@ -129,18 +134,32 @@ export class NetworkGraphComponent extends Chart<GraphData> {
             .domain([ minRadius, maxRadius ])
             .range([ this.minNodeSize(), this.maxNodeSize() ]);
 
-        return chart
-            .selectAll<SVGCircleElement, GraphNode>('.node')
+        const nodeGroup = chart
+            .selectAll('g.node-group')
             .data(this.data().nodes)
             .enter()
+            .append('g')
+            .attr('class', 'node-group');
+
+        nodeGroup
             .append('circle')
             .attr('class', 'node')
             .attr('r', d => radiusScale(d.radius))
             .attr('fill', d => d.color);
+
+        nodeGroup
+            .append('text')
+            .text(d => d.id)
+            .attr('text-anchor', 'middle')
+            .attr('dy', d => -(radiusScale(d.radius) + 4))
+            .attr('font-size', '10px')
+            .attr('fill', '#333');
+
+        return nodeGroup;
     }
 
     private addDragBehavior() {
-        return drag<SVGCircleElement, GraphNode>()
+        return drag<SVGGElement, GraphNode>()
             .on('start', (event, d) => {
                 if (!event.active) {
                     this.simulation.alphaTarget(0.3).restart();
@@ -168,22 +187,23 @@ export class NetworkGraphComponent extends Chart<GraphData> {
     ): void {
         const tooltip = createTooltip(container);
 
-        registerTooltip(nodeSelection, tooltip, container, (d) => {
+        registerTooltip(nodeSelection, tooltip, container, d => {
             return `<strong>Topic:</strong> ${ d.id }<br>Total articles: ${ d.radius }`;
         });
 
-        registerTooltip(linkSelection, tooltip, container, (d) => {
+        registerTooltip(linkSelection, tooltip, container, d => {
             return `<strong>Link:</strong> ${ (d.source as any).id } - ${ (d.target as any).id }<br>Shared articles: ${ d.weight }`;
         });
     }
 
     private initForceSimulation(
-        nodeSelection: Selection<SVGCircleElement, GraphNode, SVGGElement, unknown>,
+        nodeGroupSelection: Selection<SVGGElement, GraphNode, SVGGElement, unknown>,
         linkSelection: Selection<SVGLineElement, GraphLink, SVGGElement, unknown>,
         width: number,
         height: number
     ): void {
         const { nodes, links } = this.data();
+
         this.simulation = forceSimulation<GraphNode>(nodes)
             .force('link', forceLink<GraphNode, GraphLink>(links).id(d => d.id))
             .force('charge', forceManyBody().strength(this.forceStrength()))
@@ -199,13 +219,13 @@ export class NetworkGraphComponent extends Chart<GraphData> {
                     .attr('x2', d => (d.target as any)?.x ?? 0)
                     .attr('y2', d => (d.target as any)?.y ?? 0);
 
-                nodeSelection
-                    .attr('cx', d => d.x ?? 0)
-                    .attr('cy', d => d.y ?? 0);
+                // Move the entire node group rather than just the circle
+                nodeGroupSelection
+                    .attr('transform', d => `translate(${ d.x ?? 0 }, ${ d.y ?? 0 })`);
             });
+
         this.simulation.alpha(1).restart();
     }
-
 
     private isolateUnlinkedNodesForce(
         nodes: GraphNode[],
@@ -214,7 +234,6 @@ export class NetworkGraphComponent extends Chart<GraphData> {
         centerY: number,
         strength: number = 0.05
     ) {
-        // Count how many links each node has
         const linkCount = new Map<string, number>();
         nodes.forEach(node => linkCount.set(node.id, 0));
         links.forEach(link => {
@@ -222,7 +241,6 @@ export class NetworkGraphComponent extends Chart<GraphData> {
             linkCount.set(String(link.target), (linkCount.get(String(link.target)) || 0) + 1);
         });
 
-        // Return a force function that the simulation calls on each "tick"
         return (alpha: number) => {
             for (const node of nodes) {
                 if (!linkCount.get(node.id)) {

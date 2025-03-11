@@ -1,18 +1,11 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, filter, map, Observable, pairwise, switchMap, tap } from 'rxjs';
-import { startWith } from 'rxjs/operators';
-import { getColorByCountryCode } from '../../../../configuration/countries/countries';
+import { combineLatest, filter, map, Observable } from 'rxjs';
 import { loadingMap } from '../../common/utility/loading-map';
-import { IndicatorIntersectionTimeline } from '../../domain/indicators/types/indicator-intersection-timeline.interface';
-import { IndicatorsIntersections } from '../../domain/indicators/types/indicator-intersection.interface';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { EvolutionLinkDto } from '../../domain/science/types/evolution-link.dto';
-import { TopTopicsPerYear } from '../../domain/science/types/topic-timespan.interface';
-import { BubbleChartComponent, BubbleChartData } from '../../ui/charts/bubble-chart/bubble-chart.component';
-import { GraphData, GraphLink, GraphNode, NetworkGraphComponent } from '../../ui/charts/evolution-chart/evolution-chart.component';
-import { LineChartComponent, LineChartData } from '../../ui/charts/line-chart/line-chart.component';
+import { GraphData, GraphNode, NetworkGraphComponent } from '../../ui/charts/evolution-chart/evolution-chart.component';
 import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { YearSliderComponent } from '../../ui/components/year-slider/year-slider.component';
 import { BasePage } from '../base.page';
@@ -21,14 +14,8 @@ import { BasePage } from '../base.page';
     selector: 'evolution-page',
     standalone: true,
     imports: [
-        LineChartComponent,
         YearSliderComponent,
-        BubbleChartComponent,
         MenuComponent,
-        LineChartComponent,
-        LineChartComponent,
-        BubbleChartComponent,
-        LineChartComponent,
         AsyncPipe,
         NetworkGraphComponent,
     ],
