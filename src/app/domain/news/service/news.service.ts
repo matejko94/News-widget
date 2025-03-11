@@ -28,28 +28,51 @@ export class NewsService {
         )
     }
 
-    public getNews(shownDate: Date, sdg: string): Observable<NewsItem[]> {
+    public getNews(
+        shownDate: Date,
+        sdg: string,
+        topic: string | undefined,
+        onlyEnglish: boolean,
+    ): Observable<NewsItem[]> {
+        const filters = [
+            {
+                'match': {
+                    'SDG.keyword': `SDG ${ sdg }`
+                }
+            },
+            {
+                'range': {
+                    'dateTimePub': {
+                        'gte': shownDate.toISOString(),
+                        'lt': new Date(new Date(shownDate).setDate(shownDate.getDate() + 1)).toISOString(),
+                    }
+                }
+            }
+        ] as any[];
+
+        if (onlyEnglish) {
+            filters.push({
+                'term': {
+                    'lang.keyword': 'eng'
+                }
+            },)
+        }
+
+        if (topic) {
+            filters.push({
+                'term': {
+                    'topics.keyword': 'Microfinance'
+                }
+            })
+        }
+
         return this.http.post<NewsDto>(
             environment.api.news.url,
             {
                 'size': 10000,
                 'query': {
                     'bool': {
-                        'must': [
-                            {
-                                'match': {
-                                    'SDG.keyword': `SDG ${ sdg }`
-                                }
-                            },
-                            {
-                                'range': {
-                                    'dateTimePub': {
-                                        'gte': shownDate.toISOString(),
-                                        'lt': new Date(new Date(shownDate).setDate(shownDate.getDate() + 1)).toISOString(),
-                                    }
-                                }
-                            }
-                        ]
+                        'must': filters
                     }
                 }
             },

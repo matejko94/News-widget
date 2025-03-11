@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG8_CONFIGURATION: SdgConfiguration = {
     id: 8,
     color: '#4CAE50',
+    erId: 'e3da153d-a47b-477c-8336-3ac7dd69fbdd',
     topics: [
         {
             name: 'Unemployment',

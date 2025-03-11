@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG17_CONFIGURATION: SdgConfiguration = {
     id: 17,
     color: '#4CAE50',
+    erId: '807418e1-2097-4eed-85e5-63ab530369fa',
     topics: [
         {
             name: 'Global Cooperation',

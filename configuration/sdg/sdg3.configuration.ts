@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG3_CONFIGURATION: SdgConfiguration = {
     id: 3,
     color: '#4CAE50',
+    erId: 'acfcde9c-99c4-44f6-85d1-23d811e41bf6',
     topics: [
         {
             name: 'Rare Diseases',

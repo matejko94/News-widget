@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG6_CONFIGURATION: SdgConfiguration = {
     id: 6,
     color: '#4CAE50',
+    erId: 'd2781b6e-ac05-4b9e-a4c9-ec0d1a4c2d57',
     topics: [
         {
             name: 'Water Access',

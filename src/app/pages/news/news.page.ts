@@ -1,12 +1,15 @@
 import { AsyncPipe, DatePipe, SlicePipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
-import { BehaviorSubject, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs';
+import { Checkbox } from 'primeng/checkbox';
+import { BehaviorSubject, combineLatest, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs';
 import { NewsService } from '../../domain/news/service/news.service';
 import { NewsItem } from '../../domain/news/types/news-item.interface';
 import { HeatmapComponent } from '../../ui/charts/heatmap/heatmap.component';
 import { SentimentMeterComponent } from '../../ui/charts/sentiment-meter/sentiment-meter.component';
+import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { BasePage } from '../base.page';
 
 @Component({
@@ -18,7 +21,10 @@ import { BasePage } from '../base.page';
         AsyncPipe,
         DatePipe,
         SlicePipe,
-        HeatmapComponent
+        HeatmapComponent,
+        Checkbox,
+        FormsModule,
+        MenuComponent
     ],
     styles: `
         .h-container {
@@ -93,9 +99,14 @@ import { BasePage } from '../base.page';
 
         @let news = news$ | async;
         @let data = cloudData$ | async;
-        <div class="flex gap-2 p-2">
+        <div class="flex items-center gap-2 p-2">
             <div>Date: <b>{{ loadedDate$ | async | date: 'dd.MM.yyyy' }}</b></div>
             <div>Total news: <b>{{ news?.length }}</b></div>
+            <div class="flex items-center ml-auto mr-2">
+                <p-checkbox [(ngModel)]="onlyEnglish" [binary]="true" size="small" class="flex"/>
+                <label class="ml-1">EN News Only</label>
+            </div>
+            <app-menu class="z-20" queryParam="topic" label="Topic" [options]="topicOptions()"/>
         </div>
         <div class="grid grid-cols-2 h-container" [class.no-keywords]="data?.length === 0">
             <div class="overflow-y-auto h-container" [class.no-keywords]="data?.length === 0">
@@ -142,6 +153,7 @@ export default class NewsPage extends BasePage implements OnInit {
     public shownDate$ = new BehaviorSubject(new Date());
     public loadedDate$ = new BehaviorSubject(new Date());
     public isLoading$ = new BehaviorSubject(true);
+    public onlyEnglish = signal(false);
     public news$: Observable<NewsItem[]> = EMPTY;
     public cloudData$: Observable<CloudData[]> = EMPTY;
     public sentimentAverage$: Observable<number> = EMPTY;
@@ -161,9 +173,13 @@ export default class NewsPage extends BasePage implements OnInit {
     }
 
     private setupNews() {
-        return this.shownDate$.pipe(
+        return combineLatest([
+            this.shownDate$,
+            toObservable(this.topic, { injector: this.injector }),
+            toObservable(this.onlyEnglish, { injector: this.injector }),
+        ]).pipe(
             tap(() => this.isLoading$.next(true)),
-            switchMap(shownDate => this.newsService.getNews(shownDate, this.sdg())),
+            switchMap(([ shownDate, topic, onlyEnglish ]) => this.newsService.getNews(shownDate, this.sdg(), topic, onlyEnglish)),
             tap(() => {
                 this.loadedDate$.next(this.shownDate$.value);
                 this.isLoading$.next(false);

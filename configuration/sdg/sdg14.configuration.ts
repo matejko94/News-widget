@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG14_CONFIGURATION: SdgConfiguration = {
     id: 14,
     color: '#4CAE50',
+    erId: '48f2290b-50de-412c-bd89-73bbd5202fab',
     topics: [
         {
             name: 'Marine Ecosystems',

@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG2_CONFIGURATION: SdgConfiguration = {
     id: 2,
     color: '',
+    erId: 'd5a40d4-ec5f-4142-957f-aa95c0374f6e',
     topics: [
         {
             name: 'Food Security',

@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG10_CONFIGURATION: SdgConfiguration = {
     id: 10,
     color: '#4CAE50',
+    erId: '922d5944-0b06-4e7d-8ed4-e25252982c89',
     topics: [
         {
             name: 'Social Exclusion',

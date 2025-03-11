@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG5_CONFIGURATION: SdgConfiguration = {
     id: 5,
     color: '#4CAE50',
+    erId: '294e2eec-9970-439c-b879-a26174629dcd',
     topics: [
         {
             name: 'Women\'s Empowerment',

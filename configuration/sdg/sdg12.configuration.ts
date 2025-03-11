@@ -3,6 +3,7 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG12_CONFIGURATION: SdgConfiguration = {
     id: 12,
     color: '#4CAE50',
+    erId: 'c4d5af06-b9d4-4f28-91a9-148e28c24fb3',
     topics: [
         {
             name: 'Waste Reduction',
