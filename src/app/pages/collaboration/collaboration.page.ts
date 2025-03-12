@@ -30,10 +30,6 @@ import { BasePage } from '../base.page';
         }
     `,
     template: `
-        <div class="flex justify-end items-center w-full mt-3 mb-5 pr-4">
-            <app-menu queryParam="topic" label="Topic" [options]="topicOptions()"/>
-        </div>
-
         @if (data$ | async; as data) {
             <app-force-directed-chart [data]="data" tagLabel="Country" class="w-full flex-1 min-h-0"/>
         }
@@ -48,9 +44,8 @@ export default class CollaborationPage extends BasePage implements OnInit {
 
         this.data$ = combineLatest([
             toObservable(this.sdg, { injector: this.injector }),
-            toObservable(this.topic, { injector: this.injector }),
         ]).pipe(
-            loadingMap(([ sdg, topic ]) => this.innovationsService.getIndustryCollaborations(+sdg, topic)),
+            loadingMap(([ sdg ]) => this.innovationsService.getIndustryCollaborations(+sdg, undefined)),
             map(data => data ? this.mapData(data) : undefined),
         );
     }

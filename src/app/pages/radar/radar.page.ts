@@ -6,7 +6,7 @@ import { PolicyService } from '../../domain/policy/service/policy.service';
 import { RadarDto } from '../../domain/policy/types/radar.dto';
 import { LollipopChartComponent, LollipopChartData } from '../../ui/charts/lollipop-chart/lollipop-chart.component';
 import { RadarChartComponent, RadarChartData } from '../../ui/charts/radar-chart/radar-chart.component';
-import { MultiMenuComponent } from '../../ui/components/multi-menu/multi-menu.component';
+import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { YearSliderComponent } from '../../ui/components/year-slider/year-slider.component';
 import { BasePage } from '../base.page';
 
@@ -17,8 +17,8 @@ import { BasePage } from '../base.page';
         RadarChartComponent,
         LollipopChartComponent,
         YearSliderComponent,
-        MultiMenuComponent,
-        AsyncPipe
+        AsyncPipe,
+        MenuComponent
     ],
     styles: `
         :host {
@@ -32,7 +32,7 @@ import { BasePage } from '../base.page';
     template: `
         <div class="w-full">
             <app-year-slider [min]="2000" [max]="2025" autoIncrement/>
-            <app-multi-menu queryParam="regions" label="Select region" [options]="worldRegionOptions"
+            <app-menu queryParam="region" label="Select region" [options]="worldRegionOptions"
                             class="ml-auto mr-4"/>
         </div>
 
@@ -74,11 +74,11 @@ export default class RadarPage extends BasePage implements OnInit {
 
         const data$ = combineLatest([
             toObservable(this.sdg),
-            toObservable(this.regions),
+            toObservable(this.region),
             toObservable(this.year)
         ]).pipe(
             filter(([ sdg, _, year ]) => !!sdg && !!year),
-            switchMap(([ sdg, regions, year ]) => this.policyService.getRadarData(+sdg, regions, +year!)),
+            switchMap(([ sdg, region, year ]) => this.policyService.getRadarData(+sdg, region, +year!)),
             shareReplay(1)
         );
 

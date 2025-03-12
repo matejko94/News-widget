@@ -22,9 +22,15 @@ export class PolicyService {
         );
     }
 
-    public getRadarData(sdg: number, regions: string[] | undefined, year: number): Observable<RadarDto[]> {
+    public getRadarData(sdg: number, region: string | undefined, year: number): Observable<RadarDto[]> {
+        const params = new URLSearchParams({
+            sdg: sdg.toString(),
+            year: year.toString(),
+            region_code: region ?? 'All'
+        });
+
         return this.http.get<RadarDto[]>(
-            `${ environment.api.url }/policy/radar?sdg=${ sdg }&region_code=${ regions?.length ? regions.join(',') : 'All' }&year=${ year }`
+            `${ environment.api.url }/policy/radar?${ params }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch radar data', e);

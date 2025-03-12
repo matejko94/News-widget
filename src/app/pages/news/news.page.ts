@@ -106,7 +106,10 @@ import { BasePage } from '../base.page';
                 <p-checkbox [(ngModel)]="onlyEnglish" [binary]="true" size="small" class="flex"/>
                 <label class="ml-1">EN News Only</label>
             </div>
-            <app-menu class="z-20" queryParam="topic" label="Topic" [options]="topicOptions()"/>
+
+            @if (topicOptions().length) {
+                <app-menu class="z-20" queryParam="topic" label="Topic" [options]="topicOptions()"/>
+            }
         </div>
         <div class="grid grid-cols-2 h-container" [class.no-keywords]="data?.length === 0">
             <div class="overflow-y-auto h-container" [class.no-keywords]="data?.length === 0">
@@ -152,7 +155,7 @@ export default class NewsPage extends BasePage implements OnInit {
 
     public shownDate$ = new BehaviorSubject(new Date());
     public loadedDate$ = new BehaviorSubject(new Date());
-    public isLoading$ = new BehaviorSubject(true);
+    public isLoading$ = new BehaviorSubject(false);
     public onlyEnglish = signal(false);
     public news$: Observable<NewsItem[]> = EMPTY;
     public cloudData$: Observable<CloudData[]> = EMPTY;
@@ -178,17 +181,19 @@ export default class NewsPage extends BasePage implements OnInit {
             toObservable(this.topic, { injector: this.injector }),
             toObservable(this.onlyEnglish, { injector: this.injector }),
         ]).pipe(
+            filter(() => !this.isLoading$.value),
             tap(() => this.isLoading$.next(true)),
             switchMap(([ shownDate, topic, onlyEnglish ]) => this.newsService.getNews(shownDate, this.sdg(), topic, onlyEnglish)),
             tap(() => {
-                this.loadedDate$.next(this.shownDate$.value);
                 this.isLoading$.next(false);
+                this.loadedDate$.next(this.shownDate$.value);
             }),
             shareReplay(1),
         );
     }
 
     private setupTags() {
+        // TODO: fix speed
         return this.shownDate$.pipe(
             switchMap(shownDate => {
                 const dayAfter = new Date(shownDate);

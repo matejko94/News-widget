@@ -164,6 +164,7 @@ export class NetworkGraphComponent extends Chart<GraphData> {
                 if (!event.active) {
                     this.simulation.alphaTarget(0.3).restart();
                 }
+
                 d.fx = d.x;
                 d.fy = d.y;
             })
@@ -173,10 +174,11 @@ export class NetworkGraphComponent extends Chart<GraphData> {
             })
             .on('end', (event, d) => {
                 if (!event.active) {
-                    this.simulation.alphaTarget(0);
+                    this.simulation.alphaTarget(0.1);
                 }
-                d.fx = null;
-                d.fy = null;
+
+                d.fx = d.x;
+                d.fy = d.y;
             });
     }
 
@@ -244,7 +246,6 @@ export class NetworkGraphComponent extends Chart<GraphData> {
         return (alpha: number) => {
             for (const node of nodes) {
                 if (!linkCount.get(node.id)) {
-                    // Node is isolated (no links); gently nudge it toward the center
                     const vx = (centerX - (node.x ?? 0)) * strength * alpha;
                     const vy = (centerY - (node.y ?? 0)) * strength * alpha;
                     node.vx = (node.vx || 0) + vx;
