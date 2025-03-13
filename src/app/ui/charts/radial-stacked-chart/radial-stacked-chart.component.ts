@@ -38,6 +38,7 @@ interface CellData {
                 }
 
                 .bar-label {
+                    font-weight: 600;
                     font-size: 14px;
 
                     @media (max-width: 768px) {
