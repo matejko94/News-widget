@@ -10,10 +10,10 @@ export const cacheMiddleware: PagesFunction = async ({ request, next }) => {
             return cachedResponse;
         }
     }
-
     const response = await next();
 
     if (response.status === 200) {
+        console.log('Caching response', cacheKey);
         await cache.put(cacheKey, response.clone());
     }
 

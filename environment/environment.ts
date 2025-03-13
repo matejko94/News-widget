@@ -34,6 +34,9 @@ export const environment = {
         },
         topics: {
             url: 'http://localhost:4000/api/news/topics'
-        }
+        },
+        newsArticles: {
+            url: 'http://localhost:4000/api/news/articles'
+        },
     }
 }

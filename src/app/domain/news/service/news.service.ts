@@ -4,8 +4,7 @@ import { catchError, map, Observable, of, shareReplay } from 'rxjs';
 import { environment } from '../../../../../environment/environment';
 import { CloudTagResponse } from '../../../../../functions/api/news/tags/interface/cloud-tag-response.interface';
 import { Tag } from '../../../../../functions/api/news/tags/interface/tag.interface';
-import { NewsDto } from '../types/news-dto.interface';
-import { NewsItem } from '../types/news-item.interface';
+import { NewsItem, NewsResponse } from '../types/news-item.interface';
 import { NewsOnDateDto } from '../types/news-on-date.dto';
 import { TopicDto } from '../types/topic.dto';
 
@@ -17,7 +16,7 @@ export class NewsService {
 
     public getCloudData(sdg: string, startDate: Date, endDate: Date, limit: number): Observable<Tag[]> {
         return this.http.get<CloudTagResponse>(
-            `${ environment.api.tags.url }?startDate=${ startDate.toISOString() }&endDate=${ endDate.toISOString() }&sdg=${ sdg }&limit=${ limit }`
+            `${ environment.api.tags.url }?startDate=${ this.isoDateWithoutTime(startDate) }&endDate=${ this.isoDateWithoutTime(endDate) }&sdg=${ sdg }&limit=${ limit }`
         ).pipe(
             map(response => response.tags),
             catchError(e => {
@@ -28,62 +27,17 @@ export class NewsService {
         )
     }
 
-    public getNews(
-        shownDate: Date,
-        sdg: string,
-        topic: string | undefined,
-        onlyEnglish: boolean,
-    ): Observable<NewsItem[]> {
-        const filters = [
-            {
-                'match': {
-                    'SDG.keyword': `SDG ${ sdg }`
-                }
-            },
-            {
-                'range': {
-                    'dateTimePub': {
-                        'gte': shownDate.toISOString(),
-                        'lt': new Date(new Date(shownDate).setDate(shownDate.getDate() + 1)).toISOString(),
-                    }
-                }
-            }
-        ] as any[];
+    public getNews(shownDate: Date, topicPage: string): Observable<NewsItem[]> {
+        const tommorow = new Date(shownDate);
+        tommorow.setDate(tommorow.getDate() + 1);
 
-        if (onlyEnglish) {
-            filters.push({
-                'term': {
-                    'lang.keyword': 'eng'
-                }
-            },)
-        }
-
-        if (topic) {
-            filters.push({
-                'term': {
-                    'topics.keyword': 'Microfinance'
-                }
-            })
-        }
-
-        return this.http.post<NewsDto>(
-            environment.api.news.url,
+        return this.http.get<NewsResponse>(
+            `${ environment.api.newsArticles.url }?topicPage=${ topicPage }&startDate=${ this.isoDateWithoutTime(shownDate) }&endDate=${ this.isoDateWithoutTime(tommorow) }`,
             {
-                'size': 10000,
-                'query': {
-                    'bool': {
-                        'must': filters
-                    }
-                }
-            },
-            {
-                headers: new HttpHeaders({
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + environment.api.news.auth,
-                })
+                headers: new HttpHeaders({ 'Content-Type': 'application/json' })
             }
         ).pipe(
-            map(response => response.hits.hits),
+            map(response => response.articles.results),
             catchError(e => {
                 console.error('Failed to fetch news', e);
                 return of([])
@@ -139,5 +93,9 @@ export class NewsService {
                 return of([])
             })
         );
+    }
+
+    private isoDateWithoutTime(date: Date) {
+        return date.toISOString().split('T')[0] + 'T00:00:00.000Z';
     }
 }

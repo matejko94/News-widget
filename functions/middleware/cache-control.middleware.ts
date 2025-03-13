@@ -1,4 +1,4 @@
-export const cacheControlMiddleware: PagesFunction = async ({ request, next }) => {
+export const cacheControlMiddleware: PagesFunction = async ({ next }) => {
     const response = await next();
 
     if (response.status === 200) {

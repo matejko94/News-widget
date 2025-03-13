@@ -9,14 +9,12 @@ import { IndustryCollaborationResponseDto } from '../../domain/innovations/types
 import { IndustryEdgeDto } from '../../domain/innovations/types/industry-edge.dto';
 import { IndustryNodeDto } from '../../domain/innovations/types/industry-node.dto';
 import { ForceData, ForceDirectedChartComponent, ForceLink, ForceNode } from '../../ui/charts/force-directed-chart/force-directed-chart.component';
-import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { BasePage } from '../base.page';
 
 @Component({
     selector: 'collaboration-page',
     standalone: true,
     imports: [
-        MenuComponent,
         ForceDirectedChartComponent,
         AsyncPipe,
     ],
@@ -61,8 +59,6 @@ export default class CollaborationPage extends BasePage implements OnInit {
             linkCounts
         );
         const nodes = this.mapNodes(response.nodes, linkCounts);
-
-        console.log({ linkCounts, nodes, links });
 
         return { nodes, links };
     }

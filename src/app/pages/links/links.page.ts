@@ -26,6 +26,10 @@ import { BasePage } from '../base.page';
             width: 100%;
             height: 100%;
         }
+
+        [hidden] {
+            display: none;
+        }
     `,
     template: `
         <div class="flex justify-end items-center w-full mt-3 mb-5 pr-4">

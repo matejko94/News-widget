@@ -1,8 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, filter, map, Observable } from 'rxjs';
-import { loadingMap } from '../../common/utility/loading-map';
+import { combineLatest, filter, map, Observable, switchMap } from 'rxjs';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { EvolutionLinkDto } from '../../domain/science/types/evolution-link.dto';
 import { GraphData, GraphNode, NetworkGraphComponent } from '../../ui/charts/evolution-chart/evolution-chart.component';
@@ -66,7 +65,7 @@ export default class EvolutionPage extends BasePage implements OnInit {
             toObservable(this.topic)
         ]).pipe(
             filter(([ year ]) => !!year),
-            loadingMap(([ year, topic ]) => this.getData(+this.sdg(), topic!, +year!)),
+            switchMap(([ year, topic ]) => this.getData(+this.sdg(), topic!, +year!)),
         );
     }
 

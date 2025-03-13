@@ -4,7 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
-import { BehaviorSubject, combineLatest, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, skip, startWith, switchMap, tap } from 'rxjs';
 import { NewsService } from '../../domain/news/service/news.service';
 import { NewsItem } from '../../domain/news/types/news-item.interface';
 import { HeatmapComponent } from '../../ui/charts/heatmap/heatmap.component';
@@ -108,18 +108,18 @@ import { BasePage } from '../base.page';
             </div>
 
             @if (topicOptions().length) {
-                <app-menu class="z-20" queryParam="topic" label="Topic" [options]="topicOptions()"/>
+                <app-menu class="z-20" queryParam="topic" label="Topic" [options]="topicOptions()" showClear/>
             }
         </div>
         <div class="grid grid-cols-2 h-container" [class.no-keywords]="data?.length === 0">
             <div class="overflow-y-auto h-container" [class.no-keywords]="data?.length === 0">
-                @for (newsItem of news; track newsItem._source.url) {
-                    <div class="border-b-2 my-3" [title]="(newsItem._source.body | slice:0:100) + '...'">
-                        <a class="font-semibold text-lg mb-2" [href]="newsItem._source.url">
-                            {{ newsItem._source.title | slice:0:40 }}
+                @for (newsItem of news; track newsItem.url) {
+                    <div class="border-b-2 my-3 px-2" [title]="(newsItem.body | slice:0:100) + '...'">
+                        <a class="font-semibold text-lg mb-2" [href]="newsItem.url">
+                            {{ newsItem.title | slice:0:40 }}
                         </a>
                         <div class="text-gray-500 text-lg">
-                            {{ newsItem._source.dateTimePub | date: 'EEE MMM d yyyy, HH:mm': 'UTC' }}
+                            {{ newsItem.dateTime | date: 'EEE MMM d yyyy, HH:mm': 'UTC' }}
                         </div>
                     </div>
                 } @empty {
@@ -131,7 +131,7 @@ import { BasePage } from '../base.page';
 
             <div class="overflow-visible flex flex-col items-center">
                 @if (data?.length) {
-                    <angular-tag-cloud [height]="250" [realignOnResize]="true" [data]="data!" class="-mt-8 ml-4 cloud"
+                    <angular-tag-cloud [height]="325" [realignOnResize]="true" [data]="data!" class="-mt-6 ml-4 cloud"
                                        [width]="width()"/>
                 } @else {
                     <div class="h-full w-fit text-xl font-semibold text-gray-600 my-10 mx-auto">
@@ -168,7 +168,7 @@ export default class NewsPage extends BasePage implements OnInit {
     public override ngOnInit() {
         super.ngOnInit();
 
-        this.shownDate$.next(new Date(new Date().setDate(new Date().getDate() - 15)));
+        this.shownDate$.next(new Date(new Date().setDate(new Date().getDate())));
         this.news$ = this.setupNews();
         this.cloudData$ = this.setupTags();
         this.sentimentAverage$ = this.setupSentimentAverage();
@@ -176,24 +176,44 @@ export default class NewsPage extends BasePage implements OnInit {
     }
 
     private setupNews() {
-        return combineLatest([
-            this.shownDate$,
-            toObservable(this.topic, { injector: this.injector }),
-            toObservable(this.onlyEnglish, { injector: this.injector }),
-        ]).pipe(
+        const topic$ = toObservable(this.topic, { injector: this.injector });
+        const onlyEnglish$ = toObservable(this.onlyEnglish, { injector: this.injector });
+
+        return this.shownDate$.pipe(
             filter(() => !this.isLoading$.value),
             tap(() => this.isLoading$.next(true)),
-            switchMap(([ shownDate, topic, onlyEnglish ]) => this.newsService.getNews(shownDate, this.sdg(), topic, onlyEnglish)),
+            switchMap(shownDate => this.newsService.getNews(shownDate, this.getErId(this.sdg()!))),
             tap(() => {
                 this.isLoading$.next(false);
                 this.loadedDate$.next(this.shownDate$.value);
             }),
+            combineLatestWith(topic$, onlyEnglish$),
+            map(([ news, topic, onlyEnglish ]) => this.filterNews(news, topic, onlyEnglish)),
+            tap(news => console.log({ news })),
             shareReplay(1),
         );
     }
 
+    private filterNews(news: NewsItem[], topic: string | undefined, onlyEnglish: boolean) {
+        return news
+            .filter(newsItem => {
+                if (topic) {
+                    const slugifiedTopic = topic.replace(' ', '_').toLowerCase();
+                    return newsItem.concepts.some(concept => concept.uri.toLowerCase().includes(slugifiedTopic));
+                }
+
+                return true;
+            })
+            .filter(newsItem => {
+                if (onlyEnglish) {
+                    return newsItem.lang === 'eng';
+                }
+
+                return true;
+            });
+    }
+
     private setupTags() {
-        // TODO: fix speed
         return this.shownDate$.pipe(
             switchMap(shownDate => {
                 const dayAfter = new Date(shownDate);
@@ -212,9 +232,9 @@ export default class NewsPage extends BasePage implements OnInit {
                 let sentiment = 0;
 
                 data.forEach(item => {
-                    if (item._source.sentiment !== null && item._source.sentiment !== undefined) {
+                    if (item.sentiment !== null && item.sentiment !== undefined) {
                         total++;
-                        sentiment += item._source.sentiment;
+                        sentiment += item.sentiment;
                     }
                 })
 
@@ -226,11 +246,13 @@ export default class NewsPage extends BasePage implements OnInit {
 
     private startCounter() {
         return this.isLoading$.pipe(
+            skip(1),
             startWith(true),
             pairwise(),
             filter(([ prev, next ]) => prev && !next),
-            delay(1500),
+            delay(2000),
             tap(() => {
+                console.log('here')
                 const currentDate = new Date(this.shownDate$.value);
 
                 if (currentDate >= this.minDate) {

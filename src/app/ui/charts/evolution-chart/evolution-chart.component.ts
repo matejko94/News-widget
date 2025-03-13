@@ -92,7 +92,6 @@ export class NetworkGraphComponent extends Chart<GraphData> {
         const linkSelection = this.drawLinks(chartGroup);
         const nodeGroupSelection = this.drawNodes(chartGroup);
 
-        // Apply drag behavior to the node group (circles + text)
         nodeGroupSelection.call(this.addDragBehavior());
 
         this.addTooltips(container, nodeGroupSelection.select('circle'), linkSelection);
@@ -221,9 +220,7 @@ export class NetworkGraphComponent extends Chart<GraphData> {
                     .attr('x2', d => (d.target as any)?.x ?? 0)
                     .attr('y2', d => (d.target as any)?.y ?? 0);
 
-                // Move the entire node group rather than just the circle
-                nodeGroupSelection
-                    .attr('transform', d => `translate(${ d.x ?? 0 }, ${ d.y ?? 0 })`);
+                nodeGroupSelection.attr('transform', d => `translate(${ d.x ?? 0 }, ${ d.y ?? 0 })`);
             });
 
         this.simulation.alpha(1).restart();

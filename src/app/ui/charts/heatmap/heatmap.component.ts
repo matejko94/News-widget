@@ -3,6 +3,7 @@ import { AsyncPipe } from "@angular/common";
 import { GoogleMap, MapCircle } from "@angular/google-maps";
 import { catchError, EMPTY, map, Observable, of, take } from "rxjs";
 import { HttpClient } from "@angular/common/http";
+import { countryCoordinates } from '../../../common/utility/contry-coordinates';
 import { NewsItem } from "../../../domain/news/types/news-item.interface";
 import {environment} from "../../../../../environment/environment";
 
@@ -113,11 +114,17 @@ export class HeatmapComponent implements OnInit {
         }>();
 
         newsItems
-            ?.filter(item => item._source.source.location?.country)
+            ?.filter(item => item.location?.country?.label?.eng)
             .forEach(item => {
-                const country = item._source.source.location.country?.label?.['eng'];
-                const sentiment = item._source.sentiment ?? 0;
-                const {lat, long: lng} = item._source.source.location.country;
+                const country = item.location!.country!.label!.eng!;
+                const coordinates = this.getCountryCoordinates(country);
+                const sentiment = item.sentiment ?? 0;
+
+                if (!coordinates) {
+                    return;
+                }
+
+                const { lat, lng } = coordinates;
 
                 if (countrySentiment.has(country)) {
                     const current = countrySentiment.get(country)!;
@@ -144,6 +151,10 @@ export class HeatmapComponent implements OnInit {
                     strokeColor: this.getColorForValue(sentiment)
                 }
             }));
+    }
+
+    private getCountryCoordinates(country: string): { lat: number, lng: number } | undefined {
+        return countryCoordinates[country.toLowerCase()];
     }
 
     private getColorForValue(value: number) {
