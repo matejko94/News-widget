@@ -33,7 +33,7 @@ export class YearSliderComponent implements AfterViewInit, OnDestroy {
 
     public sliderEl = viewChild.required<ElementRef<HTMLDivElement>>('slider');
     public autoIncrement = input(false, { transform: booleanAttribute });
-    public autoDelay = input(2500);
+    public autoDelay = input(3500);
     public min = input.required<number>();
     public max = input.required<number>();
     public interval: number | undefined;
