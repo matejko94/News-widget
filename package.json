@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve & wrangler pages dev",
-    "build": "ng build --configuration production"
+      "build": "ng build --configuration production && cp _headers dist/_headers"
   },
   "private": true,
   "dependencies": {
