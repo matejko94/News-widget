@@ -252,7 +252,6 @@ export default class NewsPage extends BasePage implements OnInit {
             filter(([ prev, next ]) => prev && !next),
             delay(2000),
             tap(() => {
-                console.log('here')
                 const currentDate = new Date(this.shownDate$.value);
 
                 if (currentDate >= this.minDate) {

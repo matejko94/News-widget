@@ -14,9 +14,12 @@ export interface NewsItem {
         uri: string;
     }[];
     sentiment: number | null;
-    location: {
+    location?: {
         type: string,
-        country: {
+        label?: {
+            eng: string
+        }
+        country?: {
             label: {
                 eng: string
             }

@@ -1,3 +1,2 @@
-https://news-widget.pages.dev//*
-    Access-Control-Allow-Origin: *
-    Cache-Control: public, max-age=0, must-revalidate
+Access-Control-Allow-Origin: *
+Cache-Control: public, max-age=0, must-revalidate

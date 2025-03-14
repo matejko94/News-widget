@@ -114,9 +114,9 @@ export class HeatmapComponent implements OnInit {
         }>();
 
         newsItems
-            ?.filter(item => item.location?.country?.label?.eng)
+            ?.filter((item) => item.location?.label?.eng || item.location?.country?.label?.eng)
             .forEach(item => {
-                const country = item.location!.country!.label!.eng!;
+                const country = item.location?.country?.label?.eng! || item.location?.label?.eng!;
                 const coordinates = this.getCountryCoordinates(country);
                 const sentiment = item.sentiment ?? 0;
 
@@ -154,7 +154,15 @@ export class HeatmapComponent implements OnInit {
     }
 
     private getCountryCoordinates(country: string): { lat: number, lng: number } | undefined {
-        return countryCoordinates[country.toLowerCase()];
+        const coordinates = countryCoordinates[country.toLowerCase()];
+
+        if (!coordinates) {
+            console.warn(`Country not found: ${ country }`);
+        } else {
+            console.log(`Country found: ${ country }`);
+        }
+
+        return coordinates;
     }
 
     private getColorForValue(value: number) {
