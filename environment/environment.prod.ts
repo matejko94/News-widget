@@ -34,6 +34,9 @@ export const environment = {
         },
         tags: {
             url: 'https://news-widget.pages.dev/api/news/tags'
-        }
+        },
+        newsArticles: {
+            url: 'https://news-widget.pages.dev/api/news/articles'
+        },
     }
 }
