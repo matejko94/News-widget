@@ -158,8 +158,6 @@ export class HeatmapComponent implements OnInit {
 
         if (!coordinates) {
             console.warn(`Country not found: ${ country }`);
-        } else {
-            console.log(`Country found: ${ country }`);
         }
 
         return coordinates;
