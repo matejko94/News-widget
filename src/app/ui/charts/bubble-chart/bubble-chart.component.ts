@@ -70,10 +70,10 @@ export class BubbleChartComponent extends Chart<BubbleChartData[]> {
 
     private margin = { top: 10, right: 20, bottom: 30, left: 10 };
     private svg!: Selection<SVGSVGElement, unknown, null, undefined>;
+    private tooltip!: Selection<HTMLDivElement, unknown, null, undefined>;
 
     protected override renderChart(): void {
         const container = this.chartContainer().nativeElement;
-        container.innerHTML = '';
 
         const { width, height } = container.getBoundingClientRect();
         const chartWidth = width - this.margin.left - this.margin.right;
@@ -82,16 +82,19 @@ export class BubbleChartComponent extends Chart<BubbleChartData[]> {
         this.createSvg(container, width, height);
         const { xScale, yScale, zScale } = this.prepareScales(chartWidth, chartHeight);
         this.createAxes(xScale, yScale, chartHeight);
-        const bubbles = this.drawBubbles(xScale, yScale, zScale);
-        this.addChartTooltip(container, bubbles);
+        this.updateBubbles(xScale, yScale, zScale);
+        this.updateLabels(xScale, yScale, zScale);
+        this.addChartTooltip(container);
     }
 
     private createSvg(container: HTMLElement, width: number, height: number): void {
-        this.svg = select(container)
-            .append('svg')
+        this.svg = select(container).select<SVGSVGElement>('svg').node()
+            ? select(container).select<SVGSVGElement>('svg')
+            : select(container).append('svg');
+
+        this.svg
             .attr('width', width)
             .attr('height', height);
-
         this.svg
             .append('g')
             .attr('transform', `translate(${ this.margin.left }, ${ this.margin.top })`);
@@ -119,49 +122,99 @@ export class BubbleChartComponent extends Chart<BubbleChartData[]> {
         return { xScale, yScale, zScale };
     }
 
-    private createAxes(
-        xScale: ScaleLinear<number, number>,
-        yScale: ScaleLinear<number, number>,
-        chartHeight: number
-    ): void {
-        this.svg
-            .append('g')
+    private createAxes(xScale: ScaleLinear<number, number>, yScale: ScaleLinear<number, number>, chartHeight: number) {
+        const xAxisGroup = this.svg.select<SVGGElement>('g.x-axis').node()
+            ? this.svg.select<SVGGElement>('g.x-axis')
+            : this.svg.append('g').attr('class', 'x-axis');
+
+        xAxisGroup
             .attr('transform', `translate(0, ${ chartHeight })`)
             .call(axisBottom(xScale));
-        this.svg
-            .append('g')
-            .call(axisLeft(yScale));
+
+        const yAxisGroup = this.svg.select<SVGGElement>('g.y-axis').node()
+            ? this.svg.select<SVGGElement>('g.y-axis')
+            : this.svg.append('g').attr('class', 'y-axis');
+
+        yAxisGroup.call(axisLeft(yScale));
     }
 
-    private drawBubbles(
+    private updateBubbles(
         xScale: ScaleLinear<number, number>,
         yScale: ScaleLinear<number, number>,
         zScale: ScaleLinear<number, number>
     ) {
-        return this.svg
-            .selectAll('circle')
-            .data(this.data())
+        const bubbles = this.svg
+            .selectAll<SVGCircleElement, BubbleChartData>('circle')
+            .data(this.data(), (d: BubbleChartData) => d.country);
+
+        bubbles
             .enter()
             .append('circle')
+            .attr('fill', d => d.color)
+            .attr('r', 0)
+            .attr('cx', d => xScale(d.xValue))
+            .attr('cy', d => yScale(d.yValue))
+            .merge(bubbles)
+            .transition()
+            .duration(750)
             .attr('cx', d => xScale(d.xValue))
             .attr('cy', d => yScale(d.yValue))
             .attr('r', d => zScale(d.radius))
-            .attr('fill', d => d.color as string);
+            .attr('fill', d => d.color);
+
+        bubbles
+            .exit()
+            .transition()
+            .duration(500)
+            .attr('r', 0)
+            .remove();
     }
 
-    private addChartTooltip(
-        container: HTMLElement,
-        circles: Selection<SVGCircleElement, BubbleChartData, SVGGElement, unknown>
+    private updateLabels(
+        xScale: ScaleLinear<number, number>,
+        yScale: ScaleLinear<number, number>,
+        zScale: ScaleLinear<number, number>
     ) {
-        const tooltip = createTooltip(container);
+        const labels = this.svg
+            .selectAll<SVGTextElement, BubbleChartData>('text.country-label')
+            .data(this.data(), (d: BubbleChartData) => d.country);
 
-        registerTooltip(circles as any, tooltip, container, (d: any) => {
+        labels
+            .enter()
+            .append('text')
+            .attr('class', 'country-label')
+            .attr('text-anchor', 'middle')
+            .attr('x', d => xScale(d.xValue))
+            .attr('y', d => yScale(d.yValue) - zScale(d.radius) - 5)
+            .merge(labels)
+            .transition()
+            .duration(750)
+            .attr('x', d => xScale(d.xValue))
+            .attr('y', d => yScale(d.yValue) - zScale(d.radius) - 5)
+            .text(d => d.country);
+
+        labels
+            .exit()
+            .transition()
+            .duration(500)
+            .style('opacity', 0)
+            .remove();
+    }
+
+    private addChartTooltip(container: HTMLElement) {
+        const circles = this.svg.selectAll<SVGCircleElement, BubbleChartData>('circle');
+
+        if (!this.tooltip) {
+            this.tooltip = createTooltip(container);
+        }
+
+        registerTooltip(circles as any, this.tooltip, container, (d: BubbleChartData) => {
             return `
-                Country: ${ d.country }<br>
-                ${ this.yAxisLabel() }: ${ d.yValue }<br>
-                ${ this.xAxisLabel() }: ${ d.xValue }<br>
-                ${ this.zAxisLabel() }: ${ d.radius }
-            `;
+        Country: ${ d.country }<br>
+        ${ this.yAxisLabel() }: ${ d.yValue }<br>
+        ${ this.xAxisLabel() }: ${ d.xValue }<br>
+        ${ this.zAxisLabel() }: ${ d.radius }
+      `;
         });
     }
 }

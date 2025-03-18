@@ -37,7 +37,7 @@ import { BasePage } from '../base.page';
     `,
     template: `
         <div class="w-full">
-            <app-year-slider [min]="2000" [max]="2025" autoIncrement/>
+            <app-year-slider [min]="2010" [max]="2025" autoIncrement/>
         </div>
 
         <div class="flex justify-between items-center w-full max-w-3xl mx-auto mb-5 gap-4">
