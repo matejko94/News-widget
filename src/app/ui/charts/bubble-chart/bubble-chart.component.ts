@@ -7,6 +7,7 @@ export interface BubbleChartData {
     xValue: number;
     yValue: number;
     radius: number;
+    countryCode: string;
     country: string;
     color: string;
 }
@@ -191,7 +192,7 @@ export class BubbleChartComponent extends Chart<BubbleChartData[]> {
             .duration(750)
             .attr('x', d => xScale(d.xValue))
             .attr('y', d => yScale(d.yValue) - zScale(d.radius) - 5)
-            .text(d => d.country);
+            .text(d => d.countryCode);
 
         labels
             .exit()

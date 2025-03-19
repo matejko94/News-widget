@@ -16,13 +16,9 @@ import { BasePage } from '../base.page';
     selector: 'bubble-page',
     standalone: true,
     imports: [
-        LineChartComponent,
         YearSliderComponent,
         BubbleChartComponent,
         MenuComponent,
-        LineChartComponent,
-        LineChartComponent,
-        BubbleChartComponent,
         LineChartComponent,
         AsyncPipe,
     ],
@@ -132,6 +128,7 @@ export default class BubblePage extends BasePage implements OnInit {
             xValue: value.indicator1_value,
             yValue: value.indicator2_value,
             radius: value.indicator3_value,
+            countryCode: value.country_code,
             country: value.country_name,
             color: getColorByCountryCode(value.country_code)!
         }));
