@@ -80,7 +80,7 @@ export class BubbleChartComponent extends Chart<BubbleChartData[]> {
         const chartWidth = width - this.margin.left - this.margin.right;
         const chartHeight = height - this.margin.top - this.margin.bottom;
 
-        this.createSvg(container, width, height);
+        this.svg = this.createSvg(container, width, height);
         const { xScale, yScale, zScale } = this.prepareScales(chartWidth, chartHeight);
         this.createAxes(xScale, yScale, chartHeight);
         this.updateBubbles(xScale, yScale, zScale);
@@ -88,17 +88,18 @@ export class BubbleChartComponent extends Chart<BubbleChartData[]> {
         this.addChartTooltip(container);
     }
 
-    private createSvg(container: HTMLElement, width: number, height: number): void {
-        this.svg = select(container).select<SVGSVGElement>('svg').node()
+    private createSvg(container: HTMLElement, width: number, height: number) {
+        const svg = select(container).select<SVGSVGElement>('svg').node()
             ? select(container).select<SVGSVGElement>('svg')
             : select(container).append('svg');
 
-        this.svg
+        svg
             .attr('width', width)
-            .attr('height', height);
-        this.svg
+            .attr('height', height)
             .append('g')
             .attr('transform', `translate(${ this.margin.left }, ${ this.margin.top })`);
+
+        return svg;
     }
 
     private prepareScales(chartWidth: number, chartHeight: number) {
