@@ -32,7 +32,7 @@ import { BasePage } from '../base.page';
     template: `
         <div class="w-full flex flex-col items-end">
             <app-year-slider [min]="2000" [max]="2025" autoIncrement/>
-            <app-menu queryParam="region" label="Select region" [options]="worldRegionOptions" class="w-fit mr-4"/>
+            <app-menu queryParam="region" label="Select region" [options]="worldRegionOptions" class="w-fit mr-4" showClear/>
         </div>
 
         <div class="flex max-md:flex-col justify-between max-md:justify-start w-full h-full max-md:h-fit

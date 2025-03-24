@@ -33,7 +33,7 @@ import { BasePage } from '../base.page';
     `,
     template: `
         <div class="flex justify-end items-center w-full mt-3 mb-5 pr-4">
-            <app-menu queryParam="topic" label="Topic" [options]="topicOptions()"/>
+            <app-menu queryParam="topic" label="Topic" [options]="topicOptions()" showClear/>
         </div>
         @if (data$ | async; as data) {
             @if (data.nodes.length) {

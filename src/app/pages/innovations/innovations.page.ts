@@ -94,9 +94,11 @@ export default class InnovationsPage extends BasePage {
     }
 
     private setIndustryOptions({ nodes }: InnovationResponseDto) {
-        this.industryOptions.set(nodes.map(node => ({
-            label: node.industry,
-            value: node.industry
+        const uniqueIndustries = [...new Set(nodes.map(node => node.industry))];
+
+        this.industryOptions.set(uniqueIndustries.map(industry => ({
+            label: industry,
+            value: industry
         })));
     }
 }

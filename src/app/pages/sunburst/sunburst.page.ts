@@ -31,8 +31,7 @@ import { BasePage } from '../base.page';
     `,
     template: `
         @if (topicOptions().length) {
-            <app-menu queryParam="topic" label="Select topic" [options]="topicOptions()"
-                      class="absolute right-3 top-14 z-10"/>
+            <app-menu queryParam="topic" label="Select topic" [options]="topicOptions()" showClear class="absolute right-3 top-14 z-10"/>
         }
 
         @if (node$ | async; as node) {
@@ -63,7 +62,7 @@ export default class SunburstPage extends BasePage implements OnInit {
     private setupNodes(): Observable<SunburstNode | undefined> {
         return this.selectedTopic$.pipe(
             loadingMap(topics => this.newsService.getTopics(
-                this.sdg() === '0' ? [ 'Landslide', 'Flood', 'Debris' ] : topics.wikiConcepts
+                this.sdg() === '0' ? ['Landslide', 'Flood', 'Debris'] : topics.wikiConcepts
             )),
             map(topics => topics ? this.mapToNode(topics) : undefined),
         )

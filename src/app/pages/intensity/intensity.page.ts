@@ -34,7 +34,7 @@ import { BasePage } from '../base.page';
             <app-year-slider [min]="2000" [max]="2025" autoIncrement/>
         </div>
         <div class="flex justify-end items-center w-full mb-5 pr-4">
-            <app-menu queryParam="topic" label="Indicator X" [options]="topicOptions()" showClear/>
+            <app-menu queryParam="topic" label="Topic" [options]="topicOptions()" showClear/>
         </div>
 
         <div class="flex flex-col justify-start w-full h-fit">

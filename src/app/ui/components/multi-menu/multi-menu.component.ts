@@ -25,7 +25,7 @@ export interface Option {
             [options]="options()" [ngModel]="selected()" (ngModelChange)="onChange($event)"
             optionLabel="label" optionValue="value" [maxSelectedLabels]="2" [filter]="false"
             [placeholder]="label()" display="chip" class="w-80 border border-gray-300"
-            [showToggleAll]="false" [showClear]="true"
+            [showToggleAll]="false" [showClear]="true" appendTo="body"
         />
     `
 })
