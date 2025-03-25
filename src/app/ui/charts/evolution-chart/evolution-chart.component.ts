@@ -76,85 +76,111 @@ export class NetworkGraphComponent extends Chart<GraphData> {
     public minNodeSize = input<number>(5);
     public maxNodeSize = input<number>(20);
     public forceStrength = input<number>(-600);
+    private nodeGroups!: Selection<SVGGElement, GraphNode, SVGGElement, unknown>;
+    private links!: Selection<SVGLineElement, GraphLink, SVGGElement, unknown>;
     private simulation!: Simulation<GraphNode, GraphLink>;
+    private tooltip!: Selection<HTMLDivElement, any, any, any>;
 
     protected override renderChart(): void {
         const container = this.chartContainer().nativeElement;
-        container.innerHTML = '';
 
         const { width, height } = container.getBoundingClientRect();
         if (!width || !height) return;
 
         const chartGroup = this.createSvg(container, width, height);
 
+        if (!this.tooltip) {
+            this.tooltip = createTooltip(container);
+        }
+
         if (!this.data().nodes.length) return;
 
-        const linkSelection = this.drawLinks(chartGroup);
-        const nodeGroupSelection = this.drawNodes(chartGroup);
-
-        nodeGroupSelection.call(this.addDragBehavior());
-
-        this.addTooltips(container, nodeGroupSelection.select('circle'), linkSelection);
-        this.initForceSimulation(nodeGroupSelection, linkSelection, width, height);
+        this.links = this.updateLinks(chartGroup);
+        this.nodeGroups = this.updateNodes(chartGroup, this.data().nodes);
+        this.nodeGroups.call(this.addDragBehavior());
+        this.addTooltips(container, this.nodeGroups.select('circle'), this.links);
+        this.initForceSimulation(this.nodeGroups, this.links, width, height);
     }
 
     private createSvg(container: HTMLElement, width: number, height: number) {
-        return select(container)
-            .append('svg')
+        const svg = select(container).select<SVGSVGElement>('svg').node()
+            ? select(container).select<SVGSVGElement>('svg')
+            : select(container).append('svg');
+
+        svg
             .attr('width', width)
             .attr('height', height)
-            .append('g');
+
+        return svg.select<SVGGElement>('g.chart-group').empty()
+            ? svg.append('g').attr('class', 'chart-group')
+            : svg.select<SVGGElement>('g.chart-group');
     }
 
-    private drawLinks(chart: Selection<SVGGElement, unknown, null, undefined>) {
+    private updateLinks(chart: Selection<SVGGElement, unknown, null, undefined>) {
         const weights = this.data().links.map(link => link.weight);
-        const minWeightVal = Math.min(...weights);
-        const maxWeightVal = Math.max(...weights);
-
         const edgeScale = scaleLinear()
-            .domain([ minWeightVal, maxWeightVal ])
+            .domain([ Math.min(...weights), Math.max(...weights) ])
             .range([ this.minEdgeSize(), this.maxEdgeSize() ]);
 
-        return chart
-            .selectAll<SVGLineElement, GraphLink>('.link')
-            .data(this.data().links)
-            .enter()
+        const linkSelection = chart.selectAll<SVGLineElement, GraphLink>('.link')
+            .data(this.data().links, link => {
+                // @ts-ignore
+                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                // @ts-ignore
+                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                return `${ sourceId }-${ targetId }`;
+            });
+
+        linkSelection.exit().remove();
+
+        const linkEnter = linkSelection.enter()
             .append('line')
             .attr('class', 'link')
+            .attr('stroke-width', 0);
+
+        const mergedLinks = linkEnter.merge(linkSelection);
+        mergedLinks
+            .transition()
+            .duration(750)
             .attr('stroke-width', d => edgeScale(d.weight));
+
+        return mergedLinks;
     }
 
-    private drawNodes(chart: Selection<SVGGElement, unknown, null, undefined>) {
-        const radiusList = this.data().nodes.map(node => node.radius);
-        const minRadius = Math.min(...radiusList);
-        const maxRadius = Math.max(...radiusList);
-
+    private updateNodes(chart: Selection<SVGGElement, unknown, null, undefined>, nodes: GraphNode[]) {
+        const radiusList = nodes.map(node => node.radius);
         const radiusScale = scaleLinear()
-            .domain([ minRadius, maxRadius ])
+            .domain([ Math.min(...radiusList), Math.max(...radiusList) ])
             .range([ this.minNodeSize(), this.maxNodeSize() ]);
 
-        const nodeGroup = chart
-            .selectAll('g.node-group')
-            .data(this.data().nodes)
-            .enter()
+        const nodeSelection = chart.selectAll<SVGGElement, GraphNode>('g.node-group')
+            .data(nodes, d => d.id);
+
+        const nodeEnter = nodeSelection.enter()
             .append('g')
             .attr('class', 'node-group');
 
-        nodeGroup
-            .append('circle')
+        nodeEnter.append('circle')
             .attr('class', 'node')
             .attr('r', d => radiusScale(d.radius))
             .attr('fill', d => d.color);
 
-        nodeGroup
-            .append('text')
-            .text(d => d.id)
+        nodeEnter.append('text')
             .attr('text-anchor', 'middle')
-            .attr('dy', d => -(radiusScale(d.radius) + 4))
             .attr('font-size', '10px')
-            .attr('fill', '#333');
+            .attr('fill', '#333')
+            .text(d => d.id);
 
-        return nodeGroup;
+        const mergedNodes = nodeEnter.merge(nodeSelection);
+
+        mergedNodes.select('text')
+            .transition()
+            .duration(750)
+            .attr('dy', d => -(radiusScale(d.radius) + 4));
+
+        nodeSelection.exit().remove();
+
+        return mergedNodes;
     }
 
     private addDragBehavior() {
@@ -186,13 +212,11 @@ export class NetworkGraphComponent extends Chart<GraphData> {
         nodeSelection: Selection<SVGCircleElement, GraphNode, SVGGElement, unknown>,
         linkSelection: Selection<SVGLineElement, GraphLink, SVGGElement, unknown>
     ): void {
-        const tooltip = createTooltip(container);
-
-        registerTooltip(nodeSelection, tooltip, container, d => {
+        registerTooltip(nodeSelection, this.tooltip, container, d => {
             return `<strong>Topic:</strong> ${ d.id }<br>Total articles: ${ d.radius }`;
         });
 
-        registerTooltip(linkSelection, tooltip, container, d => {
+        registerTooltip(linkSelection, this.tooltip, container, d => {
             return `<strong>Link:</strong> ${ (d.source as any).id } - ${ (d.target as any).id }<br>Shared articles: ${ d.weight }`;
         });
     }
@@ -213,6 +237,7 @@ export class NetworkGraphComponent extends Chart<GraphData> {
                 'isolate',
                 this.isolateUnlinkedNodesForce(nodes, links, width / 2, height / 2, 0.1)
             )
+            .alphaDecay(0.01)
             .on('tick', () => {
                 linkSelection
                     .attr('x1', d => (d.source as any)?.x ?? 0)
