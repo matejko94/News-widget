@@ -1,8 +1,8 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, map, Observable } from 'rxjs';
-import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
+import { getSDGColor } from '../../../../configuration/colors/policy/sdg.colors';
 import { loadingMap } from '../../common/utility/loading-map';
 import { EducationService } from '../../domain/education/service/education.service';
 import { EventSdgsDto } from '../../domain/education/types/event-sdgs.dto';
@@ -37,7 +37,8 @@ import { BasePage } from '../base.page';
         </div>
         @if (data$ | async; as data) {
             @if (data.nodes.length) {
-                <app-force-directed-chart [data]="data" tagLabel="SDG" [legend]="legend" class="w-full flex-1 min-h-0"/>
+                <app-force-directed-chart [data]="data" tagLabel="SDG" [fixedColor]="color()"
+                                          class="w-full flex-1 min-h-0"/>
             } @else {
                 <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
                     No data available
@@ -50,7 +51,7 @@ export default class LinksPage extends BasePage implements OnInit {
     private educationService = inject(EducationService);
 
     public data$!: Observable<ForceData | undefined>;
-    public legend = SDG_COLORS.colors.map((color, index) => ({ label: `SDG ${ index + 1 }`, color }));
+    public color = computed(() => getSDGColor(this.sdg()));
 
     public override ngOnInit() {
         super.ngOnInit();

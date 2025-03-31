@@ -51,11 +51,7 @@ export default class CollaborationPage extends BasePage implements OnInit {
     private mapData(response: IndustryCollaborationResponseDto): ForceData {
         const linkCounts = new Map<string, number>();
         const links = this.mapLinks(
-            response.edges.filter(({
-                                       source,
-                                       target,
-                                       shared_sdgs
-                                   }) => !source.includes('Other') && !target.includes('Other') && shared_sdgs > 2),
+            response.edges,
             linkCounts
         );
         const nodes = this.mapNodes(response.nodes, linkCounts);
@@ -64,27 +60,44 @@ export default class CollaborationPage extends BasePage implements OnInit {
     }
 
     private mapNodes(data: IndustryNodeDto[], linkCounts: Map<string, number>): ForceNode[] {
-        return data.map(node => ({
-            id: node.industry,
-            group: node.region,
-            tag: node.industry,
-            totalLinks: linkCounts.get(node.industry) ?? 0,
-            color: getRegionColor(node.region),
-        }));
+        return data
+            .map(node => ({
+                id: node.industry,
+                group: node.region,
+                tag: node.industry,
+                // consider also region in name
+                totalLinks: linkCounts.get(node.industry) ?? 0,
+                color: getRegionColor(node.region),
+            }))
+            .filter(node => {
+                const okay = node.totalLinks > 0;
+
+                if (!okay) {
+                    console.warn(`Node ${ node.tag } has no links`);
+                } else {
+                    console.log(`Node ${ node.tag } has ${ node.totalLinks } links`);
+                }
+
+                return okay;
+            });
     }
 
     private mapLinks(data: IndustryEdgeDto[], linkCounts: Map<string, number>): ForceLink[] {
-        return data.map(edge => {
-            this.incrementLinkCount(edge.source.split('_')[0], linkCounts);
-            this.incrementLinkCount(edge.target.split('_')[0], linkCounts);
+        return data
+            .filter(({ source, target, shared_sdgs }) =>
+                !source.includes('Other') && !target.includes('Other') && shared_sdgs > 2
+            )
+            .map(edge => {
+                this.incrementLinkCount(edge.source.split('_')[0], linkCounts);
+                this.incrementLinkCount(edge.target.split('_')[0], linkCounts);
 
-            return {
-                source: edge.source.split('_')[0],
-                target: edge.target.split('_')[0],
-                link: edge.shared_sdgs.toString(),
-                value: edge.shared_sdgs,
-            };
-        });
+                return {
+                    source: edge.source.split('_')[0],
+                    target: edge.target.split('_')[0],
+                    link: edge.shared_sdgs.toString(),
+                    value: edge.shared_sdgs,
+                };
+            });
     }
 
     private incrementLinkCount(nodeId: string, linkCounts: Map<string, number>) {

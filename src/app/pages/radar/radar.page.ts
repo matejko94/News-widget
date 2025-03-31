@@ -31,7 +31,7 @@ import { BasePage } from '../base.page';
     `,
     template: `
         <div class="w-full flex flex-col items-end">
-            <app-year-slider [min]="2000" [max]="2025" autoIncrement/>
+            <app-year-slider [min]="2015" [max]="2025" autoIncrement/>
             <app-menu queryParam="region" label="Select region" [options]="worldRegionOptions" class="w-fit mr-4" showClear/>
         </div>
 

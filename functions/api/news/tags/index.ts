@@ -1,8 +1,8 @@
-import {ElasticCloudTagResponse} from "./interface/elastic-cloud-tag-response.interface";
-import {Tag} from "./interface/tag.interface";
-import {Env} from "../../../env";
+import { Env } from '../../../env';
+import { ElasticCloudTagResponse } from './interface/elastic-cloud-tag-response.interface';
+import { Tag } from './interface/tag.interface';
 
-export const onRequestGet: PagesFunction<Env> = async ({request, env}) => {
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const searchParams = new URL(request.url).searchParams;
 
     const startDate = new Date(searchParams.get('startDate'));
@@ -11,7 +11,7 @@ export const onRequestGet: PagesFunction<Env> = async ({request, env}) => {
     const limit = searchParams.get('limit');
 
     if (!startDate || !endDate || !sdg || !limit) {
-        return new Response('Missing one of queryParameters: startDate, endDate, sdg, limit', {status: 400});
+        return new Response('Missing one of queryParameters: startDate, endDate, sdg, limit', { status: 400 });
     }
 
     const tags = await getCloudData(
@@ -23,7 +23,7 @@ export const onRequestGet: PagesFunction<Env> = async ({request, env}) => {
         +limit
     );
 
-    return new Response(JSON.stringify({tags}));
+    return new Response(JSON.stringify({ tags }));
 }
 
 async function getCloudData(url: string, credentials: string, sdg: string, startDate: Date, endDate: Date, limit: number): Promise<Tag[]> {
@@ -44,7 +44,7 @@ async function getCloudData(url: string, credentials: string, sdg: string, start
                         },
                         {
                             match: {
-                                "SDG.keyword": `SDG ${sdg}`
+                                'SDG.keyword': `SDG ${ sdg }`
                             }
                         }
                     ]
@@ -53,10 +53,10 @@ async function getCloudData(url: string, credentials: string, sdg: string, start
             aggs: {
                 concept_labels: {
                     terms: {
-                        field: "concepts.label.eng.keyword",
+                        field: 'concepts.label.eng.keyword',
                         size: limit,
                         order: {
-                            _count: "desc"
+                            _count: 'desc'
                         }
                     }
                 }

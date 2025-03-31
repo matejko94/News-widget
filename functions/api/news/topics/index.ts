@@ -24,8 +24,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 async function getTopics(url: string, apiKey: string, topics: string[]): Promise<TopicDto[]> {
     console.log({topics})
     const response = await HttpClient.post(url, {
-        body:
-            JSON.stringify({
+        body: JSON.stringify({
                 'apiKey': apiKey,
                 'resultType': 'categoryAggr',
                 'categoryAggrSortBy': 'date',

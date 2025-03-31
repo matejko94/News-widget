@@ -1,18 +1,5 @@
 import { Component, effect, input } from '@angular/core';
-import {
-    D3DragEvent,
-    drag,
-    forceCenter,
-    forceCollide,
-    forceLink,
-    forceManyBody,
-    forceSimulation,
-    scaleOrdinal,
-    schemeCategory10,
-    select,
-    Selection,
-    Simulation,
-} from 'd3';
+import { D3DragEvent, drag, forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation, scaleOrdinal, schemeCategory10, select, Selection, Simulation, } from 'd3';
 import { LegendItem, PillLegendComponent } from '../../components/legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
@@ -78,6 +65,7 @@ export interface ForceData {
 export class ForceDirectedChartComponent extends Chart<ForceData> {
     public data = input.required<ForceData>();
     public tagLabel = input.required<string>();
+    public fixedColor = input<string | undefined>();
     public legend = input<LegendItem[]>();
 
     private svg!: Selection<SVGSVGElement, unknown, null, unknown>;
@@ -142,7 +130,7 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
             .data(this.data().nodes)
             .join('circle')
             .attr('r', this.nodeRadius)
-            .attr('fill', d => this.colorScale(d.group))
+            .attr('fill', d => this.fixedColor() || this.colorScale(d.group))
             .call(
                 drag<SVGCircleElement, ForceNode>()
                     .on('start', this.dragStarted.bind(this))
@@ -191,11 +179,9 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
         d.fy = event.y;
     }
 
-    private dragEnded(event: D3DragEvent<SVGCircleElement, ForceNode, unknown>, d: ForceNode): void {
+    private dragEnded(event: D3DragEvent<SVGCircleElement, ForceNode, unknown>): void {
         if (!event.active) {
             this.simulation.alphaTarget(0);
         }
-        d.fx = null;
-        d.fy = null;
     }
 }

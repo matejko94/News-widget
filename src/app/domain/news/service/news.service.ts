@@ -2,9 +2,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, of, shareReplay } from 'rxjs';
 import { environment } from '../../../../../environment/environment';
+import { ElasticNewsItem } from '../../../../../functions/api/news/articles/interface/elastic-news-item';
 import { CloudTagResponse } from '../../../../../functions/api/news/tags/interface/cloud-tag-response.interface';
 import { Tag } from '../../../../../functions/api/news/tags/interface/tag.interface';
-import { NewsItem, NewsResponse } from '../types/news-item.interface';
 import { NewsOnDateDto } from '../types/news-on-date.dto';
 import { TopicDto } from '../types/topic.dto';
 
@@ -27,17 +27,13 @@ export class NewsService {
         )
     }
 
-    public getNews(shownDate: Date, topicPage: string): Observable<NewsItem[]> {
-        const tommorow = new Date(shownDate);
-        tommorow.setDate(tommorow.getDate() + 1);
-
-        return this.http.get<NewsResponse>(
-            `${ environment.api.newsArticles.url }?topicPage=${ topicPage }&startDate=${ this.isoDateWithoutTime(shownDate) }&endDate=${ this.isoDateWithoutTime(tommorow) }`,
+    public getNews(sdg: number, shownDate: Date): Observable<ElasticNewsItem[]> {
+        return this.http.get<ElasticNewsItem[]>(
+            `${ environment.api.newsArticles.url }?sdg=${ sdg }&date=${ this.isoDateWithoutTime(shownDate) }`,
             {
                 headers: new HttpHeaders({ 'Content-Type': 'application/json' })
             }
         ).pipe(
-            map(response => response.articles.results),
             catchError(e => {
                 console.error('Failed to fetch news', e);
                 return of([])

@@ -117,7 +117,7 @@ export default class EvolutionPage extends BasePage implements OnInit {
     }
 
     private getNodeColor(activeTopic: string, topic: string): string {
-        if (activeTopic === topic) {
+        if (activeTopic.toLowerCase() === topic.toLowerCase()) {
             return 'red';
         }
 

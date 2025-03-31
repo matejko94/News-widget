@@ -5,8 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
 import { BehaviorSubject, combineLatestWith, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, skip, startWith, switchMap, tap } from 'rxjs';
+import { ElasticNewsItem } from '../../../../functions/api/news/articles/interface/elastic-news-item';
 import { NewsService } from '../../domain/news/service/news.service';
-import { NewsItem } from '../../domain/news/types/news-item.interface';
 import { HeatmapComponent } from '../../ui/charts/heatmap/heatmap.component';
 import { SentimentMeterComponent } from '../../ui/charts/sentiment-meter/sentiment-meter.component';
 import { MenuComponent } from '../../ui/components/menu/menu.component';
@@ -157,7 +157,7 @@ export default class NewsPage extends BasePage implements OnInit {
     public loadedDate$ = new BehaviorSubject(new Date());
     public isLoading$ = new BehaviorSubject(false);
     public onlyEnglish = signal(false);
-    public news$: Observable<NewsItem[]> = EMPTY;
+    public news$: Observable<ElasticNewsItem[]> = EMPTY;
     public cloudData$: Observable<CloudData[]> = EMPTY;
     public sentimentAverage$: Observable<number> = EMPTY;
     public width = toSignal(fromEvent(window, 'resize').pipe(
@@ -182,19 +182,18 @@ export default class NewsPage extends BasePage implements OnInit {
         return this.shownDate$.pipe(
             filter(() => !this.isLoading$.value),
             tap(() => this.isLoading$.next(true)),
-            switchMap(shownDate => this.newsService.getNews(shownDate, this.getErId(this.sdg()!))),
+            switchMap(shownDate => this.newsService.getNews(+this.sdg()!, shownDate)),
             tap(() => {
                 this.isLoading$.next(false);
                 this.loadedDate$.next(this.shownDate$.value);
             }),
             combineLatestWith(topic$, onlyEnglish$),
             map(([ news, topic, onlyEnglish ]) => this.filterNews(news, topic, onlyEnglish)),
-            tap(news => console.log({ news })),
             shareReplay(1),
         );
     }
 
-    private filterNews(news: NewsItem[], topic: string | undefined, onlyEnglish: boolean) {
+    private filterNews(news: ElasticNewsItem[], topic: string | undefined, onlyEnglish: boolean) {
         return news
             .filter(newsItem => {
                 if (topic) {

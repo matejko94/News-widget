@@ -77,6 +77,13 @@ export class HeatmapComponent implements OnInit {
             },
         styles: [
             {
+                'featureType': 'administrative.country',
+                'elementType': 'geometry',
+                'stylers': [
+                    { 'visibility': 'off' }
+                ]
+            },
+            {
               "featureType": "administrative.country",
               "elementType": "labels",
               "stylers": [
