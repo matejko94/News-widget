@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG12_CONFIGURATION: SdgConfiguration = {
     id: 12,
     color: '#4CAE50',
-    erId: 'c4d5af06-b9d4-4f28-91a9-148e28c24fb3',
     topics: [
         {
             name: 'Waste Reduction',
@@ -48,23 +47,19 @@ export const SDG12_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
+            name: 'Imports of goods and services',
+        },
+        {
+            name: 'Inflation, consumer prices'
+        },
+        {
+            name: 'General government final consumption expenditure',
+        },
+        {
             name: 'Annualized growth in per capita real survey mean consumption or income, bottom 40%',
         },
         {
             name: 'Annualized growth in per capita real survey mean consumption or income, total population',
-        },
-        {
-            name: 'General government final consumption expenditure',
-        },
-        {
-            name: 'General government final consumption expenditure',
-        },
-        {
-            name: 'Imports of goods and services',
-        },
-
-        {
-            name: 'Inflation, consumer prices'
         },
         {
             name: 'Mineral rents',

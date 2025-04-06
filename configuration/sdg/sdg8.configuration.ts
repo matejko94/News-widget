@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG8_CONFIGURATION: SdgConfiguration = {
     id: 8,
     color: '#4CAE50',
-    erId: 'e3da153d-a47b-477c-8336-3ac7dd69fbdd',
     topics: [
         {
             name: 'Unemployment',
@@ -48,6 +47,15 @@ export const SDG8_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
+            name: 'Broad money growth',
+        },
+        {
+            name: 'Bank capital to assets ratio',
+        },
+        {
+            name: 'Coverage of social safety net programs',
+        },
+        {
             name: 'Account ownership at a financial institution or with a mobile-money-service provider',
         },
         {
@@ -75,13 +83,7 @@ export const SDG8_CONFIGURATION: SdgConfiguration = {
             name: 'Account ownership at a financial institution or with a mobile-money-service provider, young adults',
         },
         {
-            name: 'Bank capital to assets ratio',
-        },
-        {
             name: 'Bank nonperforming loans to total gross loans',
-        },
-        {
-            name: 'Broad money growth',
         },
         {
             name: 'Broad money to total reserves ratio',
@@ -112,9 +114,6 @@ export const SDG8_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Coverage of social insurance programs in richest quintile',
-        },
-        {
-            name: 'Coverage of social safety net programs',
         },
         {
             name: 'Coverage of social safety net programs in 2nd quintile',

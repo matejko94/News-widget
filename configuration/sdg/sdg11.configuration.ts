@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG11_CONFIGURATION: SdgConfiguration = {
     id: 11,
     color: '#4CAE50',
-    erId: '66f79af1-579d-405e-a480-a93bdd7d0d89',
     topics: [
         {
             name: 'Green Urban Planning',
@@ -51,6 +50,12 @@ export const SDG11_CONFIGURATION: SdgConfiguration = {
             name: 'Air transport, freight',
         },
         {
+            name: 'Railways, goods transported',
+        },
+        {
+            name: 'PM2.5 air pollution, mean annual exposure',
+        },
+        {
             name: 'Air transport, passengers carried',
         },
         {
@@ -63,13 +68,7 @@ export const SDG11_CONFIGURATION: SdgConfiguration = {
             name: 'Investment in transport with private participation',
         },
         {
-            name: 'PM2.5 air pollution, mean annual exposure',
-        },
-        {
             name: 'PM2.5 air pollution, population exposed to levels exceeding WHO guideline value',
-        },
-        {
-            name: 'Railways, goods transported',
         },
         {
             name: 'Railways, passengers carried',

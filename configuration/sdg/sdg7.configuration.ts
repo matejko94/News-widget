@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG7_CONFIGURATION: SdgConfiguration = {
     id: 7,
     color: '#4CAE50',
-    erId: 'cc939003-2b43-4ffc-9fd5-1dcd9eb93256',
     topics: [
         {
             name: 'Renewable Energy',
@@ -48,16 +47,19 @@ export const SDG7_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
-            name: 'Access to clean fuels and technologies for cooking',
-        },
-        {
-            name: 'Access to electricity',
-        },
-        {
             name: 'Access to electricity, rural',
         },
         {
             name: 'Access to electricity, urban',
+        },
+        {
+            name: 'Renewable electricity output',
+        },
+        {
+            name: 'Access to clean fuels and technologies for cooking',
+        },
+        {
+            name: 'Access to electricity',
         },
         {
             name: 'Coal rents',
@@ -73,9 +75,6 @@ export const SDG7_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Oil rents',
-        },
-        {
-            name: 'Renewable electricity output',
         },
     ]
 };

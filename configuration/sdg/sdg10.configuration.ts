@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG10_CONFIGURATION: SdgConfiguration = {
     id: 10,
     color: '#4CAE50',
-    erId: '922d5944-0b06-4e7d-8ed4-e25252982c89',
     topics: [
         {
             name: 'Social Exclusion',
@@ -48,6 +47,15 @@ export const SDG10_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
+            name: 'Tariff rate, applied, simple mean, all products'
+        },
+        {
+            name: 'Tax revenue (% GDP)'
+        },
+        {
+            name: 'Proportion of people living below 50 percent of median income'
+        },
+        {
             name: 'Children in employment, female'
         },
         {
@@ -58,9 +66,6 @@ export const SDG10_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Physicians'
-        },
-        {
-            name: 'Proportion of people living below 50 percent of median income'
         },
         {
             name: 'Population spending above 10% of household consumption on healthcare'
@@ -78,9 +83,6 @@ export const SDG10_CONFIGURATION: SdgConfiguration = {
             name: 'Proportion of time spent on unpaid domestic and care work, male'
         },
         {
-            name: 'Tariff rate, applied, simple mean, all products'
-        },
-        {
             name: 'Tariff rate, applied, simple mean, manufactured products'
         },
         {
@@ -94,9 +96,6 @@ export const SDG10_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Tariff rate, applied, weighted mean, primary products'
-        },
-        {
-            name: 'Tax revenue (% GDP)'
         },
         {
             name: 'Tax revenue (LCU)'

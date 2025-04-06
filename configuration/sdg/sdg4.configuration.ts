@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG4_CONFIGURATION: SdgConfiguration = {
     id: 4,
     color: '#4CAE50',
-    erId: '854d95ef-56f1-4455-aee6-1781da704c63',
     topics: [
         {
             name: 'Lifelong Learning',
@@ -51,13 +50,16 @@ export const SDG4_CONFIGURATION: SdgConfiguration = {
             name: 'Adolescents out of school',
         },
         {
+            name: 'Children out of school',
+        },
+        {
+            name: 'Compulsory education, duration',
+        },
+        {
             name: 'Adolescents out of school, female',
         },
         {
             name: 'Adolescents out of school, male',
-        },
-        {
-            name: 'Children out of school',
         },
         {
             name: 'Children out of school, female',
@@ -73,9 +75,6 @@ export const SDG4_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Children out of school, primary, male',
-        },
-        {
-            name: 'Compulsory education, duration',
         },
         {
             name: 'Educational attainment, at least Bachelor\'s or equivalent, population 25+, female',

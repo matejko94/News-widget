@@ -50,8 +50,4 @@ export abstract class BasePage implements OnInit {
             queryParamsHandling: 'merge',
         });
     }
-
-    protected getErId(sdg: string): string {
-        return this.configuration.get(sdg).erId;
-    }
 }

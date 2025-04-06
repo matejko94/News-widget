@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG9_CONFIGURATION: SdgConfiguration = {
     id: 9,
     color: '#4CAE50',
-    erId: '3d89bf89-149e-480d-8eae-27c3f8e7c9aa',
     topics: [
         {
             name: 'Infrastructure',
@@ -48,6 +47,15 @@ export const SDG9_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
+            name: 'New business density',
+        },
+        {
+            name: 'Patent applications, nonresidents',
+        },
+        {
+            name: 'Patent applications, residents',
+        },
+        {
             name: 'Industry',
         },
         {
@@ -70,15 +78,6 @@ export const SDG9_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Net official development assistance received',
-        },
-        {
-            name: 'New business density',
-        },
-        {
-            name: 'Patent applications, nonresidents',
-        },
-        {
-            name: 'Patent applications, residents',
         },
         {
             name: 'Periodicity and timeliness assessment of statistical capacity',

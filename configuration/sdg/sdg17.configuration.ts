@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG17_CONFIGURATION: SdgConfiguration = {
     id: 17,
     color: '#4CAE50',
-    erId: '807418e1-2097-4eed-85e5-63ab530369fa',
     topics: [
         {
             name: 'Global Cooperation',
@@ -54,10 +53,10 @@ export const SDG17_CONFIGURATION: SdgConfiguration = {
             name: 'Average transaction cost of sending remittances to a specific country',
         },
         {
-            name: 'Foreign direct investment, net inflows (%GDP)',
+            name: 'Foreign direct investment, net inflows (BoP $)',
         },
         {
-            name: 'Foreign direct investment, net inflows (BoP $)',
+            name: 'Foreign direct investment, net inflows (%GDP)',
         },
         {
             name: 'Merchandise trade',

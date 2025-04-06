@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG1_CONFIGURATION: SdgConfiguration = {
     id: 1,
     color: '#E5243B',
-    erId: '132a0b27-3a0d-4cfc-ae1a-a3bf391b4f48',
     topics: [
         {
             name: 'Microfinance',

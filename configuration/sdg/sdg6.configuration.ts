@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG6_CONFIGURATION: SdgConfiguration = {
     id: 6,
     color: '#4CAE50',
-    erId: 'd2781b6e-ac05-4b9e-a4c9-ec0d1a4c2d57',
     topics: [
         {
             name: 'Water Access',
@@ -48,6 +47,15 @@ export const SDG6_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
+            name: 'Water productivity, total',
+        },
+        {
+            name: 'Renewable internal freshwater resources, total',
+        },
+        {
+            name: 'Level of water stress: freshwater withdrawal as a proportion of available freshwater resources',
+        },
+        {
             name: 'Annual freshwater withdrawals, agriculture',
         },
         {
@@ -64,9 +72,6 @@ export const SDG6_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Investment in water and sanitation with private participation',
-        },
-        {
-            name: 'Level of water stress: freshwater withdrawal as a proportion of available freshwater resources',
         },
         {
             name: 'People practicing open defecation',
@@ -124,12 +129,6 @@ export const SDG6_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Renewable internal freshwater resources per capita',
-        },
-        {
-            name: 'Renewable internal freshwater resources, total',
-        },
-        {
-            name: 'Water productivity, total',
         },
     ]
 };

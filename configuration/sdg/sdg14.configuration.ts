@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG14_CONFIGURATION: SdgConfiguration = {
     id: 14,
     color: '#4CAE50',
-    erId: '48f2290b-50de-412c-bd89-73bbd5202fab',
     topics: [
         {
             name: 'Marine Ecosystems',
@@ -51,10 +50,10 @@ export const SDG14_CONFIGURATION: SdgConfiguration = {
             name: 'Aquaculture production',
         },
         {
-            name: 'Fish species, threatened',
+            name: 'Marine protected areas',
         },
         {
-            name: 'Marine protected areas',
+            name: 'Fish species, threatened',
         },
         {
             name: 'Terrestrial and marine protected areas',

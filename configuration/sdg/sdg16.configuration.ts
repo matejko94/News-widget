@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG16_CONFIGURATION: SdgConfiguration = {
     id: 16,
     color: '#4CAE50',
-    erId: '177b7af0-8fcf-49e7-8a68-d47a976b0770',
     topics: [
         {
             name: 'Rule of Law',
@@ -48,7 +47,7 @@ export const SDG16_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
-            name: 'Battle-related deaths',
+            name: 'Intentional homicides',
         },
         {
             name: 'Bribery incidence',
@@ -57,7 +56,7 @@ export const SDG16_CONFIGURATION: SdgConfiguration = {
             name: 'Firms expected to give gifts in meetings with tax officials',
         },
         {
-            name: 'Intentional homicides',
+            name: 'Battle-related deaths',
         },
         {
             name: 'Intentional homicides, female',

@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG13_CONFIGURATION: SdgConfiguration = {
     id: 13,
     color: '#4CAE50',
-    erId: '32cc9ec6-9dc8-41ad-882a-3701c22ef9da',
     topics: [
         {
             name: 'Climate Change',

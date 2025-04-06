@@ -3,7 +3,6 @@ import { SdgConfiguration } from '../../src/app/domain/configuration/types/sdg-c
 export const SDG3_CONFIGURATION: SdgConfiguration = {
     id: 3,
     color: '#4CAE50',
-    erId: 'acfcde9c-99c4-44f6-85d1-23d811e41bf6',
     topics: [
         {
             name: 'Rare Diseases',
@@ -48,10 +47,16 @@ export const SDG3_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
-            name: 'Adolescent fertility rate',
+            name: 'Mortality rate, neonatal',
         },
         {
             name: 'Births attended by skilled health staff',
+        },
+        {
+            name: 'Prevalence of undernourishment',
+        },
+        {
+            name: 'Adolescent fertility rate',
         },
         {
             name: 'Completeness of birth registration',
@@ -129,9 +134,6 @@ export const SDG3_CONFIGURATION: SdgConfiguration = {
             name: 'Mortality rate attributed to unsafe water, unsafe sanitation and lack of hygiene',
         },
         {
-            name: 'Mortality rate, neonatal',
-        },
-        {
             name: 'Mortality rate, under - 5',
         },
         {
@@ -196,9 +198,6 @@ export const SDG3_CONFIGURATION: SdgConfiguration = {
         },
         {
             name: 'Prevalence of stunting, height for age, male',
-        },
-        {
-            name: 'Prevalence of undernourishment',
         },
         {
             name: 'Prevalence of underweight, weight for age',
