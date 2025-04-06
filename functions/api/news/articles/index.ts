@@ -23,27 +23,37 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 }
 
 async function getArticles(url: string, apiKey: string, sdg: string, date: Date): Promise<ElasticNewsItem[]> {
-    console.log({ url, apiKey, sdg, date });
+    const filters: any[] = [
+        {
+            range: {
+                dateTimePub: {
+                    gte: date.toISOString(),
+                    lt: new Date(new Date(date).setDate(date.getDate() + 1)).toISOString(),
+                }
+            }
+        },
+    ]
+
+    if (sdg !== '0') {
+        filters.push({
+            match: {
+                'SDG.keyword': `SDG ${ sdg }`
+            }
+        });
+    } else {
+        filters.push({
+            match: {
+                'pilot.keyword': 'Landslides'
+            }
+        })
+    }
+
     const response = await HttpClient.post(url, {
         body: JSON.stringify({
-            'size': 10000,
-            'query': {
-                'bool': {
-                    'must': [
-                        {
-                            'range': {
-                                'dateTimePub': {
-                                    'gte': date.toISOString(),
-                                    'lt': new Date(new Date(date).setDate(date.getDate() + 1)).toISOString(),
-                                }
-                            }
-                        },
-                        {
-                            'match': {
-                                'SDG.keyword': `SDG ${ sdg }`
-                            }
-                        }
-                    ]
+            size: 10000,
+            query: {
+                bool: {
+                    must: filters
                 }
             }
         }),

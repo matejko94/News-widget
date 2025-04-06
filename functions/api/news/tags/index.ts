@@ -27,27 +27,38 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 }
 
 async function getCloudData(url: string, credentials: string, sdg: string, startDate: Date, endDate: Date, limit: number): Promise<Tag[]> {
+    const filters: any = [
+        {
+            range: {
+                date: {
+                    gte: startDate.toISOString(),
+                    lt: endDate.toISOString()
+                }
+            }
+        },
+    ];
+
+    if (sdg !== '0') {
+        filters.push({
+            match: {
+                'SDG.keyword': `SDG ${ sdg }`
+            }
+        });
+    } else {
+        filters.push({
+            match: {
+                'pilot.keyword': 'Landslides'
+            }
+        })
+    }
+
     const response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify({
             size: 0,
             query: {
                 bool: {
-                    must: [
-                        {
-                            range: {
-                                date: {
-                                    gte: startDate.toISOString(),
-                                    lt: endDate.toISOString()
-                                }
-                            }
-                        },
-                        {
-                            match: {
-                                'SDG.keyword': `SDG ${ sdg }`
-                            }
-                        }
-                    ]
+                    must: filters
                 }
             },
             aggs: {

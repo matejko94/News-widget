@@ -14,19 +14,6 @@ import { TopicDto } from '../types/topic.dto';
 export class NewsService {
     private http = inject(HttpClient);
 
-    public getCloudData(sdg: string, startDate: Date, endDate: Date, limit: number): Observable<Tag[]> {
-        return this.http.get<CloudTagResponse>(
-            `${ environment.api.tags.url }?startDate=${ this.isoDateWithoutTime(startDate) }&endDate=${ this.isoDateWithoutTime(endDate) }&sdg=${ sdg }&limit=${ limit }`
-        ).pipe(
-            map(response => response.tags),
-            catchError(e => {
-                console.error('failed to fetch data', e);
-                return of([])
-            }),
-            shareReplay(1)
-        )
-    }
-
     public getNews(sdg: number, shownDate: Date): Observable<ElasticNewsItem[]> {
         return this.http.get<ElasticNewsItem[]>(
             `${ environment.api.newsArticles.url }?sdg=${ sdg }&date=${ this.isoDateWithoutTime(shownDate) }`,
@@ -36,6 +23,19 @@ export class NewsService {
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch news', e);
+                return of([])
+            }),
+            shareReplay(1)
+        )
+    }
+
+    public getCloudTags(sdg: string, startDate: Date, endDate: Date, limit: number): Observable<Tag[]> {
+        return this.http.get<CloudTagResponse>(
+            `${ environment.api.tags.url }?startDate=${ this.isoDateWithoutTime(startDate) }&endDate=${ this.isoDateWithoutTime(endDate) }&sdg=${ sdg }&limit=${ limit }`
+        ).pipe(
+            map(response => response.tags),
+            catchError(e => {
+                console.error('failed to fetch data', e);
                 return of([])
             }),
             shareReplay(1)
