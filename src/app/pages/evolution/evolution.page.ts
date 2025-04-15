@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, filter, map, Observable, switchMap } from 'rxjs';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { EvolutionLinkDto } from '../../domain/science/types/evolution-link.dto';
-import { GraphData, GraphNode, NetworkGraphComponent } from '../../ui/charts/evolution-chart/evolution-chart.component';
+import { GraphData, GraphNode, NetworkChartComponent } from '../../ui/charts/network-chart/network-chart.component';
 import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { YearSliderComponent } from '../../ui/components/year-slider/year-slider.component';
 import { BasePage } from '../base.page';
@@ -16,7 +16,7 @@ import { BasePage } from '../base.page';
         YearSliderComponent,
         MenuComponent,
         AsyncPipe,
-        NetworkGraphComponent,
+        NetworkChartComponent,
     ],
     styles: `
         :host {
@@ -34,11 +34,14 @@ import { BasePage } from '../base.page';
 
 
         <div class="flex flex-col gap-10 justify-start flex-1 w-full relative">
-            <app-menu class="absolute top-0 right-10 z-20" queryParam="topic" label="Topic" [options]="topicOptions()"/>
+            @if (topicOptions().length) {
+                <app-menu class="absolute top-0 right-10 z-20" queryParam="topic" label="Topic"
+                          [options]="topicOptions()"/>
+            }
 
             @if (data$ | async; as data) {
                 @if (data.nodes.length) {
-                    <app-network-graph class="h-[150%]" [data]="data"/>
+                    <app-network-chart class="h-[150%]" [data]="data"/>
                 } @else {
                     <div class="flex items-center justify-center flex-1 text-2xl text-gray-400">
                         No data available

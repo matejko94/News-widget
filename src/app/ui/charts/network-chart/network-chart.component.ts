@@ -21,7 +21,7 @@ export interface GraphData {
 }
 
 @Component({
-    selector: 'app-network-graph',
+    selector: 'app-network-chart',
     styles: [
         `
             :host {
@@ -69,7 +69,7 @@ export interface GraphData {
         </div>
     `
 })
-export class NetworkGraphComponent extends Chart<GraphData> {
+export class NetworkChartComponent extends Chart<GraphData> {
     public data = input.required<GraphData>();
     public minEdgeSize = input<number>(2);
     public maxEdgeSize = input<number>(20);
