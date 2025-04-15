@@ -36,7 +36,7 @@ import { BasePage } from '../base.page';
         <div class="flex flex-col gap-10 justify-start flex-1 w-full relative">
             @if (topicOptions().length) {
                 <app-menu class="absolute top-0 right-10 z-20" queryParam="topic" label="Topic"
-                          [options]="topicOptions()"/>
+                          [options]="topicOptions()" showClear/>
             }
 
             @if (data$ | async; as data) {
@@ -51,7 +51,7 @@ import { BasePage } from '../base.page';
         </div>
     `
 })
-export default class EvolutionPage extends BasePage implements OnInit {
+export default class EvolutionPage extends BasePage {
     private scienceService = inject(ScienceService);
 
     public year = input<string>();
@@ -68,25 +68,17 @@ export default class EvolutionPage extends BasePage implements OnInit {
             toObservable(this.topic)
         ]).pipe(
             filter(([ year ]) => !!year),
-            switchMap(([ year, topic ]) => this.getData(+this.sdg(), topic!, +year!)),
+            switchMap(([ year, topic ]) => this.getData(+this.sdg(), topic, +year!)),
         );
     }
 
-    public override ngOnInit() {
-        super.ngOnInit();
-
-        if (!this.topic()) {
-            setTimeout(() => this.setQueryParam('topic', this.topicOptions()[0].value));
-        }
-    }
-
-    private getData(sdg: number, topic: string, year: number): Observable<GraphData> {
+    private getData(sdg: number, topic: string | undefined, year: number): Observable<GraphData> {
         return this.scienceService.getTopicEvolution(sdg, topic, year).pipe(
             map(data => this.mapGraphData(topic, data))
         );
     }
 
-    private mapGraphData(selectedTopic: string, intersections: EvolutionLinkDto[]): GraphData {
+    private mapGraphData(selectedTopic: string | undefined, intersections: EvolutionLinkDto[]): GraphData {
         if (selectedTopic !== this.previousTopic) {
             this.previousNodes.clear();
         }
@@ -109,7 +101,7 @@ export default class EvolutionPage extends BasePage implements OnInit {
         return { nodes, links };
     }
 
-    private mapNodes(intersections: EvolutionLinkDto[], activeTopic: string): GraphNode[] {
+    private mapNodes(intersections: EvolutionLinkDto[], activeTopic: string | undefined): GraphNode[] {
         return intersections
             .filter(topic => !topic.concept_display_name.includes(this.separator))
             .map(topic => ({
@@ -119,8 +111,8 @@ export default class EvolutionPage extends BasePage implements OnInit {
             }));
     }
 
-    private getNodeColor(activeTopic: string, topic: string): string {
-        if (activeTopic.toLowerCase() === topic.toLowerCase()) {
+    private getNodeColor(activeTopic: string | undefined, topic: string): string {
+        if (activeTopic?.toLowerCase() === topic.toLowerCase()) {
             return 'red';
         }
 

@@ -22,9 +22,15 @@ export class ScienceService {
         );
     }
 
-    public getTopicEvolution(sdg: number, topic: string, year: number): Observable<EvolutionLinkDto[]> {
+    public getTopicEvolution(sdg: number, topic: string | undefined, year: number): Observable<EvolutionLinkDto[]> {
+        const params = new URLSearchParams({ year: year.toString() });
+
+        if (topic) {
+            params.set('topic', topic);
+        }
+
         return this.http.get<EvolutionLinkDto[]>(
-            `${ environment.api.url }/science/evolution/${ sdg }?topic=${ topic }&year=${ year }`
+            `${ environment.api.url }/science/evolution/${ sdg }?${ params }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch science topic evolution', e);
