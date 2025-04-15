@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { D3DragEvent, drag, forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation, scaleOrdinal, schemeCategory10, select, Selection, Simulation, } from 'd3';
 import { LegendItem, PillLegendComponent } from '../../components/legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
@@ -69,7 +69,6 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
     public legend = input<LegendItem[]>();
 
     private svg!: Selection<SVGSVGElement, unknown, null, unknown>;
-    private colorScale = scaleOrdinal(schemeCategory10);
     private simulation!: Simulation<ForceNode, ForceLink>;
     private nodeRadius = 5;
 
@@ -85,7 +84,7 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
         const nodes = this.drawNodes();
         this.setupSimulationUpdates(height, width, links as any, nodes as any);
         const tooltip = createTooltip(container);
-        registerTooltip(nodes as any, tooltip, container, (d: any) => `${ d.id }`);
+        registerTooltip(nodes as any, tooltip, container, (d: any) => `${ d.tag }`);
         registerTooltip(links as any, tooltip, container, (d: any) => `Source: ${ d.source.id }<br>Target: ${ d.target.id }<br>Shared sdgs: ${ d.value }`);
     }
 
@@ -122,7 +121,7 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
             .data(this.data().nodes)
             .join('circle')
             .attr('r', this.nodeRadius)
-            .attr('fill', d => this.fixedColor() || this.colorScale(d.group))
+            .attr('fill', d => this.fixedColor() || d.color)
             .call(
                 drag<SVGCircleElement, ForceNode>()
                     .on('start', this.dragStarted.bind(this))

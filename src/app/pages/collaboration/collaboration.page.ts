@@ -29,7 +29,10 @@ import { BasePage } from '../base.page';
     `,
     template: `
         @if (data$ | async; as data) {
-            <app-force-directed-chart [data]="data" tagLabel="Country" class="w-full flex-1 min-h-0"/>
+            <app-force-directed-chart
+                class="w-full flex-1 min-h-0" [data]="data"
+                tagLabel="Country" [legend]="worldRegionOptions"
+            />
         }
     `,
 })

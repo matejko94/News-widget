@@ -2,7 +2,6 @@ import { computed, Directive, inject, Injector, input, OnInit, signal } from '@a
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, Observable } from 'rxjs';
-import { transform } from 'topojson-client';
 import { WorldBankRegions } from '../../../configuration/regions/world-regions';
 import { Configuration } from '../domain/configuration/service/configuration';
 import { Topic } from '../domain/configuration/types/topic.interface';
