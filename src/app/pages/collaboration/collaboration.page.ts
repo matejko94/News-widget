@@ -36,6 +36,7 @@ import { BasePage } from '../base.page';
 export default class CollaborationPage extends BasePage implements OnInit {
     private innovationsService = inject(InnovationsService);
     public data$!: Observable<ForceData | undefined>;
+    private minShared = 4;
 
     public override ngOnInit() {
         super.ngOnInit();
@@ -50,10 +51,7 @@ export default class CollaborationPage extends BasePage implements OnInit {
 
     private mapData(response: IndustryCollaborationResponseDto): ForceData {
         const linkCounts = new Map<string, number>();
-        const links = this.mapLinks(
-            response.edges,
-            linkCounts
-        );
+        const links = this.mapLinks(response.edges, linkCounts);
         const nodes = this.mapNodes(response.nodes, linkCounts);
 
         return { nodes, links };
@@ -61,14 +59,17 @@ export default class CollaborationPage extends BasePage implements OnInit {
 
     private mapNodes(data: IndustryNodeDto[], linkCounts: Map<string, number>): ForceNode[] {
         return data
-            .map(node => ({
-                id: node.industry,
-                group: node.region,
-                tag: node.industry,
-                // consider also region in name
-                totalLinks: linkCounts.get(node.industry) ?? 0,
-                color: getRegionColor(node.region),
-            }))
+            .map(node => {
+                const id = node.industry + ' | ' + node.region;
+
+                return {
+                    id: id,
+                    group: node.region,
+                    tag: node.industry,
+                    totalLinks: linkCounts.get(id.toLowerCase()) ?? 0,
+                    color: getRegionColor(node.region),
+                }
+            })
             .filter(node => {
                 const okay = node.totalLinks > 0;
 
@@ -85,15 +86,22 @@ export default class CollaborationPage extends BasePage implements OnInit {
     private mapLinks(data: IndustryEdgeDto[], linkCounts: Map<string, number>): ForceLink[] {
         return data
             .filter(({ source, target, shared_sdgs }) =>
-                !source.includes('Other') && !target.includes('Other') && shared_sdgs > 2
+                !source.includes('Other') &&
+                !target.includes('Other') &&
+                shared_sdgs > this.minShared
             )
             .map(edge => {
-                this.incrementLinkCount(edge.source.split('_')[0], linkCounts);
-                this.incrementLinkCount(edge.target.split('_')[0], linkCounts);
+                const [ sourceName, sourceRegion ] = edge.source.split('_');
+                const [ targetName, targetRegion ] = edge.target.split('_');
+                const source = `${ sourceName } | ${ sourceRegion }`;
+                const target = `${ targetName } | ${ targetRegion }`;
+
+                this.incrementLinkCount(source.toLowerCase(), linkCounts);
+                this.incrementLinkCount(target.toLowerCase(), linkCounts);
 
                 return {
-                    source: edge.source.split('_')[0],
-                    target: edge.target.split('_')[0],
+                    source: source,
+                    target: target,
                     link: edge.shared_sdgs.toString(),
                     value: edge.shared_sdgs,
                 };

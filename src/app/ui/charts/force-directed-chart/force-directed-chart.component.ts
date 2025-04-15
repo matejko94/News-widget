@@ -73,14 +73,6 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
     private simulation!: Simulation<ForceNode, ForceLink>;
     private nodeRadius = 5;
 
-    constructor() {
-        super();
-        effect(() => {
-            this.data();
-            this.renderChart();
-        });
-    }
-
     protected override renderChart(): void {
         const container = this.chartContainer().nativeElement;
         container.innerHTML = '';
@@ -93,8 +85,8 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
         const nodes = this.drawNodes();
         this.setupSimulationUpdates(height, width, links as any, nodes as any);
         const tooltip = createTooltip(container);
-        registerTooltip(nodes as any, tooltip, container, (d: any) => `Node: ${ d.id }`);
-        registerTooltip(links as any, tooltip, container, (d: any) => `Link: ${ d.source.id } - ${ d.target.id }`);
+        registerTooltip(nodes as any, tooltip, container, (d: any) => `${ d.id }`);
+        registerTooltip(links as any, tooltip, container, (d: any) => `Source: ${ d.source.id }<br>Target: ${ d.target.id }<br>Shared sdgs: ${ d.value }`);
     }
 
     private createSvg(container: HTMLElement, width: number, height: number): void {
@@ -107,7 +99,7 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
     private initializeSimulation(width: number, height: number): void {
         this.simulation = forceSimulation(this.data().nodes)
             .force('link', forceLink<ForceNode, ForceLink>(this.data().links).id(d => d.id).strength(0.1))
-            .force('charge', forceManyBody().strength(-50))
+            .force('charge', forceManyBody().strength(-350))
             .force('center', forceCenter(width / 3, height / 3))
             .force('collide', forceCollide(this.nodeRadius * 2));
     }
