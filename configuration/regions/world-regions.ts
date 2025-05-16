@@ -2,8 +2,8 @@ import { Option } from '../../src/app/ui/components/menu/menu.component';
 
 export const WorldBankRegions: (Option & { color: string })[] = [
     {
-        label: 'Australia and New Zealand',
-        value: 'Australia and New Zealand',
+        label: 'Australia and New Zealand and Oceania',
+        value: 'Australia and New Zealand and Oceania',
         color: '#00857e'
     },
     {
