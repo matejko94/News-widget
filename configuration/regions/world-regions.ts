@@ -31,11 +31,11 @@ export const WorldBankRegions: (Option & { color: string })[] = [
         value: 'Northern Africa and Western Asia',
         color: '#bb8f5b'
     },
-    {
-        label: 'Oceania',
-        value: 'Oceania',
-        color: '#39aaba'
-    },
+    // {
+    //     label: 'Oceania',
+    //     value: 'Oceania',
+    //     color: '#39aaba'
+    // },
     {
         label: 'Sub-Saharan Africa',
         value: 'Sub-Saharan Africa',
