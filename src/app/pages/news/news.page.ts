@@ -218,7 +218,7 @@ export default class NewsPage extends BasePage implements OnInit {
                 const dayAfter = new Date(shownDate);
                 dayAfter.setDate(dayAfter.getDate() + 1);
 
-                return this.newsService.getCloudTags(this.sdg(), shownDate, dayAfter, 18)
+                return this.newsService.getCloudTags(this.sdg()!, shownDate, dayAfter, 18)
             }),
             shareReplay(1),
         )

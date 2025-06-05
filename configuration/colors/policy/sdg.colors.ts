@@ -20,7 +20,11 @@ export const SDG_COLORS = {
     ]
 }
 
-export function getSDGColor(sdg: string): string {
+export function getSDGColor(sdg: string | undefined): string {
+    if (!sdg) {
+        return '#6B7280';
+    }
+    
     const sdgNumber = parseInt(sdg.replace('SDG ', ''));
     return SDG_COLORS.colors[sdgNumber - 1];
 }

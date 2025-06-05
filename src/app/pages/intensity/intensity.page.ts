@@ -62,7 +62,7 @@ export default class IntensityPage extends BasePage implements OnInit {
             toObservable(this.year)
         ]).pipe(
             filter(([ sdg, _, year ]) => !!sdg && !!year),
-            switchMap(([ sdg, topic, year ]) => this.newsService.getNewsIntensityPerYear(sdg, year!, topic)),
+            switchMap(([ sdg, topic, year ]) => this.newsService.getNewsIntensityPerYear(sdg!, year!, topic)),
             map(news => news.map(({ country, value }) => {
                 return {
                     country,
@@ -79,7 +79,7 @@ export default class IntensityPage extends BasePage implements OnInit {
             toObservable(this.topic)
         ]).pipe(
             filter(([ sdg ]) => !!sdg),
-            switchMap(([ sdg, topic ]) => this.newsService.getNewsIntensity(sdg, topic)),
+            switchMap(([ sdg, topic ]) => this.newsService.getNewsIntensity(sdg!, topic)),
             map(news => news.map(({ date, value }) => ({ date: new Date(date), count: value })))
         );
     }

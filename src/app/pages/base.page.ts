@@ -13,7 +13,7 @@ export abstract class BasePage implements OnInit {
     private configuration = inject(Configuration);
     protected injector = inject(Injector);
 
-    public sdg = input.required<string>();
+    public sdg = input<string | undefined>();
     public topic = input<string>();
     public region = input<string>();
     public selectedRegion$ = toObservable(this.region);
@@ -26,9 +26,14 @@ export abstract class BasePage implements OnInit {
     public selectedTopic$!: Observable<Topic>;
 
     public ngOnInit() {
-        const configuration = this.configuration.get(this.sdg());
-        this.availableTopics.set(configuration.topics);
-        this.availableIndicators.set(configuration.indicators);
+        const sdgValue = this.sdg();
+        
+        if (sdgValue) {
+            const configuration = this.configuration.get(sdgValue);
+            
+            this.availableTopics.set(configuration.topics);
+            this.availableIndicators.set(configuration.indicators);
+        }
 
         this.selectedTopic$ = this.route.queryParamMap.pipe(
             map(params => params.get('topic')),

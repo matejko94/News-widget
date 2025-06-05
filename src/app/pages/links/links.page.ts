@@ -60,7 +60,7 @@ export default class LinksPage extends BasePage implements OnInit {
             toObservable(this.sdg, { injector: this.injector }),
             toObservable(this.topic, { injector: this.injector }),
         ]).pipe(
-            loadingMap(([ sdg, topic ]) => this.educationService.getEventSdgs(+sdg, topic)),
+            loadingMap(([ sdg, topic ]) => this.educationService.getEventSdgs(sdg? +sdg : undefined, topic)),
             map(data => data && this.mapData(data))
         );
     }

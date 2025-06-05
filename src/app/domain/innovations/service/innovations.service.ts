@@ -11,15 +11,19 @@ import { InnovationResponseDto } from '../types/innovation-response.dto';
 export class InnovationsService {
     private http = inject(HttpClient);
 
-    public getIndustryCollaborations(sdg: number, topic: string | undefined) {
+    public getIndustryCollaborations(sdg: number | undefined, topic: string | undefined) {
         const params = new URLSearchParams();
 
         if (topic) {
             params.set('topic', topic);
         }
 
+        if (sdg !== undefined) {
+            params.set('sdg', sdg.toString());
+        }
+
         return this.http.get<IndustryCollaborationResponseDto>(
-            `${ environment.api.url }/innovation/collaborations/${ sdg }` + (params.size ? `?${ params }` : '')
+            `${ environment.api.url }/innovation/collaborations` + (params.size ? `?${ params }` : '')
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch industry collaborations', e);
@@ -28,9 +32,15 @@ export class InnovationsService {
         );
     }
 
-    public getIntersections(sdg: number) {
+    public getIntersections(sdg: number | undefined) {
+        const params = new URLSearchParams();
+
+        if (sdg !== undefined) {
+            params.set('sdg', sdg.toString());
+        }
+
         return this.http.get<InnovationResponseDto>(
-            `${ environment.api.url }/innovation/sdg/${ sdg }`
+            `${ environment.api.url }/innovation/sdg` + (params.size ? `?${ params }` : '')
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch industry collaborations', e);

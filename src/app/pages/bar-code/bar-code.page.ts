@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, filter, map, Observable } from 'rxjs';
 import { loadingMap } from '../../common/utility/loading-map';
 import { sortBySdg } from '../../common/utility/sort-by-sdg';
 import { PolicyService } from '../../domain/policy/service/policy.service';
@@ -65,7 +65,7 @@ export default class BarCodePage extends BasePage implements OnInit {
             toObservable(this.sdg, { injector: this.injector }),
             toObservable(this.region, { injector: this.injector })
         ]).pipe(
-            loadingMap(([ sdg, region ]) => this.policyService.getIntersectingSdgPolicies(+sdg, region, 20)),
+            loadingMap(([ sdg, region ]) => this.policyService.getIntersectingSdgPolicies(sdg ? +sdg : undefined, region, 20)),
             map(intersection => intersection
                 ?.sort((a, b) => sortBySdg(a.sdg, b.sdg))
                 .flatMap(({ sdg, sdg_intersections }) => sdg_intersections.map(({ key, value }) => ({

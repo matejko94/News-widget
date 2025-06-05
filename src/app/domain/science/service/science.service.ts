@@ -11,9 +11,17 @@ import { TopTopicsPerYear } from '../types/topic-timespan.interface';
 export class ScienceService {
     private http = inject(HttpClient);
 
-    public getTopTopicsPerYear(sdg: number, limit: number): Observable<TopTopicsPerYear[]> {
+    public getTopTopicsPerYear(sdg: number | undefined, limit: number): Observable<TopTopicsPerYear[]> {
+        const params = new URLSearchParams({
+            limit: limit.toString()
+        });
+        
+        if (sdg !== undefined) {
+            params.set('sdg', sdg.toString());
+        }
+
         return this.http.get<TopTopicsPerYear[]>(
-            `${ environment.api.url }/science/timespan?sdg=${ sdg }&limit=${ limit }`
+            `${ environment.api.url }/science/timespan?${ params }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch science top topics per year', e);

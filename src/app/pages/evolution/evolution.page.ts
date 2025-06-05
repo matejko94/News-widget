@@ -64,11 +64,12 @@ export default class EvolutionPage extends BasePage {
         super();
 
         this.data$ = combineLatest([
+            toObservable(this.sdg),
             toObservable(this.year),
             toObservable(this.topic)
         ]).pipe(
-            filter(([ year ]) => !!year),
-            switchMap(([ year, topic ]) => this.getData(+this.sdg(), topic, +year!)),
+            filter(([ sdg, year, _ ]) => !!sdg && !!year),
+            switchMap(([ sdg, year, topic ]) => this.getData(+sdg!, topic, +year!)),
         );
     }
 

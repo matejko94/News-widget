@@ -11,8 +11,12 @@ import { EventSdgsDto } from '../types/event-sdgs.dto';
 export class EducationService {
     private http = inject(HttpClient);
 
-    public getEventSdgs(sdg: number, topic: string | undefined) {
-        const params = new URLSearchParams({ sdg: sdg.toString() });
+    public getEventSdgs(sdg: number | undefined, topic: string | undefined) {
+        const params = new URLSearchParams();
+
+        if (sdg !== undefined) {
+            params.set('sdg', sdg.toString());
+        }
 
         if (topic) {
             params.set('topic', topic);

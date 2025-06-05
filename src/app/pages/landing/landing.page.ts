@@ -30,14 +30,14 @@ import { SafeUrlPipe } from '../../common/pipe/safe-url.pipe';
             <div class="mb-4">
                 <label for="sdg-select" class="block text-sm font-medium text-gray-700">Select SDG Number:</label>
                 <select id="sdg-select" [(ngModel)]="selectedSdg" (change)="updateIframe()">
-                    @for (sdg of config.sdgs; track sdg) {
-                        <option [value]="sdg">SDG {{ sdg }}</option>
+                    @for (sdg of getAvailableSdgs(); track sdg) {
+                        <option [value]="sdg">{{ sdg === null ? 'No SDG' : 'SDG ' + sdg }}</option>
                     }
                 </select>
             </div>
             <div class="mb-4">
                 <label for="widget-select" class="block text-sm font-medium text-gray-700">Select Widget:</label>
-                <select id="widget-select" [(ngModel)]="selectedWidget" (change)="updateIframe()">
+                <select id="widget-select" [(ngModel)]="selectedWidget" (change)="onWidgetChange()">
                     <option *ngFor="let widget of widgetKeys" [value]="config.widgets[widget]">{{ widget }}</option>
                 </select>
             </div>
@@ -62,6 +62,15 @@ import { SafeUrlPipe } from '../../common/pipe/safe-url.pipe';
     `
 })
 export default class LandingPage {
+    private readonly widgetsWithNoSdgOption = [
+        '/education/radial',      // 3. Radial
+        '/policy/heatmap',        // 4. Barcode
+        '/policy/timeline',       // 5. Timeline
+        '/innovations/collaboration', // 8. Collaboration
+        '/education/links',       // 10. Links
+        '/innovations/relations', // 11. Relations
+    ];
+
     config: any = {
         sdgs: Array.from({ length: 18 }, (_, i) => i),
         widgets: {
@@ -100,11 +109,36 @@ export default class LandingPage {
         return Object.keys(this.config.environment);
     }
 
+    getAvailableSdgs() {
+        const currentWidget = this.selectedWidget() as string;
+        
+        if (this.widgetsWithNoSdgOption.includes(currentWidget)) {
+            return [null, ...this.config.sdgs];
+        }
+        
+        return this.config.sdgs;
+    }
+
     updateIframe() {
-        this.currentUrl.set(`${ this.selectedEnvironment() }${ this.selectedWidget() }?sdg=${ this.selectedSdg() }`);
+        const sdgValue = this.selectedSdg();
+        const sdgParam = (sdgValue !== null && sdgValue !== 'null') ? `?sdg=${sdgValue}` : '';
+        this.currentUrl.set(`${this.selectedEnvironment()}${this.selectedWidget()}${sdgParam}`);
     }
 
     copyUrl() {
         navigator.clipboard.writeText(this.currentUrl());
+    }
+
+    onWidgetChange() {
+        const currentWidget = this.selectedWidget() as string;
+        
+        if (this.widgetsWithNoSdgOption.includes(currentWidget)) {
+            this.selectedSdg.set(null);
+            
+        } else if (this.selectedSdg() === null) {
+            this.selectedSdg.set(this.config.sdgs[1]);
+        }
+        
+        this.updateIframe();
     }
 }

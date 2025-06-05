@@ -53,8 +53,7 @@ export default class InnovationsPage extends BasePage {
         return combineLatest([
             toObservable(this.sdg),
         ]).pipe(
-            filter(([ sdg ]) => !!sdg),
-            switchMap(([ sdg ]) => this.innovationsService.getIntersections(+sdg)),
+            switchMap(([ sdg ]) => this.innovationsService.getIntersections(sdg ? +sdg : undefined)),
             tap(data => this.setIndustryOptions(data)),
             combineLatestWith(toObservable(this.industries)),
             map((([ data, industries ]) => this.toChordData(data, industries))),

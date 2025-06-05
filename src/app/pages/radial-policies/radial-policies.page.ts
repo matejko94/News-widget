@@ -58,7 +58,10 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
 
         this.sdgPolicies$ = this.selectedRegion$
             .pipe(
-                loadingMap(region => this.policyService.getIntersectingSdgPolicies(+this.sdg(), region, 20)),
+                loadingMap(region => {
+                    const sdgValue = this.sdg();
+                    return this.policyService.getIntersectingSdgPolicies(sdgValue ? +sdgValue : undefined, region, 20);
+                }),
                 map(policies => policies ? this.groupBySdg(policies, 10) : null)
             );
     }

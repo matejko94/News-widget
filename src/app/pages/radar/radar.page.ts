@@ -77,7 +77,7 @@ export default class RadarPage extends BasePage implements OnInit {
             toObservable(this.year)
         ]).pipe(
             filter(([ sdg, _, year ]) => !!sdg && !!year),
-            switchMap(([ sdg, region, year ]) => this.policyService.getRadarData(+sdg, region, +year!)),
+            switchMap(([ sdg, region, year ]) => this.policyService.getRadarData(+sdg!, region, +year!)),
             shareReplay(1)
         );
 

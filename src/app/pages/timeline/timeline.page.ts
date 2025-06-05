@@ -54,7 +54,8 @@ export default class TimelinePage extends BasePage implements OnInit {
     }
 
     private setupData(): Observable<TimelineRow[]> {
-        return this.scienceService.getTopTopicsPerYear(+this.sdg(), 15).pipe(
+        const sdgValue = this.sdg();
+        return this.scienceService.getTopTopicsPerYear(sdgValue ? +sdgValue : undefined, 15).pipe(
             map(years => this.mapTopicsToRows(years))
         );
     }

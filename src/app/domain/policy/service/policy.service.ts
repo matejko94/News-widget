@@ -11,9 +11,18 @@ import { RadarDto } from '../types/radar.dto';
 export class PolicyService {
     private http = inject(HttpClient);
 
-    public getIntersectingSdgPolicies(sdg: number, region: string | undefined, limit: number): Observable<IntersectingPolicyDto[]> {
+    public getIntersectingSdgPolicies(sdg: number | undefined, region: string | undefined, limit: number): Observable<IntersectingPolicyDto[]> {
+        const params = new URLSearchParams({
+            region_code: region ?? 'All',
+            limit: limit.toString()
+        });
+        
+        if (sdg !== undefined) {
+            params.set('sdg', sdg.toString());
+        }
+
         return this.http.get<IntersectingPolicyDto[]>(
-            `${ environment.api.url }/policy/intersection?sdg=${ sdg }&region_code=${ region ?? 'All' }&limit=${ limit }`
+            `${ environment.api.url }/policy/intersection?${ params }`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch intersecting policies', e);
@@ -22,12 +31,15 @@ export class PolicyService {
         );
     }
 
-    public getRadarData(sdg: number, region: string | undefined, year: number): Observable<RadarDto[]> {
+    public getRadarData(sdg: number | undefined, region: string | undefined, year: number): Observable<RadarDto[]> {
         const params = new URLSearchParams({
-            sdg: sdg.toString(),
             year: year.toString(),
             region_code: region ?? 'All'
         });
+
+        if (sdg !== undefined) {
+            params.set('sdg', sdg.toString());
+        }
 
         return this.http.get<RadarDto[]>(
             `${ environment.api.url }/policy/radar?${ params }`
