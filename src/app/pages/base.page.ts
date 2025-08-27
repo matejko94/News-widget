@@ -14,6 +14,7 @@ export abstract class BasePage implements OnInit {
     protected injector = inject(Injector);
 
     public sdg = input<string | undefined>();
+    public pilot = input<string | undefined>();
     public topic = input<string>();
     public region = input<string>();
     public selectedRegion$ = toObservable(this.region);
@@ -27,10 +28,16 @@ export abstract class BasePage implements OnInit {
 
     public ngOnInit() {
         const sdgValue = this.sdg();
-        
+        const pilotValue = this.pilot();
+        console.log(pilotValue, 'pilotValue');
+        console.log(sdgValue, 'sdgValue');
         if (sdgValue) {
             const configuration = this.configuration.get(sdgValue);
             
+            this.availableTopics.set(configuration.topics);
+            this.availableIndicators.set(configuration.indicators);
+        }else if (pilotValue) {
+            const configuration = this.configuration.get(pilotValue);
             this.availableTopics.set(configuration.topics);
             this.availableIndicators.set(configuration.indicators);
         }

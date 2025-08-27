@@ -31,6 +31,28 @@ export class PolicyService {
         );
     }
 
+    public getIntersectingPilotPolicies(pilot: string | undefined, region: string | undefined, size: number): Observable<IntersectingPolicyDto[]> {
+        const params = new URLSearchParams({
+            region_code: region ?? 'All',
+            size: size.toString(),
+            format: 'json'
+        });
+
+        if (pilot && pilot !== null) {
+            return this.http.get<IntersectingPolicyDto[]>(
+                `${ environment.api.url }/policy/intersection/pilot/${ pilot }?${ params }`
+            ).pipe(
+                catchError(e => {
+                    console.error('Failed to fetch intersecting pilot policies', e);
+                    return of([])
+                })
+            );
+        }
+
+        // If no pilot or pilot is null, return empty array
+        return of([]);
+    }
+
     public getRadarData(sdg: number | undefined, region: string | undefined, year: number): Observable<RadarDto[]> {
         const params = new URLSearchParams({
             year: year.toString(),
@@ -49,5 +71,26 @@ export class PolicyService {
                 return of([])
             })
         );
+    }
+
+    public getPilotRadarData(pilot: string | undefined, region: string | undefined, year: number): Observable<RadarDto[]> {
+        const params = new URLSearchParams({
+            year: year.toString(),
+            region_code: region ?? 'All'
+        });
+
+        if (pilot && pilot !== null) {
+            return this.http.get<RadarDto[]>(
+                `${ environment.api.url }/policy/radar/pilot/${ pilot }?${ params }`
+            ).pipe(
+                catchError(e => {
+                    console.error('Failed to fetch pilot radar data', e);
+                    return of([])
+                })
+            );
+        }
+
+        // If no pilot or pilot is null, return empty array
+        return of([]);
     }
 }

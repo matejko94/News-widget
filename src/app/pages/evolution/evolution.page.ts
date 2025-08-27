@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, filter, map, Observable, switchMap } from 'rxjs';
+import { combineLatest, filter, map, Observable, switchMap, of } from 'rxjs';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { EvolutionLinkDto } from '../../domain/science/types/evolution-link.dto';
 import { GraphData, GraphNode, NetworkChartComponent } from '../../ui/charts/network-chart/network-chart.component';
@@ -66,17 +66,34 @@ export default class EvolutionPage extends BasePage {
         this.data$ = combineLatest([
             toObservable(this.sdg),
             toObservable(this.year),
-            toObservable(this.topic)
+            toObservable(this.topic),
+            toObservable(this.pilot)
         ]).pipe(
-            filter(([ sdg, year, _ ]) => !!sdg && !!year),
-            switchMap(([ sdg, year, topic ]) => this.getData(+sdg!, topic, +year!)),
+            filter(([sdg, year, topic, pilot]) => !!(sdg || pilot) && !!year),
+            switchMap(([sdg, year, topic, pilot]) => this.getData(sdg ? +sdg : undefined, topic, +year!, pilot)),
         );
     }
 
-    private getData(sdg: number, topic: string | undefined, year: number): Observable<GraphData> {
-        return this.scienceService.getTopicEvolution(sdg, topic, year).pipe(
-            map(data => this.mapGraphData(topic, data))
-        );
+    private getData(sdg: number | undefined, topic: string | undefined, year: number, pilot: string | undefined): Observable<GraphData> {
+        console.log('getData called with:', { sdg, topic, year, pilot });
+        
+        if (pilot && pilot !== null) {
+            console.log('Using pilot evolution for:', pilot);
+            return this.scienceService.getPilotEvolution(pilot, topic, year).pipe(
+                map(data => this.mapGraphData(topic, data))
+            );
+        }
+
+        if (sdg !== undefined) {
+            console.log('Using SDG evolution for:', sdg);
+            return this.scienceService.getTopicEvolution(sdg, topic, year).pipe(
+                map(data => this.mapGraphData(topic, data))
+            );
+        }
+
+        // If neither pilot nor sdg is available, return empty data
+        console.log('No pilot or SDG available, returning empty data');
+        return of({ nodes: [], links: [] });
     }
 
     private mapGraphData(selectedTopic: string | undefined, intersections: EvolutionLinkDto[]): GraphData {

@@ -62,6 +62,10 @@ export class Configuration {
                 return SDG16_CONFIGURATION;
             case '17':
                 return SDG17_CONFIGURATION;
+            case 'COP30':
+                return SDG1_CONFIGURATION;
+            case 'ELIAS':
+                return SDG1_CONFIGURATION;
             default:
                 throw new Error(`No configuration found for SDG ${sdg}`);
         }

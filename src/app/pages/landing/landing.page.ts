@@ -29,7 +29,7 @@ import { SafeUrlPipe } from '../../common/pipe/safe-url.pipe';
         <div class="w-full mx-auto px-8">
             <div class="mb-4">
                 <label for="sdg-select" class="block text-sm font-medium text-gray-700">Select SDG Number:</label>
-                <select id="sdg-select" [(ngModel)]="selectedSdg" (change)="updateIframe()">
+                <select id="sdg-select" [(ngModel)]="selectedSdg" (change)="onSdgChange()">
                     @for (sdg of getAvailableSdgs(); track sdg) {
                         <option [value]="sdg">{{ sdg === null ? 'No SDG' : 'SDG ' + sdg }}</option>
                     }
@@ -39,6 +39,15 @@ import { SafeUrlPipe } from '../../common/pipe/safe-url.pipe';
                 <label for="widget-select" class="block text-sm font-medium text-gray-700">Select Widget:</label>
                 <select id="widget-select" [(ngModel)]="selectedWidget" (change)="onWidgetChange()">
                     <option *ngFor="let widget of widgetKeys" [value]="config.widgets[widget]">{{ widget }}</option>
+                </select>
+            </div>
+            <!-- Select for pilot -->
+            <div class="mb-4">
+                <label for="pilot-select" class="block text-sm font-medium text-gray-700">Select Pilot:</label>
+                <select id="pilot-select" [(ngModel)]="selectedPilot" (change)="onPilotChange()">
+                    @for (pilot of getAvailablePilots(); track pilot) {
+                        <option [value]="pilot">{{ pilot === null ? 'No Pilot' : pilot }}</option>
+                    }
                 </select>
             </div>
             <div class="mb-4">
@@ -68,7 +77,9 @@ export default class LandingPage {
         '/policy/timeline',       // 5. Timeline
         '/innovations/collaboration', // 8. Collaboration
         '/education/links',       // 10. Links
+        '/science/evolution',
         '/innovations/relations', // 11. Relations
+        '/policy/radar',          // 12. Radar
     ];
 
     config: any = {
@@ -90,12 +101,17 @@ export default class LandingPage {
         environment: {
             'Local': 'http://localhost:4200',
             'Production': 'https://news-widget.pages.dev'
+        },
+        pilots: {
+            'COP30': 'COP30',
+            'ELIAS': 'ELIAS',
         }
     };
     public selectedSdg = signal(this.config.sdgs[1]);
     public selectedWidget = signal(Object.values(this.config.widgets)[0]);
     public selectedEnvironment = signal(Object.values((this.config.environment))[0]);
     public currentUrl = signal('');
+    public selectedPilot = signal(Object.values(this.config.pilots)[0]);
 
     public ngOnInit() {
         this.updateIframe();
@@ -103,6 +119,10 @@ export default class LandingPage {
 
     get widgetKeys() {
         return Object.keys(this.config.widgets);
+    }
+
+    get pilotKeys() {
+        return Object.keys(this.config.pilots);
     }
 
     get environmentKeys() {
@@ -115,14 +135,43 @@ export default class LandingPage {
         if (this.widgetsWithNoSdgOption.includes(currentWidget)) {
             return [null, ...this.config.sdgs];
         }
-        
+        console.log(this.config.sdgs, 'sdgs');
         return this.config.sdgs;
+    }
+
+    getAvailablePilots() {
+        return [null, ...Object.values(this.config.pilots)];
     }
 
     updateIframe() {
         const sdgValue = this.selectedSdg();
-        const sdgParam = (sdgValue !== null && sdgValue !== 'null') ? `?sdg=${sdgValue}` : '';
-        this.currentUrl.set(`${this.selectedEnvironment()}${this.selectedWidget()}${sdgParam}`);
+        const pilotValue = this.selectedPilot();
+        
+        let queryParams = [];
+        
+        if (sdgValue !== null && sdgValue !== 'null') {
+            queryParams.push(`sdg=${sdgValue}`);
+        }
+        
+        if (pilotValue && pilotValue !== null) {
+            queryParams.push(`pilot=${pilotValue}`);
+        }
+        
+        const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+        this.currentUrl.set(`${this.selectedEnvironment()}${this.selectedWidget()}${queryString}`);
+        console.log(this.currentUrl());
+    }
+
+    onPilotChange() {
+        //set sdg to null if pilot is selected
+        this.selectedSdg.set(null);
+        this.updateIframe();
+    }
+
+    onSdgChange() {
+        //set pilot to null if sdg is selected
+        this.selectedPilot.set(null);
+        this.updateIframe();
     }
 
     copyUrl() {
@@ -141,4 +190,6 @@ export default class LandingPage {
         
         this.updateIframe();
     }
+
+
 }

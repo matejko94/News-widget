@@ -124,7 +124,9 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
         const stackedInput: CellData[] = this.data().map(({ groupLabel, items }) => {
             const ranges: CellData['ranges'] = [];
             let currentTotal = 0;
-
+            console.log(items, 'items');
+            console.log(keys, 'keys');
+            console.log(groupLabel, 'groupLabel');
             for (const [ label, value ] of Object.entries(items)) {
                 const start = currentTotal;
                 currentTotal += value;
@@ -191,6 +193,7 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
         registerTooltip(paths, tooltip, this.chartContainer().nativeElement, (data) => {
             const [ hoveredMin, hoveredMax ] = data;
             const { total, ranges, groupLabel } = data.data as CellData;
+            console.log(data, 'data');
             const value = hoveredMax - hoveredMin;
             const label = ranges.find(({ start }) => start === hoveredMin)?.label;
             const percentage = (value / total * 100).toFixed(2);
