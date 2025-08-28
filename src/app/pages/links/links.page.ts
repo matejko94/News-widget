@@ -58,9 +58,17 @@ export default class LinksPage extends BasePage implements OnInit {
 
         this.data$ = combineLatest([
             toObservable(this.sdg, { injector: this.injector }),
+            toObservable(this.pilot, { injector: this.injector }),
             toObservable(this.topic, { injector: this.injector }),
         ]).pipe(
-            loadingMap(([ sdg, topic ]) => this.educationService.getEventSdgs(sdg? +sdg : undefined, topic)),
+            loadingMap(([ sdg, pilot, topic ]) => {
+                // Use pilot event sdgs if pilot is available, otherwise fall back to sdg event sdgs
+                if (pilot && pilot !== null) {
+                    return this.educationService.getPilotEvent(pilot, topic);
+                } else {
+                    return this.educationService.getEventSdgs(sdg? +sdg : undefined, topic);
+                }
+            }),
             map(data => data && this.mapData(data))
         );
     }

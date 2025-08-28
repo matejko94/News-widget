@@ -30,6 +30,23 @@ export class ScienceService {
         );
     }
 
+    public getPilotTopTopicsPerYear(pilot: string, limit: number): Observable<TopTopicsPerYear[]> {
+        const params = new URLSearchParams({
+            limit: limit.toString()
+        });
+        
+ 
+
+        return this.http.get<TopTopicsPerYear[]>(
+            `${ environment.api.url }/science/timespan/pilot/${ pilot }?${ params }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch science pilot top topics per year', e);
+                return of([])
+            })
+        );
+    }
+
     public getTopicEvolution(sdg: number, topic: string | undefined, year: number): Observable<EvolutionLinkDto[]> {
         const params = new URLSearchParams({ year: year.toString() });
 

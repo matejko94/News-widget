@@ -93,10 +93,18 @@ export default class BubblePage extends BasePage implements OnInit {
             toObservable(this.paramY),
             toObservable(this.paramZ),
             toObservable(this.sdg),
+            toObservable(this.pilot),
             toObservable(this.year)
         ]).pipe(
-            filter(([ x, y, z, sdg, year ]) => !!x && !!y && !!z && !!sdg && !!year),
-            switchMap(([ x, y, z, sdg, year ]) => this.indicatorsService.getIntersections(+sdg!, year!, x!, y!, z!)),
+            filter(([ x, y, z, sdg, pilot, year ]) => !!x && !!y && !!z && !!(sdg || pilot) && !!year),
+            switchMap(([ x, y, z, sdg, pilot, year ]) => {
+                // Use pilot intersections if pilot is available, otherwise fall back to sdg intersections
+                if (pilot && pilot !== null) {
+                    return this.indicatorsService.getPilotIntersections(pilot, year!, x!, y!, z!);
+                } else {
+                    return this.indicatorsService.getIntersections(+sdg!, year!, x!, y!, z!);
+                }
+            }),
             map(data => data && this.mapBubbleData(data)),
         );
 
@@ -104,10 +112,18 @@ export default class BubblePage extends BasePage implements OnInit {
             toObservable(this.paramX),
             toObservable(this.paramY),
             toObservable(this.paramZ),
-            toObservable(this.sdg)
+            toObservable(this.sdg),
+            toObservable(this.pilot)
         ]).pipe(
-            filter(([ x, y, z, sdg ]) => !!x && !!y && !!z && !!sdg),
-            switchMap(([ x, y, z, sdg ]) => this.indicatorsService.getIntersectionsTimeline(+sdg!, x!, y!, z!)),
+            filter(([ x, y, z, sdg, pilot ]) => !!x && !!y && !!z && !!(sdg || pilot)),
+            switchMap(([ x, y, z, sdg, pilot ]) => {
+                // Use pilot intersections timeline if pilot is available, otherwise fall back to sdg intersections timeline
+                if (pilot && pilot !== null) {
+                    return this.indicatorsService.getPilotIntersectionsTimeline(pilot, x!, y!, z!);
+                } else {
+                    return this.indicatorsService.getIntersectionsTimeline(+sdg!, x!, y!, z!);
+                }
+            }),
             map(data => data && this.mapLineData(data)),
         );
     }

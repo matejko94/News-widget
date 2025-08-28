@@ -62,8 +62,16 @@ export default class CollaborationPage extends BasePage implements OnInit {
 
         this.data$ = combineLatest([
             toObservable(this.sdg, { injector: this.injector }),
+            toObservable(this.pilot, { injector: this.injector }),
         ]).pipe(
-            loadingMap(([ sdg ]) => this.innovationsService.getIndustryCollaborations(sdg ? +sdg : undefined, undefined)),
+            loadingMap(([ sdg, pilot ]) => {
+                // Use pilot industry collaborations if pilot is available, otherwise fall back to sdg industry collaborations
+                if (pilot && pilot !== null) {
+                    return this.innovationsService.getPilotIndustryCollaborations(pilot, undefined);
+                } else {
+                    return this.innovationsService.getIndustryCollaborations(sdg ? +sdg : undefined, undefined);
+                }
+            }),
             combineLatestWith(this.selectedRegion$),
             map(([ data, region ]) => data ? this.mapData(data, region) : undefined),
         );

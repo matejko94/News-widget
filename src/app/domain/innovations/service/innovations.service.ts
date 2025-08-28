@@ -32,6 +32,24 @@ export class InnovationsService {
         );
     }
 
+    public getPilotIndustryCollaborations(pilot: string, topic: string | undefined) {
+        const params = new URLSearchParams();
+
+        if (topic) {
+            params.set('topic', topic);
+        }
+        
+
+        return this.http.get<IndustryCollaborationResponseDto>(
+            `${ environment.api.url }/innovation/collaborations/pilot/${ pilot }` + (params.size ? `?${ params }` : '')
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch industry collaborations', e);
+                return of({ nodes: [], edges: [] })
+            })
+        );
+    }
+
     public getIntersections(sdg: number | undefined) {
         const params = new URLSearchParams();
 
@@ -47,5 +65,24 @@ export class InnovationsService {
                 return of({ nodes: [], links: [] })
             })
         );
+    }
+
+
+
+    public getPilotIntersections(pilot: string, topic: string | undefined) {
+        const params = new URLSearchParams();
+
+        if (topic) {
+            params.set('topic', topic);
+        }
+
+        return this.http.get<InnovationResponseDto>(
+            `${ environment.api.url }/innovation/pilot/${ pilot }` + (params.size ? `?${ params }` : '')
+    ).pipe(
+        catchError(e => {
+            console.error('Failed to fetch industry collaborations', e);
+            return of({ nodes: [], links: [] })
+        })
+    );
     }
 }

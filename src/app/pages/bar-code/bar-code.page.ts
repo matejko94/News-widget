@@ -63,9 +63,17 @@ export default class BarCodePage extends BasePage implements OnInit {
 
         this.data$ = combineLatest([
             toObservable(this.sdg, { injector: this.injector }),
+            toObservable(this.pilot, { injector: this.injector }),
             toObservable(this.region, { injector: this.injector })
         ]).pipe(
-            loadingMap(([ sdg, region ]) => this.policyService.getIntersectingSdgPolicies(sdg ? +sdg : undefined, region, 20)),
+            loadingMap(([ sdg, pilot, region ]) => {
+                // Use pilot intersection if pilot is available, otherwise fall back to sdg intersection
+                if (pilot && pilot !== null) {
+                    return this.policyService.getIntersectingPilotPolicies(pilot, region, 20);
+                } else {
+                    return this.policyService.getIntersectingSdgPolicies(sdg ? +sdg : undefined, region, 20);
+                }
+            }),
             map(intersection => intersection
                 ?.sort((a, b) => sortBySdg(a.sdg, b.sdg))
                 .flatMap(({ sdg, sdg_intersections }) => sdg_intersections.map(({ key, value }) => ({
