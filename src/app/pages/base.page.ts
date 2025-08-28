@@ -29,8 +29,7 @@ export abstract class BasePage implements OnInit {
     public ngOnInit() {
         const sdgValue = this.sdg();
         const pilotValue = this.pilot();
-        console.log(pilotValue, 'pilotValue');
-        console.log(sdgValue, 'sdgValue');
+
         if (sdgValue) {
             const configuration = this.configuration.get(sdgValue);
             

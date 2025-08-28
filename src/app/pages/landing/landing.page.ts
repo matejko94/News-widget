@@ -106,8 +106,18 @@ export default class LandingPage {
         pilots: {
             'COP30': 'COP30',
             'ELIAS': 'ELIAS',
+            'Lanslides': 'Lanslides',
+            'OER 1': 'OER 1',
+            'OER 2': 'OER 2',
+            'OER 3': 'OER 3',
+            'OER 4': 'OER 4',
+            'OER 5': 'OER 5',
+            'AImovement': 'AImovement',
+            'RaD': 'RaD',
+            'Quantum': 'Quantum'
         }
     };
+
     public selectedSdg = signal(this.config.sdgs[1]);
     public selectedWidget = signal(Object.values(this.config.widgets)[0]);
     public selectedEnvironment = signal(Object.values((this.config.environment))[0]);
@@ -136,7 +146,6 @@ export default class LandingPage {
         if (this.widgetsWithNoSdgOption.includes(currentWidget)) {
             return [null, ...this.config.sdgs];
         }
-        console.log(this.config.sdgs, 'sdgs');
         return this.config.sdgs;
     }
 
@@ -160,7 +169,6 @@ export default class LandingPage {
         
         const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
         this.currentUrl.set(`${this.selectedEnvironment()}${this.selectedWidget()}${queryString}`);
-        console.log(this.currentUrl());
     }
 
     onPilotChange() {

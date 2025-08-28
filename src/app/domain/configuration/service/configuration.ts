@@ -66,6 +66,24 @@ export class Configuration {
                 return SDG1_CONFIGURATION;
             case 'ELIAS':
                 return SDG1_CONFIGURATION;
+            case 'Lanslides':
+                return SDG1_CONFIGURATION;
+            case 'OER 1':
+                return SDG1_CONFIGURATION;
+            case 'OER 2':
+                return SDG1_CONFIGURATION;
+            case 'OER 3':
+                return SDG1_CONFIGURATION;
+            case 'OER 4':
+                return SDG1_CONFIGURATION;
+            case 'OER 5':
+                return SDG1_CONFIGURATION;
+            case 'AImovement':
+                return SDG1_CONFIGURATION;
+            case 'RaD':
+                return SDG1_CONFIGURATION;
+            case 'Quantum':
+                return SDG1_CONFIGURATION;
             default:
                 throw new Error(`No configuration found for SDG ${sdg}`);
         }
