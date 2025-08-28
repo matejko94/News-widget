@@ -73,11 +73,19 @@ export default class RadarPage extends BasePage implements OnInit {
 
         const data$ = combineLatest([
             toObservable(this.sdg),
+            toObservable(this.pilot),
             toObservable(this.region),
             toObservable(this.year)
         ]).pipe(
-            filter(([ sdg, _, year ]) => !!sdg && !!year),
-            switchMap(([ sdg, region, year ]) => this.policyService.getRadarData(+sdg!, region, +year!)),
+            filter(([ sdg, pilot, _, year ]) => !!(sdg || pilot) && !!year),
+            switchMap(([ sdg, pilot, region, year ]) => {
+                // Use pilot radar data if pilot is available, otherwise fall back to sdg radar data
+                if (pilot && pilot !== null) {
+                    return this.policyService.getPilotRadarData(pilot, region, +year!);
+                } else {
+                    return this.policyService.getRadarData(sdg ? +sdg : undefined, region, +year!);
+                }
+            }),
             shareReplay(1)
         );
 

@@ -46,4 +46,22 @@ export class ScienceService {
             })
         );
     }
+
+
+    public getPilotEvolution(pilot: string, topic: string | undefined, year: number): Observable<EvolutionLinkDto[]> {
+        const params = new URLSearchParams({ year: year.toString() });
+
+        if (topic) {
+            params.set('topic', topic);
+        }
+
+        return this.http.get<EvolutionLinkDto[]>(
+            `${ environment.api.url }/science/evolution/pilot/${ pilot }?${ params }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch science pilot evolution', e);
+                return of([])
+            })
+        );
+    }
 }
