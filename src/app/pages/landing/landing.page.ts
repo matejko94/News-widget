@@ -80,6 +80,7 @@ export default class LandingPage {
         '/science/evolution',
         '/innovations/relations', // 11. Relations
         '/policy/radar',          // 12. Radar
+        '/indicator/bubbles',
     ];
 
     config: any = {
@@ -111,7 +112,7 @@ export default class LandingPage {
     public selectedWidget = signal(Object.values(this.config.widgets)[0]);
     public selectedEnvironment = signal(Object.values((this.config.environment))[0]);
     public currentUrl = signal('');
-    public selectedPilot = signal(Object.values(this.config.pilots)[0]);
+    public selectedPilot = signal(null);
 
     public ngOnInit() {
         this.updateIframe();

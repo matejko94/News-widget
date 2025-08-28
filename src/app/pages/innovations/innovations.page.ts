@@ -52,8 +52,16 @@ export default class InnovationsPage extends BasePage {
     private setupHeatMapData(): Observable<ChordChartData> {
         return combineLatest([
             toObservable(this.sdg),
+            toObservable(this.pilot),
         ]).pipe(
-            switchMap(([ sdg ]) => this.innovationsService.getIntersections(sdg ? +sdg : undefined)),
+            switchMap(([ sdg, pilot ]) => {
+                // Use pilot intersections if pilot is available, otherwise fall back to sdg intersections
+                if (pilot && pilot !== null) {
+                    return this.innovationsService.getPilotIntersections(pilot, undefined);
+                } else {
+                    return this.innovationsService.getIntersections(sdg ? +sdg : undefined);
+                }
+            }),
             tap(data => this.setIndustryOptions(data)),
             combineLatestWith(toObservable(this.industries)),
             map((([ data, industries ]) => this.toChordData(data, industries))),

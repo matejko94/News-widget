@@ -35,4 +35,21 @@ export class EducationService {
             })
         );
     }
+
+    public getPilotEvent(pilot: string, topic: string | undefined) {
+        const params = new URLSearchParams();
+
+        if (topic) {
+            params.set('topic', topic);
+        }
+
+        return this.http.get<EventSdgsDto>(
+            `${ environment.api.url }/education/whitespace/pilot/${ pilot }?${ params }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch pilot event sdgs', e);
+                return of({ events: [], sdgs: [], similarities: [] })
+            })
+        );
+    }
 }
