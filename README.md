@@ -21,3 +21,34 @@ npm run start
 - cache can be bypassed with hard reload `CTRL + SHIFT + R` or `CTRL + F5`
 - full endpoint url with queryParameters can eb configured under `ENDPOINT` environment variable on [Cloudflare Dashboard](https://dash.cloudflare.com/79b2aa6fff4d448f6c2208509b887c37/pages/view/news-widget/settings/environment-variables)
 
+
+## Worker manual
+- create wrangler.toml
+```toml
+name = "news-widget"
+compatibility_date = "2023-05-18"
+
+[env.development]
+compatibility_date = "2023-05-18"
+
+[[env.development.routes]]
+pattern = "*"
+zone_name = "localhost"
+
+[build]
+command = "npm run build"
+
+pages_build_output_dir = "dist"
+```
+- run 
+```bash
+npm run build
+```
+- than install  wrangler
+```bash
+npm install -g wrangler
+```
+- and run 
+```bash
+wrangler pages dev dist --port 4000
+```

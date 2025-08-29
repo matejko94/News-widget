@@ -7,22 +7,29 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 
     const sdg = searchParams.get('sdg');
     const date = searchParams.get('date');
+    const pilot = searchParams.get('pilot');
 
-    if (!date || !sdg) {
-        return new Response('Missing one of queryParameters: date, sdg', { status: 400 });
+
+    if (!date) {
+        return new Response('Missing one of queryParameters: date', { status: 400 });
+    }
+
+    if (pilot === null && sdg === null || pilot === undefined && sdg === undefined) {
+        return new Response('pilot and sdg cannot both be null', { status: 400 });
     }
 
     const response = await getArticles(
         env.ELASTIC_MEDIA_SEARCH_URL,
         env.ELASTIC_CREDENTIALS,
         sdg,
+        pilot,
         new Date(date),
     );
 
     return new Response(JSON.stringify(response));
 }
 
-async function getArticles(url: string, apiKey: string, sdg: string, date: Date): Promise<ElasticNewsItem[]> {
+async function getArticles(url: string, apiKey: string, sdg: string, pilot: string, date: Date): Promise<ElasticNewsItem[]> {
     const filters: any[] = [
         {
             range: {
@@ -34,20 +41,20 @@ async function getArticles(url: string, apiKey: string, sdg: string, date: Date)
         },
     ]
 
-    if (sdg !== '0') {
+    if (sdg !== '0' && sdg !== null && sdg !== undefined && !isNaN(Number(sdg))) {
         filters.push({
             match: {
                 'SDG.keyword': `SDG ${ sdg }`
             }
         });
-    } else {
+    } else if (pilot !== '0' && pilot !== null && pilot !== undefined) {
         filters.push({
             match: {
-                'pilot.keyword': 'Landslides'
+                'pilot.keyword': pilot
             }
         })
     }
-
+    console.log(filters);
     const response = await HttpClient.post(url, {
         body: JSON.stringify({
             size: 10000,
@@ -64,5 +71,6 @@ async function getArticles(url: string, apiKey: string, sdg: string, date: Date)
     });
 
     const body = await response.json() as { hits: { hits: ElasticNewsItemDto[] } };
+    console.log(body);
     return body.hits.hits.map(item => item._source);
 }

@@ -4,8 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve & wrangler pages dev",
-      "build": "ng build --configuration production && cp _headers dist/_headers"
-  },
+    "build": "ng build --configuration production && cp _headers dist/_headers"},
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.0.5",

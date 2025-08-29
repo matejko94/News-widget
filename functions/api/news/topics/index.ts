@@ -43,7 +43,7 @@ async function getTopics(url: string, apiKey: string, topics: string[]): Promise
     });
 
     const data: GetArticlesResponse = await response.json();
-
+    console.log(data);
     return data.categoryAggr.results.map(({ label, count }) => ({ label: cleanLabels(label), count }));
 }
 

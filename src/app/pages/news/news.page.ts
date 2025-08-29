@@ -182,7 +182,7 @@ export default class NewsPage extends BasePage implements OnInit {
         return this.shownDate$.pipe(
             filter(() => !this.isLoading$.value),
             tap(() => this.isLoading$.next(true)),
-            switchMap(shownDate => this.newsService.getNews(+this.sdg()!, shownDate)),
+            switchMap(shownDate => this.newsService.getNews(+this.sdg()!, this.pilot()!, shownDate)),
             tap(() => {
                 this.isLoading$.next(false);
                 this.loadedDate$.next(this.shownDate$.value);
@@ -218,7 +218,7 @@ export default class NewsPage extends BasePage implements OnInit {
                 const dayAfter = new Date(shownDate);
                 dayAfter.setDate(dayAfter.getDate() + 1);
 
-                return this.newsService.getCloudTags(this.sdg()!, shownDate, dayAfter, 18)
+                return this.newsService.getCloudTags(this.sdg()!, this.pilot()!, shownDate, dayAfter, 18)
             }),
             shareReplay(1),
         )
