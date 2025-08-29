@@ -14,9 +14,9 @@ import { TopicDto } from '../types/topic.dto';
 export class NewsService {
     private http = inject(HttpClient);
 
-    public getNews(sdg: number, shownDate: Date): Observable<ElasticNewsItem[]> {
+    public getNews(sdg: number, pilot: string, shownDate: Date): Observable<ElasticNewsItem[]> {
         return this.http.get<ElasticNewsItem[]>(
-            `${ environment.api.newsArticles.url }?sdg=${ sdg }&date=${ this.isoDateWithoutTime(shownDate) }`,
+            `${ environment.api.newsArticles.url }?sdg=${ sdg }&pilot=${ pilot }&date=${ this.isoDateWithoutTime(shownDate) }`,
             {
                 headers: new HttpHeaders({ 'Content-Type': 'application/json' })
             }
@@ -29,9 +29,9 @@ export class NewsService {
         )
     }
 
-    public getCloudTags(sdg: string, startDate: Date, endDate: Date, limit: number): Observable<Tag[]> {
+    public getCloudTags(sdg: string, pilot: string, startDate: Date, endDate: Date, limit: number): Observable<Tag[]> {
         return this.http.get<CloudTagResponse>(
-            `${ environment.api.tags.url }?startDate=${ this.isoDateWithoutTime(startDate) }&endDate=${ this.isoDateWithoutTime(endDate) }&sdg=${ sdg }&limit=${ limit }`
+            `${ environment.api.tags.url }?startDate=${ this.isoDateWithoutTime(startDate) }&endDate=${ this.isoDateWithoutTime(endDate) }&sdg=${ sdg }&pilot=${ pilot }&limit=${ limit }`
         ).pipe(
             map(response => response.tags),
             catchError(e => {

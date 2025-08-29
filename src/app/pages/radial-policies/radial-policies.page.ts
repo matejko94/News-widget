@@ -61,8 +61,7 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
                 loadingMap(region => {
                     const sdgValue = this.sdg();
                     const pilotValue = this.pilot();
-                    console.log(pilotValue, 'pilotValue');
-                    console.log(sdgValue, 'sdgValue');
+
                     // Use pilot intersection if pilot is available, otherwise fall back to sdg intersection
                     if (pilotValue && pilotValue !== null) {
                         return this.policyService.getIntersectingPilotPolicies(pilotValue, region, 20);

@@ -78,14 +78,12 @@ export default class EvolutionPage extends BasePage {
         console.log('getData called with:', { sdg, topic, year, pilot });
         
         if (pilot && pilot !== null) {
-            console.log('Using pilot evolution for:', pilot);
             return this.scienceService.getPilotEvolution(pilot, topic, year).pipe(
                 map(data => this.mapGraphData(topic, data))
             );
         }
 
         if (sdg !== undefined) {
-            console.log('Using SDG evolution for:', sdg);
             return this.scienceService.getTopicEvolution(sdg, topic, year).pipe(
                 map(data => this.mapGraphData(topic, data))
             );
