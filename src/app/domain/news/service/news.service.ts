@@ -42,10 +42,11 @@ export class NewsService {
         )
     }
 
-    public getTopics(wikiConcepts: string[]): Observable<TopicDto[]> {
+    public getTopics(wikiConcepts: string[],pilot?: string): Observable<TopicDto[]> {
         return this.http.get<{ topics: TopicDto[] }>(environment.api.topics.url, {
             params: {
-                topics: wikiConcepts.join(',')
+                topics: wikiConcepts.join(','),
+                pilot: pilot?.replaceAll(' ', '') ?? '' //remove spaces from pilot if exists
             }
         }).pipe(
             map(response => response.topics),

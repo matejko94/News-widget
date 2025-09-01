@@ -81,6 +81,8 @@ export default class LandingPage {
         '/innovations/relations', // 11. Relations
         '/policy/radar',          // 12. Radar
         '/indicator/bubbles',
+        '/news/sunburst',
+        '/news',
     ];
 
     config: any = {

@@ -18,6 +18,7 @@ import { SDG7_CONFIGURATION } from '../../../../../configuration/sdg/sdg7.config
 import { SDG8_CONFIGURATION } from '../../../../../configuration/sdg/sdg8.configuration';
 import { SDG9_CONFIGURATION } from '../../../../../configuration/sdg/sdg9.configuration';
 import { SdgConfiguration } from '../types/sdg-configuration.interface';
+import { AI_MOVEMENT_CONFIGURATION, COP30_CONFIGURATION, ELIAS_CONFIGURATION, LANDSLIDES_PILOT_CONFIGURATION, OER1_CONFIGURATION, OER2_CONFIGURATION, OER3_CONFIGURATION, OER4_CONFIGURATION, OER5_CONFIGURATION, QUANTUM_CONFIGURATION, RAD_CONFIGURATION } from '../../../../../configuration/pilot/pilot.configurationt';
 
 @Injectable({
     providedIn: 'root'
@@ -63,27 +64,27 @@ export class Configuration {
             case '17':
                 return SDG17_CONFIGURATION;
             case 'COP30':
-                return SDG1_CONFIGURATION;
+                return COP30_CONFIGURATION;
             case 'ELIAS':
-                return SDG1_CONFIGURATION;
+                return ELIAS_CONFIGURATION;
             case 'Lanslides':
-                return SDG1_CONFIGURATION;
+                return LANDSLIDES_PILOT_CONFIGURATION;
             case 'OER 1':
-                return SDG1_CONFIGURATION;
+                return OER1_CONFIGURATION;
             case 'OER 2':
-                return SDG1_CONFIGURATION;
+                return OER2_CONFIGURATION;
             case 'OER 3':
-                return SDG1_CONFIGURATION;
+                return OER3_CONFIGURATION;
             case 'OER 4':
-                return SDG1_CONFIGURATION;
+                return OER4_CONFIGURATION;
             case 'OER 5':
-                return SDG1_CONFIGURATION;
+                return OER5_CONFIGURATION;
             case 'AImovement':
-                return SDG1_CONFIGURATION;
+                return AI_MOVEMENT_CONFIGURATION;
             case 'RaD':
-                return SDG1_CONFIGURATION;
+                return RAD_CONFIGURATION;
             case 'Quantum':
-                return SDG1_CONFIGURATION;
+                return QUANTUM_CONFIGURATION;
             default:
                 throw new Error(`No configuration found for SDG ${sdg}`);
         }
