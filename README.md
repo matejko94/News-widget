@@ -36,13 +36,13 @@ pattern = "*"
 zone_name = "localhost"
 
 [build]
-command = "npm run build"
+command = "npm run dev"
 
 pages_build_output_dir = "dist"
 ```
 - run 
 ```bash
-npm run build
+npm run build or npm run dev
 ```
 - than install  wrangler
 ```bash

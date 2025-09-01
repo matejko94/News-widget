@@ -62,7 +62,8 @@ export default class SunburstPage extends BasePage implements OnInit {
     private setupNodes(): Observable<SunburstNode | undefined> {
         return this.selectedTopic$.pipe(
             loadingMap(topics => this.newsService.getTopics(
-                this.sdg() === '0' ? ['Landslide', 'Flood', 'Debris'] : topics.wikiConcepts
+                this.sdg() === '0' ? ['Landslide', 'Flood', 'Debris'] : topics.wikiConcepts,
+                this.pilot()
             )),
             map(topics => topics ? this.mapToNode(topics) : undefined),
         )
