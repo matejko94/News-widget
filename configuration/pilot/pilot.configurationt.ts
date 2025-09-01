@@ -17,7 +17,32 @@ export const COP30_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+        indicators: [
+        {
+            name: 'COP30',
+        },
+        {
+            name: 'Amazon rainforest',
+        },
+        {
+            name: 'Indigenous peoples',
+        },
+        {
+            name: 'Artificial intelligence',
+        },
+        {
+            name: 'Sustainable Development Goals',
+        },
+        {
+            name: 'Citizen science',
+        },
+        {
+            name: 'Open science',
+        },
+        {
+            name: 'Climate resilience',
+        }
+    ]
 };
 
 export const ELIAS_CONFIGURATION: SdgConfiguration = {
@@ -36,7 +61,29 @@ export const ELIAS_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Migration & Refugees',
+        },
+        {
+            name: 'Human migration',
+        },
+        {
+            name: 'European migrant crisis',
+        },
+        {
+            name: 'Refugee crisis',
+        },
+        {
+            name: 'Climate migrant',
+        },
+        {
+            name: 'Economic migrant',
+        },
+        {
+            name: 'Migrant',
+        }
+    ]
 };
 
 export const LANDSLIDES_PILOT_CONFIGURATION: SdgConfiguration = {
@@ -57,7 +104,32 @@ export const LANDSLIDES_PILOT_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Landslides & Hazards',
+        },
+        {
+            name: 'Mudflow',
+        },
+        {
+            name: 'Rockfall',
+        },
+        {
+            name: 'Debris flow',
+        },
+        {
+            name: 'Flood',
+        },
+        {
+            name: 'Avalanche',
+        },
+        {
+            name: 'Sector collapse',
+        },
+        {
+            name: 'Washaway',
+        }
+    ]
 };
 
 export const OER1_CONFIGURATION: SdgConfiguration = {
@@ -75,7 +147,14 @@ export const OER1_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Open educational resources',
+        },
+        {
+            name: 'Continuing education',
+        }
+    ]
 };
 
 export const OER2_CONFIGURATION: SdgConfiguration = {
@@ -92,7 +171,17 @@ export const OER2_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Open educational resources',
+        },
+        {
+            name: 'Capacity building',
+        },
+        {
+            name: 'Continuing education',
+        }
+    ]
 };
 
 export const OER3_CONFIGURATION: SdgConfiguration = {
@@ -109,7 +198,14 @@ export const OER3_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Open educational resources',
+        },
+        {
+            name: 'Education policy',
+        }
+    ]
 };
 
 export const OER4_CONFIGURATION: SdgConfiguration = {
@@ -126,7 +222,14 @@ export const OER4_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Open educational resources',
+        },
+        {
+            name: 'Social inclusion',
+        }
+    ]
 };
 
 export const OER5_CONFIGURATION: SdgConfiguration = {
@@ -145,7 +248,14 @@ export const OER5_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Open educational resources',
+        },
+        {
+            name: 'Financial modeling',
+        }
+    ]
 };
 
 export const AI_MOVEMENT_CONFIGURATION: SdgConfiguration = {
@@ -160,7 +270,14 @@ export const AI_MOVEMENT_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Artificial Intelligence',
+        },
+        {
+            name: 'Gender',
+        }
+    ]
 };
 
 export const RAD_CONFIGURATION: SdgConfiguration = {
@@ -183,7 +300,38 @@ export const RAD_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+        {
+            name: 'Rare disease',
+        },
+        {
+            name: 'Orphanet',
+        },
+        {
+            name: '9q34.3 deletion syndrome',
+        },
+        {
+            name: 'Angelman syndrome',
+        },
+        {
+            name: 'Dravet syndrome',
+        },
+        {
+            name: 'Cornelia de Lange syndrome',
+        },
+        {
+            name: 'Fragile X syndrome',
+        },
+        {
+            name: 'Rett syndrome',
+        },
+        {
+            name: 'Kabuki syndrome',
+        },
+        {
+            name: 'Prader–Willi syndrome',
+        }
+    ]   
 };
 
 export const QUANTUM_CONFIGURATION: SdgConfiguration = {
@@ -198,7 +346,15 @@ export const QUANTUM_CONFIGURATION: SdgConfiguration = {
             ]
         }
     ],
-    indicators: []
+    indicators: [
+      
+            {
+                name: 'Quantum computing',
+            },       
+            {
+                name: 'Quantum cognition',
+            }
+    ]
 };
 
 
