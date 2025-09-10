@@ -98,6 +98,7 @@ export default class BubblePage extends BasePage implements OnInit {
         ]).pipe(
             filter(([ x, y, z, sdg, pilot, year ]) => !!x && !!y && !!z && !!(sdg || pilot) && !!year),
             switchMap(([ x, y, z, sdg, pilot, year ]) => {
+                console.log(pilot);
                 // Use pilot intersections if pilot is available, otherwise fall back to sdg intersections
                 if (pilot && pilot !== null) {
                     return this.indicatorsService.getPilotIntersections(pilot, year!, x!, y!, z!);
@@ -117,6 +118,7 @@ export default class BubblePage extends BasePage implements OnInit {
         ]).pipe(
             filter(([ x, y, z, sdg, pilot ]) => !!x && !!y && !!z && !!(sdg || pilot)),
             switchMap(([ x, y, z, sdg, pilot ]) => {
+                console.log(pilot);
                 // Use pilot intersections timeline if pilot is available, otherwise fall back to sdg intersections timeline
                 if (pilot && pilot !== null) {
                     return this.indicatorsService.getPilotIntersectionsTimeline(pilot, x!, y!, z!);

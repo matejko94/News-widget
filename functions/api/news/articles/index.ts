@@ -72,5 +72,6 @@ async function getArticles(url: string, apiKey: string, sdg: string, pilot: stri
 
     const body = await response.json() as { hits: { hits: ElasticNewsItemDto[] } };
     console.log(body);
+    console.log(url)
     return body.hits.hits.map(item => item._source);
 }

@@ -84,7 +84,7 @@ export default class LinksPage extends BasePage implements OnInit {
         return events.map((evt) => ({
             id: evt.title,
             group: '',
-            tag: '',
+            tag: evt.title,
             totalLinks: 0,
             color: '',
         }));

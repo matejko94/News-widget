@@ -59,10 +59,17 @@ export default class IntensityPage extends BasePage implements OnInit {
         return combineLatest([
             toObservable(this.sdg),
             toObservable(this.topic),
-            toObservable(this.year)
+            toObservable(this.year),
+            toObservable(this.pilot)
         ]).pipe(
-            filter(([ sdg, _, year ]) => !!sdg && !!year),
-            switchMap(([ sdg, topic, year ]) => this.newsService.getNewsIntensityPerYear(sdg!, year!, topic)),
+            filter(([ sdg, _, year, pilot ]) => !!(sdg || pilot) && !!year),
+            switchMap(([ sdg, topic, year, pilot ]) =>{
+                if (sdg && sdg !== null && sdg !== '' && sdg !== 'null' && sdg !== 'undefined') {
+                    return this.newsService.getNewsIntensityPerYear(sdg, year!, topic);
+                } else {
+                    return this.newsService.getNewsIntensityPilotPerYear(pilot!, year!, topic);
+                }
+            }),
             map(news => news.map(({ country, value }) => {
                 return {
                     country,
@@ -76,10 +83,17 @@ export default class IntensityPage extends BasePage implements OnInit {
     private setupCalendarData(): Observable<CalendarData[]> {
         return combineLatest([
             toObservable(this.sdg),
-            toObservable(this.topic)
+            toObservable(this.topic),
+            toObservable(this.pilot)
         ]).pipe(
-            filter(([ sdg ]) => !!sdg),
-            switchMap(([ sdg, topic ]) => this.newsService.getNewsIntensity(sdg!, topic)),
+            filter(([ sdg, _, pilot ]) => !!(sdg || pilot)),
+            switchMap(([ sdg, topic, pilot ]) => {
+                if (sdg && sdg !== null && sdg !== '' && sdg !== 'null' && sdg !== 'undefined') {
+                    return this.newsService.getNewsIntensity(sdg, topic);
+                } else {
+                    return this.newsService.getNewsIntensityPilot(pilot!, topic);
+                }
+            }),
             map(news => news.map(({ date, value }) => ({ date: new Date(date), count: value })))
         );
     }

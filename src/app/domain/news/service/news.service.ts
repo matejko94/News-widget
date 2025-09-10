@@ -92,6 +92,36 @@ export class NewsService {
         );
     }
 
+    //Pilot
+    public getNewsIntensityPilot(pilot: string, topic: string | undefined) {
+        const params = new URLSearchParams();
+        if (topic) {
+            params.set('topic', topic);
+        }
+        return this.http.get<NewsOnDateDto[]>(
+            `${ environment.api.url }/news/intensity/pilot/${ pilot }?${ params }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch news intensity pilot', e);
+                return of([])
+            })
+        );
+    }
+    public getNewsIntensityPilotPerYear(pilot: string, year: number, topic: string | undefined) {
+            const params = new URLSearchParams({ year: year.toString() });
+        if (topic) {
+            params.set('topic', topic);
+        }
+        return this.http.get<{ year: string, country: string, value: number }[]>(
+            `${ environment.api.url }/news/intensity/yearly/pilot/${ pilot }?${ params }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch news intensity pilot per year', e);
+                return of([])
+            })
+        );
+    }
+
     private isoDateWithoutTime(date: Date) {
         return date.toISOString().split('T')[0] + 'T00:00:00.000Z';
     }

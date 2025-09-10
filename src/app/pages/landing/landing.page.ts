@@ -77,12 +77,14 @@ export default class LandingPage {
         '/policy/timeline',       // 5. Timeline
         '/innovations/collaboration', // 8. Collaboration
         '/education/links',       // 10. Links
-        '/science/evolution',
+        '/science/evolution',       // 9. Evolution
         '/innovations/relations', // 11. Relations
         '/policy/radar',          // 12. Radar
-        '/indicator/bubbles',
-        '/news/sunburst',
-        '/news',
+        '/indicator/bubbles',      // 6. Bubble
+        '/news/sunburst',         // 2. Sunburst
+        '/news',                  // 1. News widget
+        '/news/intensity',        // 7. Intensity
+        '/innovations/collaboration', // 8. Collaboration
     ];
 
     config: any = {
