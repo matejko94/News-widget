@@ -58,6 +58,8 @@ async function getTopics(url: string, apiKey: string, topics: string[], pilot?: 
 
     const data: GetArticlesResponse = await response.json();
     console.log(data);
+    console.log('Request payload:');
+    console.log(url);
     console.log(JSON.stringify({
         'apiKey': apiKey,
         'resultType': 'categoryAggr',
