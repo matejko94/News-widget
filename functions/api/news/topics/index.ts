@@ -43,7 +43,7 @@ async function getTopics(url: string, apiKey: string, topics: string[], pilot?: 
                 'categoryAggrSortBy': 'date',
                 'query': {
                     '$query': {
-                        '$and': !pilotURI ? topics.map(t => ({ conceptUri: createConceptUri(t) })) : [{ conceptUri: pilotURI }]
+                        '$or': !pilotURI ? topics.map(t => ({ conceptUri: createConceptUri(t) })) : [{ conceptUri: pilotURI }]
                     },
                     '$filter': {
                         'forceMaxDataTimeWindow': '31'
@@ -57,22 +57,7 @@ async function getTopics(url: string, apiKey: string, topics: string[], pilot?: 
 
 
     const data: GetArticlesResponse = await response.json();
-    console.log(data);
-    console.log('Request payload:');
-    console.log(url);
-    console.log(JSON.stringify({
-        'apiKey': apiKey,
-        'resultType': 'categoryAggr',
-        'categoryAggrSortBy': 'date',
-        'query': {
-            '$query': {
-                '$and': !pilotURI ? topics.map(t => ({ conceptUri: createConceptUri(t) })) : [{ conceptUri: pilotURI }]
-            },
-            '$filter': {
-                'forceMaxDataTimeWindow': '31'
-            }
-        },
-    }, null, 2),);
+
 
     return data.categoryAggr.results.map(({ label, count }) => ({ label: cleanLabels(label), count }));
 }
