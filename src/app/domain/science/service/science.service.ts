@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { environment } from '../../../../../environment/environment';
 import { EvolutionLinkDto } from '../types/evolution-link.dto';
 import { TopTopicsPerYear } from '../types/topic-timespan.interface';
@@ -19,15 +19,25 @@ export class ScienceService {
         if (sdg !== undefined) {
             params.set('sdg', sdg.toString());
         }
-
         return this.http.get<TopTopicsPerYear[]>(
             `${ environment.api.url }/science/timespan?${ params }`
         ).pipe(
+            map(data => {
+                if (sdg !== undefined) {
+                    // Filter out topics that don't match the requested SDG
+                    return data.map(yearData => ({
+                        ...yearData,
+                        topics: yearData.topics.filter(topic => topic.sdg === `SDG ${sdg}`)
+                    }));
+                }
+                return data;
+            }),
             catchError(e => {
-                console.error('Failed to fetch science top topics per year', e);
+                console.error('Failed to fetch science top topics per year', e);    
                 return of([])
             })
         );
+
     }
 
     public getPilotTopTopicsPerYear(pilot: string, limit: number): Observable<TopTopicsPerYear[]> {
