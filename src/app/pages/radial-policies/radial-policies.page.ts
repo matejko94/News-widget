@@ -64,9 +64,9 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
 
                     // Use pilot intersection if pilot is available, otherwise fall back to sdg intersection
                     if (pilotValue && pilotValue !== null) {
-                        return this.policyService.getIntersectingPilotPolicies(pilotValue, region, 20);
+                        return this.policyService.getIntersectingPilotEducation(pilotValue, region, 20);
                     } else {
-                        return this.policyService.getIntersectingSdgPolicies(sdgValue ? +sdgValue : undefined, region, 20);
+                        return this.policyService.getIntersectingSdgEducation(sdgValue ? +sdgValue : undefined, region, 20);
                     }
                 }),
                 map(policies => policies ? this.groupBySdg(policies, 10) : null)

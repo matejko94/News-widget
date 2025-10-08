@@ -110,7 +110,7 @@ export default class LandingPage {
         pilots: {
             'COP30': 'COP30',
             'ELIAS': 'ELIAS',
-            'Lanslides': 'Lanslides',
+            'Landslides': 'Landslides',
             'OER 1': 'OER 1',
             'OER 2': 'OER 2',
             'OER 3': 'OER 3',

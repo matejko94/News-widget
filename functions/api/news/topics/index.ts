@@ -4,7 +4,7 @@ import { Env } from '../../../env';
 import { GetArticlesResponse } from './types/get-articles-response.interface';
 
 const pilotURIMapped: Record<string, string> = {
-    'Lanslides': '10cadf45-7110-4c51-8110-30e3e3848c0f',
+    'Landslides': '10cadf45-7110-4c51-8110-30e3e3848c0f',
     'OER': 'f23b14f7-60d1-4786-9ca4-f8fdd56682ec',
     'OER2': '9365e3e0-4914-41b5-822a-9e373e2fd3fa',
     'OER3': '1ebf4034-deab-452e-a0e4-edf356eb2139',
@@ -72,7 +72,7 @@ function createConceptUri(topic: string): string {
 function createConceptUriPilot(topic: string,pilot: string): string {
     
     const pilots = {
-        'Lanslides': '10cadf45-7110-4c51-8110-30e3e3848c0f',
+        'Landslides': '10cadf45-7110-4c51-8110-30e3e3848c0f',
         'OER': 'f23b14f7-60d1-4786-9ca4-f8fdd56682ec',
         'OER2': '9365e3e0-4914-41b5-822a-9e373e2fd3fa',
         'OER3': '1ebf4034-deab-452e-a0e4-edf356eb2139',

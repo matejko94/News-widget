@@ -10,19 +10,38 @@ import { RadarDto } from '../types/radar.dto';
 })
 export class PolicyService {
     private http = inject(HttpClient);
-
+    /** SDG */
     public getIntersectingSdgPolicies(sdg: number | undefined, region: string | undefined, limit: number): Observable<IntersectingPolicyDto[]> {
         const params = new URLSearchParams({
             region_code: region ?? 'All',
             limit: limit.toString()
         });
-        
+
         if (sdg !== undefined) {
             params.set('sdg', sdg.toString());
         }
 
         return this.http.get<IntersectingPolicyDto[]>(
-            `${ environment.api.url }/policy/intersection?${ params }`
+            `${environment.api.url}/policy/intersection?${params}`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch intersecting policies', e);
+                return of([])
+            })
+        );
+    }
+    public getIntersectingSdgEducation(sdg: number | undefined, region: string | undefined, limit: number): Observable<IntersectingPolicyDto[]> {
+        const params = new URLSearchParams({
+            region_code: region ?? 'All',
+            limit: limit.toString()
+        });
+
+        if (sdg !== undefined) {
+            params.set('sdg', sdg.toString());
+        }
+
+        return this.http.get<IntersectingPolicyDto[]>(
+            `${environment.api.url}/education/intersection?${params}`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch intersecting policies', e);
@@ -31,6 +50,7 @@ export class PolicyService {
         );
     }
 
+    /** PILOTS */
     public getIntersectingPilotPolicies(pilot: string | undefined, region: string | undefined, size: number): Observable<IntersectingPolicyDto[]> {
         const params = new URLSearchParams({
             region_code: region ?? 'All',
@@ -40,7 +60,29 @@ export class PolicyService {
 
         if (pilot && pilot !== null) {
             return this.http.get<IntersectingPolicyDto[]>(
-                `${ environment.api.url }/policy/intersection/pilot/${ pilot }?${ params }`
+                `${environment.api.url}/policy/intersection/pilot/${pilot}?${params}`
+            ).pipe(
+                catchError(e => {
+                    console.error('Failed to fetch intersecting pilot policies', e);
+                    return of([])
+                })
+            );
+        }
+
+        // If no pilot or pilot is null, return empty array
+        return of([]);
+    }
+
+    public getIntersectingPilotEducation(pilot: string | undefined, region: string | undefined, size: number): Observable<IntersectingPolicyDto[]> {
+        const params = new URLSearchParams({
+            region_code: region ?? 'All',
+            size: size.toString(),
+            format: 'json'
+        });
+
+        if (pilot && pilot !== null) {
+            return this.http.get<IntersectingPolicyDto[]>(
+                `${environment.api.url}/education/intersection/pilot/${pilot}?${params}`
             ).pipe(
                 catchError(e => {
                     console.error('Failed to fetch intersecting pilot policies', e);
@@ -64,7 +106,7 @@ export class PolicyService {
         }
 
         return this.http.get<RadarDto[]>(
-            `${ environment.api.url }/policy/radar?${ params }`
+            `${environment.api.url}/policy/radar?${params}`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch radar data', e);
@@ -81,7 +123,7 @@ export class PolicyService {
 
         if (pilot && pilot !== null) {
             return this.http.get<RadarDto[]>(
-                `${ environment.api.url }/policy/radar/pilot/${ pilot }?${ params }`
+                `${environment.api.url}/policy/radar/pilot/${pilot}?${params}`
             ).pipe(
                 catchError(e => {
                     console.error('Failed to fetch pilot radar data', e);
