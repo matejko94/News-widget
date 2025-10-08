@@ -69,9 +69,9 @@ export default class BarCodePage extends BasePage implements OnInit {
             loadingMap(([ sdg, pilot, region ]) => {
                 // Use pilot intersection if pilot is available, otherwise fall back to sdg intersection
                 if (pilot && pilot !== null) {
-                    return this.policyService.getIntersectingPilotPolicies(pilot, region, 20);
+                    return this.policyService.getIntersectingPilotEducation(pilot, region, 20);
                 } else {
-                    return this.policyService.getIntersectingSdgPolicies(sdg ? +sdg : undefined, region, 20);
+                    return this.policyService.getIntersectingSdgEducation(sdg ? +sdg : undefined, region, 20);
                 }
             }),
             map(intersection => intersection

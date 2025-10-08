@@ -67,7 +67,7 @@ export class Configuration {
                 return COP30_CONFIGURATION;
             case 'ELIAS':
                 return ELIAS_CONFIGURATION;
-            case 'Lanslides':
+            case 'Landslides':
                 return LANDSLIDES_PILOT_CONFIGURATION;
             case 'OER 1':
                 return OER1_CONFIGURATION;
