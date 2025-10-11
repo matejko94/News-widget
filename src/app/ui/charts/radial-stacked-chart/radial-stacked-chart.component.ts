@@ -22,7 +22,7 @@ interface CellData {
 
 @Component({
     selector: 'app-radial-stacked-chart',
-    imports: [ PillLegendComponent ],
+    imports: [PillLegendComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     styles: `
@@ -86,19 +86,23 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
     public data = input.required<RadialStackedData[]>();
     public colors = input.required<string[]>();
     public keys = computed(() => Array.from(new Set(this.data().flatMap(d => Object.keys(d.items)))));
-    public legendItems = computed(() => this.keys().map((label, i) => ({
-        label,
-        color: this.colors()[i % this.colors().length]
-    })));
+    public legendItems = computed(() => this.keys()
+        .filter(key => this.data().some(d => (d.items[key] ?? 0) > 0))
+        .map((label, i) => ({
+            label,
+            color: this.colors()[i % this.colors().length]
+        })));
     private z = computed(() => scaleOrdinal<string>().domain(this.keys()).range(this.colors()));
-    private yRange = computed<[ number, number ]>(() => {
+    private yRange = computed<[number, number]>(() => {
         const maxVal = Math.max(...this.data()
             .map(({ items }) => this.keys().reduce((acc, k) => acc + (items[k] ?? 0), 0))
         );
-        return [ 0, maxVal ];
+        return [0, maxVal];
     });
 
     protected override renderChart() {
+        console.log(this.data());
+
         if (!this.data()?.length) return;
         const container = this.chartContainer().nativeElement;
         container.innerHTML = '';
@@ -118,14 +122,14 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
         const innerRadius = size / 5;
         const outerRadius = size / 2;
         const keys = this.keys();
-        const x = scaleBand().domain(this.data().map(d => d.groupLabel)).range([ 0, 2 * Math.PI ]).align(0);
-        const y = (val: number) => scaleLinear().domain(this.yRange()).range([ innerRadius, outerRadius ])(val);
+        const x = scaleBand().domain(this.data().map(d => d.groupLabel)).range([0, 2 * Math.PI]).align(0);
+        const y = (val: number) => scaleLinear().domain(this.yRange()).range([innerRadius, outerRadius])(val);
 
         const stackedInput: CellData[] = this.data().map(({ groupLabel, items }) => {
             const ranges: CellData['ranges'] = [];
             let currentTotal = 0;
 
-            for (const [ label, value ] of Object.entries(items)) {
+            for (const [label, value] of Object.entries(items)) {
                 const start = currentTotal;
                 currentTotal += value;
                 ranges.push({ label, start });
@@ -157,7 +161,7 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
             .attr('height', size);
 
         const g = svg.append('g')
-            .attr('transform', `translate(${ size / 2 },${ size / 2 })`);
+            .attr('transform', `translate(${size / 2},${size / 2})`);
 
         return { svg, g };
     }
@@ -189,12 +193,12 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
             .attr('d', d => arcGen(d));
 
         registerTooltip(paths, tooltip, this.chartContainer().nativeElement, (data) => {
-            const [ hoveredMin, hoveredMax ] = data;
+            const [hoveredMin, hoveredMax] = data;
             const { total, ranges, groupLabel } = data.data as CellData;
             const value = hoveredMax - hoveredMin;
             const label = ranges.find(({ start }) => start === hoveredMin)?.label;
             const percentage = (value / total * 100).toFixed(2);
-            return `Group: ${ groupLabel }<br>Label: ${ label }<br>Value: ${ value }<br>Percentage: ${ percentage }%`;
+            return `Group: ${groupLabel}<br>Label: ${label}<br>Value: ${value}<br>Percentage: ${percentage}%`;
         });
     }
 
@@ -212,7 +216,7 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
             .attr('text-anchor', 'middle')
             .attr('transform', (d: RadialStackedData) => {
                 const angleDeg = (x(d.groupLabel)! + x.bandwidth()! / 2) * 180 / Math.PI - 90;
-                return `rotate(${ angleDeg })translate(${ outerRadius + labelOffset },0)`;
+                return `rotate(${angleDeg})translate(${outerRadius + labelOffset},0)`;
             });
 
         label.append('text')
@@ -233,7 +237,7 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
         const yAxis = g.append('g')
             .attr('text-anchor', 'middle');
 
-        const yTicks = [ 1, 2, 3, 4, 5 ].map((_, i) => (Math.round(this.yRange()[1] / 5)) * i);
+        const yTicks = [1, 2, 3, 4, 5].map((_, i) => (Math.round(this.yRange()[1] / 5)) * i);
         const yTick = yAxis
             .selectAll('g')
             .data(yTicks)

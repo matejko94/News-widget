@@ -69,15 +69,15 @@ export class Configuration {
                 return ELIAS_CONFIGURATION;
             case 'Landslides':
                 return LANDSLIDES_PILOT_CONFIGURATION;
-            case 'OER 1':
+            case 'OER1':
                 return OER1_CONFIGURATION;
-            case 'OER 2':
+            case 'OER2':
                 return OER2_CONFIGURATION;
-            case 'OER 3':
+            case 'OER3':
                 return OER3_CONFIGURATION;
-            case 'OER 4':
+            case 'OER4':
                 return OER4_CONFIGURATION;
-            case 'OER 5':
+            case 'OER5':
                 return OER5_CONFIGURATION;
             case 'AImovement':
                 return AI_MOVEMENT_CONFIGURATION;
