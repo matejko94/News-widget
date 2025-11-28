@@ -116,6 +116,9 @@ export default class LandingPage {
             'OER3': 'OER3',
             'OER4': 'OER4',
             'OER5': 'OER5',
+            'OBIA1': 'OBIA1',
+            'OBIA2': 'OBIA2',
+            'OBIA3': 'OBIA3',
             'AImovement': 'AImovement',
             'RaD': 'RaD',
             'Quantum': 'Quantum'
