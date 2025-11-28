@@ -357,4 +357,58 @@ export const QUANTUM_CONFIGURATION: SdgConfiguration = {
     ]
 };
 
+export const OBIA1_CONFIGURATION: SdgConfiguration = {
+    id: 1501,
+    color: '#1F77B4',
+    topics: [
+        {
+            name: 'OBIA1',
+            wikiConcepts: [
+                'OBIA1'
+            ]
+        }
+    ],
+    indicators: [
+        {
+            name: 'OBIA1',
+        }
+    ]
+};
+
+export const OBIA2_CONFIGURATION: SdgConfiguration = {
+    id: 1502,
+    color: '#17A2B8',
+    topics: [
+        {
+            name: 'OBIA2',
+            wikiConcepts: [
+                'OBIA2'
+            ]
+        }
+    ],
+    indicators: [
+        {
+            name: 'OBIA2',
+        }
+    ]
+};
+
+export const OBIA3_CONFIGURATION: SdgConfiguration = {
+    id: 1503,
+    color: '#20C997',
+    topics: [
+        {
+            name: 'OBIA3',
+            wikiConcepts: [
+                'OBIA3'
+            ]
+        }
+    ],
+    indicators: [
+        {
+            name: 'OBIA3',
+        }
+    ]
+};
+
 

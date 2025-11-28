@@ -18,7 +18,7 @@ import { SDG7_CONFIGURATION } from '../../../../../configuration/sdg/sdg7.config
 import { SDG8_CONFIGURATION } from '../../../../../configuration/sdg/sdg8.configuration';
 import { SDG9_CONFIGURATION } from '../../../../../configuration/sdg/sdg9.configuration';
 import { SdgConfiguration } from '../types/sdg-configuration.interface';
-import { AI_MOVEMENT_CONFIGURATION, COP30_CONFIGURATION, ELIAS_CONFIGURATION, LANDSLIDES_PILOT_CONFIGURATION, OER1_CONFIGURATION, OER2_CONFIGURATION, OER3_CONFIGURATION, OER4_CONFIGURATION, OER5_CONFIGURATION, QUANTUM_CONFIGURATION, RAD_CONFIGURATION } from '../../../../../configuration/pilot/pilot.configurationt';
+import { AI_MOVEMENT_CONFIGURATION, COP30_CONFIGURATION, ELIAS_CONFIGURATION, LANDSLIDES_PILOT_CONFIGURATION, OBIA1_CONFIGURATION, OBIA2_CONFIGURATION, OBIA3_CONFIGURATION, OER1_CONFIGURATION, OER2_CONFIGURATION, OER3_CONFIGURATION, OER4_CONFIGURATION, OER5_CONFIGURATION, QUANTUM_CONFIGURATION, RAD_CONFIGURATION } from '../../../../../configuration/pilot/pilot.configurationt';
 
 @Injectable({
     providedIn: 'root'
@@ -79,6 +79,12 @@ export class Configuration {
                 return OER4_CONFIGURATION;
             case 'OER5':
                 return OER5_CONFIGURATION;
+            case 'OBIA1':
+                return OBIA1_CONFIGURATION;
+            case 'OBIA2':
+                return OBIA2_CONFIGURATION;
+            case 'OBIA3':
+                return OBIA3_CONFIGURATION;
             case 'AImovement':
                 return AI_MOVEMENT_CONFIGURATION;
             case 'RaD':
