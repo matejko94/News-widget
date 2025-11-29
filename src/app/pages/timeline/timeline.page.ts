@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, switchMap } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { ScienceService } from '../../domain/science/service/science.service';
 import { TopTopicsPerYear } from '../../domain/science/types/topic-timespan.interface';
@@ -69,24 +70,27 @@ export default class TimelinePage extends BasePage implements OnInit {
     public override ngOnInit() {
         super.ngOnInit();
 
-        this.setupData().subscribe(data => {
+        combineLatest([
+            toObservable(this.sdg, { injector: this.injector }),
+            toObservable(this.pilot, { injector: this.injector })
+        ]).pipe(
+            switchMap(([sdgValue, pilotValue]) => {
+                console.log('Timeline setupData - sdgValue:', sdgValue, 'pilotValue:', pilotValue);
+                
+                if (pilotValue && pilotValue !== null) {
+                    console.log('Calling getPilotTopTopicsPerYear with pilot:', pilotValue);
+                    return this.scienceService.getPilotTopTopicsPerYear(pilotValue, 15).pipe(
+                        map(years => this.mapTopicsToRows(years))
+                    );
+                }
+
+                return this.scienceService.getTopTopicsPerYear(sdgValue ? +sdgValue : undefined, 15).pipe(
+                    map(years => this.mapTopicsToRows(years))
+                );
+            })
+        ).subscribe(data => {
             this.allData.set(data);
         });
-    }
-
-    private setupData(): Observable<TimelineRow[]> {
-        const sdgValue = this.sdg();
-        const pilotValue = this.pilot();
-        
-        if (pilotValue && pilotValue !== null) {
-            return this.scienceService.getPilotTopTopicsPerYear(pilotValue, 15).pipe(
-                map(years => this.mapTopicsToRows(years))
-            );
-        }
-
-        return this.scienceService.getTopTopicsPerYear(sdgValue ? +sdgValue : undefined, 15).pipe(
-            map(years => this.mapTopicsToRows(years))
-        );
     }
 
     public toggleSdgFilter(sdg: number): void {

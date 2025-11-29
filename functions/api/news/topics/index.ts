@@ -6,10 +6,14 @@ import { GetArticlesResponse } from './types/get-articles-response.interface';
 const pilotURIMapped: Record<string, string> = {
     'Landslides': '10cadf45-7110-4c51-8110-30e3e3848c0f',
     'OER': 'f23b14f7-60d1-4786-9ca4-f8fdd56682ec',
+    'OER1': 'f23b14f7-60d1-4786-9ca4-f8fdd56682ec',
     'OER2': '9365e3e0-4914-41b5-822a-9e373e2fd3fa',
     'OER3': '1ebf4034-deab-452e-a0e4-edf356eb2139',
     'OER4': '50c9b223-8eec-49ee-b6cb-46631ed37dcf',
     'OER5': 'f9d34ef5-0d04-4e2e-8fc7-ade59aef9801',
+    'OBIA1': '00000000-0000-0000-0000-000000000001', // TODO: Replace with actual UUID
+    'OBIA2': '00000000-0000-0000-0000-000000000002', // TODO: Replace with actual UUID
+    'OBIA3': '00000000-0000-0000-0000-000000000003', // TODO: Replace with actual UUID
     'COP30': '3e80057d-779a-4174-9c74-0ea0394d6ac6',
     'ELIAS': '71299589-2ba9-48af-9408-da0d3f704d5f',
 }
@@ -74,10 +78,14 @@ function createConceptUriPilot(topic: string,pilot: string): string {
     const pilots = {
         'Landslides': '10cadf45-7110-4c51-8110-30e3e3848c0f',
         'OER': 'f23b14f7-60d1-4786-9ca4-f8fdd56682ec',
+        'OER1': 'f23b14f7-60d1-4786-9ca4-f8fdd56682ec',
         'OER2': '9365e3e0-4914-41b5-822a-9e373e2fd3fa',
         'OER3': '1ebf4034-deab-452e-a0e4-edf356eb2139',
         'OER4': '50c9b223-8eec-49ee-b6cb-46631ed37dcf',
         'OER5': 'f9d34ef5-0d04-4e2e-8fc7-ade59aef9801',
+        'OBIA1': '00000000-0000-0000-0000-000000000001', // TODO: Replace with actual UUID
+        'OBIA2': '00000000-0000-0000-0000-000000000002', // TODO: Replace with actual UUID
+        'OBIA3': '00000000-0000-0000-0000-000000000003', // TODO: Replace with actual UUID
         'COP30': '3e80057d-779a-4174-9c74-0ea0394d6ac6',
         'ELIAS': '71299589-2ba9-48af-9408-da0d3f704d5f',
     }
