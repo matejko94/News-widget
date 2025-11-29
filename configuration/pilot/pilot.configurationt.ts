@@ -362,7 +362,7 @@ export const OBIA1_CONFIGURATION: SdgConfiguration = {
     color: '#1F77B4',
     topics: [
         {
-            name: 'OBIA 1',
+            name: 'Supercomputing & Sustainable Energy',
             wikiConcepts: [
                 'Brazil (location)',
                 'Artificial intelligence',
@@ -373,6 +373,7 @@ export const OBIA1_CONFIGURATION: SdgConfiguration = {
         }
     ],
     indicators: [
+
         {
             name: 'Artificial intelligence',
         },
@@ -393,7 +394,7 @@ export const OBIA2_CONFIGURATION: SdgConfiguration = {
     color: '#17A2B8',
     topics: [
         {
-            name: 'OBIA 2',
+            name: 'Machine Learning in Data Centers & Water Management',
             wikiConcepts: [
                 'Brazil (location)',
                 'Machine learning',
@@ -429,7 +430,7 @@ export const OBIA3_CONFIGURATION: SdgConfiguration = {
     color: '#20C997',
     topics: [
         {
-            name: 'OBIA 3',
+            name: 'Data Center Management with Large Language Models & Waste Handling',
             wikiConcepts: [
                 'Brazil (location)',
                 'Large language model',
