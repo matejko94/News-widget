@@ -11,9 +11,9 @@ const pilotURIMapped: Record<string, string> = {
     'OER3': '1ebf4034-deab-452e-a0e4-edf356eb2139',
     'OER4': '50c9b223-8eec-49ee-b6cb-46631ed37dcf',
     'OER5': 'f9d34ef5-0d04-4e2e-8fc7-ade59aef9801',
-    'OBIA1': '00000000-0000-0000-0000-000000000001', // TODO: Replace with actual UUID
-    'OBIA2': '00000000-0000-0000-0000-000000000002', // TODO: Replace with actual UUID
-    'OBIA3': '00000000-0000-0000-0000-000000000003', // TODO: Replace with actual UUID
+    'OBIA1': '99f967a0-20fa-40aa-888f-67b203554d42', // TODO: Replace with actual UUID
+    'OBIA2': '3b90568b-8d96-46bc-ae29-4b409e5a07df	', // TODO: Replace with actual UUID
+    'OBIA3': 'ad8bfbf3-98ce-472d-8db3-42243ff610b5', // TODO: Replace with actual UUID
     'COP30': '3e80057d-779a-4174-9c74-0ea0394d6ac6',
     'ELIAS': '71299589-2ba9-48af-9408-da0d3f704d5f',
 }
@@ -83,9 +83,9 @@ function createConceptUriPilot(topic: string,pilot: string): string {
         'OER3': '1ebf4034-deab-452e-a0e4-edf356eb2139',
         'OER4': '50c9b223-8eec-49ee-b6cb-46631ed37dcf',
         'OER5': 'f9d34ef5-0d04-4e2e-8fc7-ade59aef9801',
-        'OBIA1': '00000000-0000-0000-0000-000000000001', // TODO: Replace with actual UUID
-        'OBIA2': '00000000-0000-0000-0000-000000000002', // TODO: Replace with actual UUID
-        'OBIA3': '00000000-0000-0000-0000-000000000003', // TODO: Replace with actual UUID
+        'OBIA1': '99f967a0-20fa-40aa-888f-67b203554d42', // TODO: Replace with actual UUID
+        'OBIA2': '3b90568b-8d96-46bc-ae29-4b409e5a07df	', // TODO: Replace with actual UUID
+        'OBIA3': 'ad8bfbf3-98ce-472d-8db3-42243ff610b5', // TODO: Replace with actual UUID
         'COP30': '3e80057d-779a-4174-9c74-0ea0394d6ac6',
         'ELIAS': '71299589-2ba9-48af-9408-da0d3f704d5f',
     }
