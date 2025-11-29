@@ -362,15 +362,31 @@ export const OBIA1_CONFIGURATION: SdgConfiguration = {
     color: '#1F77B4',
     topics: [
         {
-            name: 'OBIA1',
+            name: 'OBIA 1',
             wikiConcepts: [
-                'OBIA1'
+                'Brazil (location)',
+                'Artificial intelligence',
+                'Supercomputer',
+                'Sustainability',
+                'Energy'
             ]
         }
     ],
     indicators: [
         {
-            name: 'OBIA1',
+            name: 'OBIA 1',
+        },
+        {
+            name: 'Artificial intelligence',
+        },
+        {
+            name: 'Supercomputer',
+        },
+        {
+            name: 'Sustainability',
+        },
+        {
+            name: 'Energy',
         }
     ]
 };
@@ -380,15 +396,35 @@ export const OBIA2_CONFIGURATION: SdgConfiguration = {
     color: '#17A2B8',
     topics: [
         {
-            name: 'OBIA2',
+            name: 'OBIA 2',
             wikiConcepts: [
-                'OBIA2'
+                'Brazil (location)',
+                'Machine learning',
+                'Data center',
+                'High-performance computing',
+                'Sustainability measurement',
+                'Water'
             ]
         }
     ],
     indicators: [
         {
-            name: 'OBIA2',
+            name: 'OBIA 2',
+        },
+        {
+            name: 'Machine learning',
+        },
+        {
+            name: 'Data center',
+        },
+        {
+            name: 'High-performance computing',
+        },
+        {
+            name: 'Sustainability measurement',
+        },
+        {
+            name: 'Water',
         }
     ]
 };
@@ -398,15 +434,35 @@ export const OBIA3_CONFIGURATION: SdgConfiguration = {
     color: '#20C997',
     topics: [
         {
-            name: 'OBIA3',
+            name: 'OBIA 3',
             wikiConcepts: [
-                'OBIA3'
+                'Brazil (location)',
+                'Large language model',
+                'Data center management',
+                'High-availability cluster',
+                'Sustainability accounting',
+                'Waste'
             ]
         }
     ],
     indicators: [
         {
-            name: 'OBIA3',
+            name: 'OBIA 3',
+        },
+        {
+            name: 'Large language model',
+        },
+        {
+            name: 'Data center management',
+        },
+        {
+            name: 'High-availability cluster',
+        },
+        {
+            name: 'Sustainability accounting',
+        },
+        {
+            name: 'Waste',
         }
     ]
 };
