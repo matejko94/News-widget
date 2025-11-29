@@ -374,9 +374,6 @@ export const OBIA1_CONFIGURATION: SdgConfiguration = {
     ],
     indicators: [
         {
-            name: 'OBIA 1',
-        },
-        {
             name: 'Artificial intelligence',
         },
         {
@@ -408,9 +405,7 @@ export const OBIA2_CONFIGURATION: SdgConfiguration = {
         }
     ],
     indicators: [
-        {
-            name: 'OBIA 2',
-        },
+
         {
             name: 'Machine learning',
         },
@@ -446,9 +441,6 @@ export const OBIA3_CONFIGURATION: SdgConfiguration = {
         }
     ],
     indicators: [
-        {
-            name: 'OBIA 3',
-        },
         {
             name: 'Large language model',
         },
