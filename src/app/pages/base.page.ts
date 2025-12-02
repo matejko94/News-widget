@@ -1,7 +1,7 @@
 import { computed, Directive, inject, Injector, input, OnInit, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { distinctUntilChanged, map, Observable } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, Observable, startWith, tap } from 'rxjs';
 import { WorldBankRegions } from '../../../configuration/regions/world-regions';
 import { Configuration } from '../domain/configuration/service/configuration';
 import { Topic } from '../domain/configuration/types/topic.interface';
@@ -27,28 +27,47 @@ export abstract class BasePage implements OnInit {
     public selectedTopic$!: Observable<Topic>;
 
     public ngOnInit() {
-        const sdgValue = this.sdg();
-        const pilotValue = this.pilot();
+        // Update availableTopics and availableIndicators when sdg or pilot changes
+        combineLatest([
+            toObservable(this.sdg, { injector: this.injector }),
+            toObservable(this.pilot, { injector: this.injector })
+        ]).pipe(
+            tap(([sdgValue, pilotValue]) => {
+                console.log('BasePage - updating topics for sdg:', sdgValue, 'pilot:', pilotValue);
+                if (sdgValue) {
+                    const configuration = this.configuration.get(sdgValue);
+                    console.log('BasePage - SDG configuration topics:', configuration.topics);
+                    this.availableTopics.set(configuration.topics);
+                    this.availableIndicators.set(configuration.indicators);
+                } else if (pilotValue) {
+                    const configuration = this.configuration.get(pilotValue);
+                    console.log('BasePage - Pilot configuration topics:', configuration.topics);
+                    this.availableTopics.set(configuration.topics);
+                    this.availableIndicators.set(configuration.indicators);
+                }
+            })
+        ).subscribe();
 
-        if (sdgValue) {
-            const configuration = this.configuration.get(sdgValue);
-            
-            this.availableTopics.set(configuration.topics);
-            this.availableIndicators.set(configuration.indicators);
-        }else if (pilotValue) {
-            const configuration = this.configuration.get(pilotValue);
-            this.availableTopics.set(configuration.topics);
-            this.availableIndicators.set(configuration.indicators);
-        }
-
-        this.selectedTopic$ = this.route.queryParamMap.pipe(
-            map(params => params.get('topic')),
-            distinctUntilChanged(),
-            map(topic => {
-                if (topic && this.availableTopics().some(t => t.name === topic)) {
-                    return this.availableTopics().find(t => t.name === topic)!;
+        this.selectedTopic$ = combineLatest([
+            this.route.queryParamMap.pipe(
+                map(params => params.get('topic')),
+                distinctUntilChanged()
+            ),
+            toObservable(this.availableTopics, { injector: this.injector }).pipe(
+                startWith(this.availableTopics()),
+                filter(topics => topics.length > 0)
+            )
+        ]).pipe(
+            map(([topic, availableTopics]) => {
+                console.log('BasePage - selectedTopic$ - topic param:', topic, 'availableTopics:', availableTopics);
+                if (topic && availableTopics.some(t => t.name === topic)) {
+                    const selected = availableTopics.find(t => t.name === topic)!;
+                    console.log('BasePage - selectedTopic$ - found topic:', selected, 'wikiConcepts:', selected.wikiConcepts);
+                    return selected;
                 } else {
-                    return this.availableTopics()[0];
+                    const first = availableTopics[0];
+                    console.log('BasePage - selectedTopic$ - using first topic:', first, 'wikiConcepts:', first?.wikiConcepts);
+                    return first;
                 }
             }),
         );

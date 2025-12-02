@@ -41,7 +41,7 @@ export class PolicyService {
         }
 
         return this.http.get<IntersectingPolicyDto[]>(
-            `${environment.api.url}/education/intersection?${params}`
+            `${environment.api.url}/policy/intersection?${params}`
         ).pipe(
             catchError(e => {
                 console.error('Failed to fetch intersecting policies', e);
@@ -82,7 +82,7 @@ export class PolicyService {
 
         if (pilot && pilot !== null) {
             return this.http.get<IntersectingPolicyDto[]>(
-                `${environment.api.url}/education/intersection/pilot/${pilot}?${params}`
+                `${environment.api.url}/policy/intersection/pilot/${pilot}?${params}`
             ).pipe(
                 catchError(e => {
                     console.error('Failed to fetch intersecting pilot policies', e);

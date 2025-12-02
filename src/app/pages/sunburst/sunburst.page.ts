@@ -1,8 +1,8 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, switchMap } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { NEWS_CATEGORIES_COLORS } from '../../../../configuration/colors/news/categories.colors';
-import { loadingMap } from '../../common/utility/loading-map';
 import { NewsService } from '../../domain/news/service/news.service';
 import { TopicDto } from '../../domain/news/types/topic.dto';
 import { SunburstChartComponent, SunburstNode } from '../../ui/charts/sunburst-chart/sunburst-chart.component';
@@ -60,13 +60,37 @@ export default class SunburstPage extends BasePage implements OnInit {
     }
 
     private setupNodes(): Observable<SunburstNode | undefined> {
-        return this.selectedTopic$.pipe(
-            loadingMap(topics => this.newsService.getTopics(
-                this.sdg() === '0' ? ['Landslide', 'Flood', 'Debris'] : topics.wikiConcepts,
-                this.pilot()
-            )),
-            map(topics => topics ? this.mapToNode(topics) : undefined),
-        )
+        const sdg$ = toObservable(this.sdg, { injector: this.injector });
+        const pilot$ = toObservable(this.pilot, { injector: this.injector });
+
+        return combineLatest([
+            this.selectedTopic$,
+            sdg$,
+            pilot$
+        ]).pipe(
+            switchMap(([topics, sdg, pilot]) => {
+                console.log('Sunburst setupNodes - topics:', topics, 'sdg:', sdg, 'pilot:', pilot);
+                const wikiConcepts = sdg === '0' ? ['Landslide', 'Flood', 'Debris'] : (topics?.wikiConcepts || []);
+                console.log('Sunburst wikiConcepts:', wikiConcepts);
+                
+                if (!wikiConcepts || wikiConcepts.length === 0) {
+                    console.warn('No wikiConcepts available for sunburst');
+                    return new Observable<TopicDto[]>(subscriber => {
+                        subscriber.next([]);
+                        subscriber.complete();
+                    }).pipe(
+                        map(topics => topics ? this.mapToNode(topics) : undefined)
+                    );
+                }
+                
+                return this.newsService.getTopics(wikiConcepts, pilot || undefined).pipe(
+                    map(topics => {
+                        console.log('Sunburst received topics:', topics);
+                        return topics ? this.mapToNode(topics) : undefined;
+                    })
+                );
+            })
+        );
     }
 
     private mapToNode(topics: TopicDto[]): SunburstNode {
