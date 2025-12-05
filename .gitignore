@@ -52,3 +52,4 @@ wrangler.toml
 .env
 
 /functions/node_modules
+/dist_headers
