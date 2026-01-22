@@ -90,23 +90,17 @@ export default class EvolutionPage extends BasePage {
         }
 
         // If neither pilot nor sdg is available, return empty data
-        console.log('No pilot or SDG available, returning empty data');
         return of({ nodes: [], links: [] });
     }
 
     private mapGraphData(selectedTopic: string | undefined, intersections: EvolutionLinkDto[]): GraphData {
-        console.log('mapGraphData - selectedTopic:', selectedTopic, 'previousTopic:', this.previousTopic);
-        console.log('mapGraphData - previousNodes before:', Array.from(this.previousNodes));
-
         if (selectedTopic !== this.previousTopic) {
-            console.log('Topic changed, clearing previousNodes');
             this.previousNodes.clear();
         }
 
         this.previousTopic = selectedTopic;
 
         const nodes = this.mapNodes(intersections, selectedTopic);
-        console.log('mapGraphData - nodes created:', nodes.map(n => ({ id: n.id, color: n.color })));
 
         const links = intersections
             .filter(topic => topic.concept_display_name.includes(this.separator))
@@ -120,7 +114,6 @@ export default class EvolutionPage extends BasePage {
 
         // Update previousNodes AFTER coloring has been determined
         this.previousNodes = new Set(nodes.map(node => node.id));
-        console.log('mapGraphData - previousNodes after:', Array.from(this.previousNodes));
 
         return { nodes, links };
     }
@@ -139,14 +132,10 @@ export default class EvolutionPage extends BasePage {
         const isInPrevious = this.previousNodes.has(topic);
 
         if (activeTopic?.toLowerCase() === topic.toLowerCase()) {
-            console.log(`getNodeColor - "${topic}" is ACTIVE TOPIC -> red`);
             return 'red';
         }
 
-        // NEW nodes (not in previousNodes) should be RED
-        // EXISTING nodes (in previousNodes) should be GREEN
         const color = isInPrevious ? 'green' : 'red';
-        console.log(`getNodeColor - "${topic}" isInPrevious: ${isInPrevious} -> ${color}`);
         return color;
     }
 }
