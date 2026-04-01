@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, filter, map, Observable, switchMap } from 'rxjs';
+import { combineLatest, filter, firstValueFrom, map, Observable, switchMap } from 'rxjs';
 import { getColorByCountryCode } from '../../../../configuration/countries/countries';
 import { IndicatorsService } from '../../domain/indicators/service/indicators.service';
 import { IndicatorIntersectionTimeline } from '../../domain/indicators/types/indicator-intersection-timeline.interface';
@@ -133,13 +133,26 @@ export default class BubblePage extends BasePage implements OnInit {
     public override async ngOnInit() {
         super.ngOnInit();
 
-        if (!this.paramX() && !this.paramY() && !this.paramZ()) {
-            const [ x, y, z ] = this.indicatorOptions().map(({ value }) => value);
-            setTimeout(async () => {
-                await this.setQueryParam('paramX', x);
-                await this.setQueryParam('paramY', y);
-                await this.setQueryParam('paramZ', z);
-            });
+        const values = await firstValueFrom(
+            toObservable(this.availableIndicators, { injector: this.injector }).pipe(
+                map(indicators => indicators.map(({ name }) => name)),
+                filter(indicators => indicators.length > 0)
+            )
+        );
+
+        const [ first, second = first, third = second ] = values;
+        const isValid = (value: string | undefined) => !!value && values.includes(value);
+
+        if (!isValid(this.paramX())) {
+            await this.setQueryParam('paramX', first);
+        }
+
+        if (!isValid(this.paramY())) {
+            await this.setQueryParam('paramY', second);
+        }
+
+        if (!isValid(this.paramZ())) {
+            await this.setQueryParam('paramZ', third);
         }
     }
 

@@ -75,6 +75,7 @@ export abstract class BasePage implements OnInit {
 
     protected setQueryParam(key: string, value: string) {
         return this.router.navigate([], {
+            relativeTo: this.route,
             queryParams: { [key]: value },
             queryParamsHandling: 'merge',
         });
