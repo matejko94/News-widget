@@ -76,7 +76,7 @@ export default class EvolutionPage extends BasePage {
 
     private getData(sdg: number | undefined, topic: string | undefined, year: number, pilot: string | undefined): Observable<GraphData> {
         console.log('getData called with:', { sdg, topic, year, pilot });
-        
+
         if (pilot && pilot !== null) {
             return this.scienceService.getPilotEvolution(pilot, topic, year).pipe(
                 map(data => this.mapGraphData(topic, data))
@@ -90,7 +90,6 @@ export default class EvolutionPage extends BasePage {
         }
 
         // If neither pilot nor sdg is available, return empty data
-        console.log('No pilot or SDG available, returning empty data');
         return of({ nodes: [], links: [] });
     }
 
@@ -102,7 +101,6 @@ export default class EvolutionPage extends BasePage {
         this.previousTopic = selectedTopic;
 
         const nodes = this.mapNodes(intersections, selectedTopic);
-        this.previousNodes = new Set(nodes.map(node => node.id));
 
         const links = intersections
             .filter(topic => topic.concept_display_name.includes(this.separator))
@@ -111,8 +109,11 @@ export default class EvolutionPage extends BasePage {
                 target: topic.concept_display_name.split(this.separator)[1],
                 articles: topic.article_count
             }))
-            .filter(({ source, target }) => this.previousNodes.has(source) && this.previousNodes.has(target))
+            .filter(({ source, target }) => nodes.some(n => n.id === source) && nodes.some(n => n.id === target))
             .map(({ source, target, articles }) => ({ source, target, weight: +articles }));
+
+        // Update previousNodes AFTER coloring has been determined
+        this.previousNodes = new Set(nodes.map(node => node.id));
 
         return { nodes, links };
     }
@@ -128,10 +129,13 @@ export default class EvolutionPage extends BasePage {
     }
 
     private getNodeColor(activeTopic: string | undefined, topic: string): string {
+        const isInPrevious = this.previousNodes.has(topic);
+
         if (activeTopic?.toLowerCase() === topic.toLowerCase()) {
             return 'red';
         }
 
-        return this.previousNodes.has(topic) ? 'blue' : 'green';
+        const color = isInPrevious ? 'green' : 'red';
+        return color;
     }
 }

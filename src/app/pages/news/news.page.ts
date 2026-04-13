@@ -115,7 +115,7 @@ import { BasePage } from '../base.page';
             <div class="overflow-y-auto h-container" [class.no-keywords]="data?.length === 0">
                 @for (newsItem of news; track newsItem.url) {
                     <div class="border-b-2 my-3 px-2" [title]="(newsItem.body | slice:0:100) + '...'">
-                        <a class="font-semibold text-lg mb-2" [href]="newsItem.url">
+                        <a class="font-semibold text-lg mb-2" [href]="newsItem.url" target="_blank" rel="noopener noreferrer">
                             {{ newsItem.title | slice:0:40 }}
                         </a>
                         <div class="text-gray-500 text-lg">
@@ -249,7 +249,7 @@ export default class NewsPage extends BasePage implements OnInit {
             startWith(true),
             pairwise(),
             filter(([ prev, next ]) => prev && !next),
-            delay(2000),
+            delay(5000),
             tap(() => {
                 const currentDate = new Date(this.shownDate$.value);
 

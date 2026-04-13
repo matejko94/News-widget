@@ -119,8 +119,8 @@ export class NetworkChartComponent extends Chart<GraphData> {
     private updateLinks(chart: Selection<SVGGElement, unknown, null, undefined>) {
         const weights = this.data().links.map(link => link.weight);
         const edgeScale = scaleLinear()
-            .domain([ Math.min(...weights), Math.max(...weights) ])
-            .range([ this.minEdgeSize(), this.maxEdgeSize() ]);
+            .domain([Math.min(...weights), Math.max(...weights)])
+            .range([this.minEdgeSize(), this.maxEdgeSize()]);
 
         const linkSelection = chart.selectAll<SVGLineElement, GraphLink>('.link')
             .data(this.data().links, link => {
@@ -128,7 +128,7 @@ export class NetworkChartComponent extends Chart<GraphData> {
                 const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                 // @ts-ignore
                 const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-                return `${ sourceId }-${ targetId }`;
+                return `${sourceId}-${targetId}`;
             });
 
         linkSelection.exit().remove();
@@ -150,8 +150,8 @@ export class NetworkChartComponent extends Chart<GraphData> {
     private updateNodes(chart: Selection<SVGGElement, unknown, null, undefined>, nodes: GraphNode[]) {
         const radiusList = nodes.map(node => node.radius);
         const radiusScale = scaleLinear()
-            .domain([ Math.min(...radiusList), Math.max(...radiusList) ])
-            .range([ this.minNodeSize(), this.maxNodeSize() ]);
+            .domain([Math.min(...radiusList), Math.max(...radiusList)])
+            .range([this.minNodeSize(), this.maxNodeSize()]);
 
         const nodeSelection = chart.selectAll<SVGGElement, GraphNode>('g.node-group')
             .data(nodes, d => d.id);
@@ -173,10 +173,16 @@ export class NetworkChartComponent extends Chart<GraphData> {
 
         const mergedNodes = nodeEnter.merge(nodeSelection);
 
+        // Update both text position AND circle color on data change
         mergedNodes.select('text')
             .transition()
             .duration(750)
             .attr('dy', d => -(radiusScale(d.radius) + 4));
+
+        mergedNodes.select('circle')
+            .transition()
+            .duration(750)
+            .attr('fill', d => d.color);
 
         nodeSelection.exit().remove();
 
@@ -213,11 +219,11 @@ export class NetworkChartComponent extends Chart<GraphData> {
         linkSelection: Selection<SVGLineElement, GraphLink, SVGGElement, unknown>
     ): void {
         registerTooltip(nodeSelection, this.tooltip, container, d => {
-            return `<strong>Topic:</strong> ${ d.id }<br>Total articles: ${ d.radius }`;
+            return `<strong>Topic:</strong> ${d.id}<br>Total articles: ${d.radius}`;
         });
 
         registerTooltip(linkSelection, this.tooltip, container, d => {
-            return `<strong>Link:</strong> ${ (d.source as any).id } - ${ (d.target as any).id }<br>Shared articles: ${ d.weight }`;
+            return `<strong>Link:</strong> ${(d.source as any).id} - ${(d.target as any).id}<br>Shared articles: ${d.weight}`;
         });
     }
 
@@ -245,7 +251,7 @@ export class NetworkChartComponent extends Chart<GraphData> {
                     .attr('x2', d => (d.target as any)?.x ?? 0)
                     .attr('y2', d => (d.target as any)?.y ?? 0);
 
-                nodeGroupSelection.attr('transform', d => `translate(${ d.x ?? 0 }, ${ d.y ?? 0 })`);
+                nodeGroupSelection.attr('transform', d => `translate(${d.x ?? 0}, ${d.y ?? 0})`);
             });
 
         this.simulation.alpha(1).restart();
