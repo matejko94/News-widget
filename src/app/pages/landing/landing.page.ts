@@ -173,7 +173,7 @@ export default class LandingPage {
         if (pilotValue && pilotValue !== null) {
             queryParams.push(`pilot=${pilotValue}`);
         }
-        
+
         const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
         this.currentUrl.set(`${this.selectedEnvironment()}${this.selectedWidget()}${queryString}`);
     }

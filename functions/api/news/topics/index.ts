@@ -20,26 +20,44 @@ const pilotURIMapped: Record<string, string> = {
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const searchParams = new URL(request.url).searchParams;
 
-    const topics = searchParams.get('topics').split(',');
-    const pilot = searchParams.get('pilot');
-    if (!topics.length) {
-        return new Response('Missing one of queryParameters: topics', { status: 400 });
+    const topicsParam = searchParams.get('topics');
+    if (!topicsParam?.trim()) {
+        return new Response('Missing query parameter: topics', { status: 400 });
     }
 
-    const returnedTopics = await getTopics(
-        env.EVENT_REGISTRY_ARTICLES_URL,
-        env.EVENT_REGISTRY_API_KEY,
-        topics,
-        pilot
-    );
+    const topics = topicsParam.split(',').map(t => t.trim()).filter(Boolean);
+    if (!topics.length) {
+        return new Response('Missing query parameter: topics', { status: 400 });
+    }
 
-    return new Response(JSON.stringify({ topics: returnedTopics }));
+    const pilot = searchParams.get('pilot') ?? '';
+
+    try {
+        const returnedTopics = await getTopics(
+            env.EVENT_REGISTRY_ARTICLES_URL,
+            env.EVENT_REGISTRY_API_KEY,
+            topics,
+            pilot
+        );
+        return new Response(JSON.stringify({ topics: returnedTopics }), {
+            headers: { 'Content-Type': 'application/json' },
+        });
+    } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        console.error('topics handler failed:', e);
+        return new Response(JSON.stringify({ topics: [] as TopicDto[], error: message }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
 }
 
 async function getTopics(url: string, apiKey: string, topics: string[], pilot?: string): Promise<TopicDto[]> {
+    if (!url || !apiKey) {
+        throw new Error('EVENT_REGISTRY_ARTICLES_URL or EVENT_REGISTRY_API_KEY is not configured');
+    }
 
-
-    const pilotURI = pilotURIMapped[pilot];
+    const pilotURI = pilot ? pilotURIMapped[pilot.trim()] : undefined;
     const response = await HttpClient.post(url, {
         body: JSON.stringify({
                 'apiKey': apiKey,
@@ -59,11 +77,24 @@ async function getTopics(url: string, apiKey: string, topics: string[], pilot?: 
         },
     });
 
+    const bodyText = await response.text();
+    if (!response.ok) {
+        throw new Error(`Event Registry HTTP ${response.status}: ${bodyText.slice(0, 500)}`);
+    }
 
-    const data: GetArticlesResponse = await response.json();
+    let data: GetArticlesResponse;
+    try {
+        data = JSON.parse(bodyText) as GetArticlesResponse;
+    } catch {
+        throw new Error(`Event Registry returned non-JSON: ${bodyText.slice(0, 200)}`);
+    }
 
+    const results = data?.categoryAggr?.results;
+    if (!results?.length) {
+        return [];
+    }
 
-    return data.categoryAggr.results.map(({ label, count }) => ({ label: cleanLabels(label), count }));
+    return results.map(({ label, count }) => ({ label: cleanLabels(label), count }));
 }
 
 function createConceptUri(topic: string): string {

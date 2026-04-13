@@ -13,14 +13,7 @@ export class HttpClient {
         try {
             console.debug('Request: ', url, options);
             const response = await fetch(url, options);
-
-            console.debug('Response: ', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: response.headers,
-                body: await response.clone().json()
-            });
-
+            console.debug('Response: ', response.status, response.statusText);
             return response;
         } catch (e: any) {
             console.error('Failed to fetch data', e);
