@@ -107,8 +107,8 @@ import { BasePage } from '../base.page';
                 <label class="ml-1">EN News Only</label>
             </div>
 
-            @if (topicOptions().length) {
-                <app-menu class="z-20" queryParam="topic" label="Topic" [options]="topicOptions()" showClear/>
+            @if (worldRegionOptions.length) {
+                <app-menu class="z-20" queryParam="region" label="World Region" [options]="worldRegionOptions" showClear/>
             }
         </div>
         <div class="grid grid-cols-2 h-container" [class.no-keywords]="data?.length === 0">
