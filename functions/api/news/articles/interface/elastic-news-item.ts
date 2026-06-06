@@ -3,6 +3,7 @@ export interface ElasticNewsItem {
     lang: string;
     location: null;
     pilot: string[ ];
+    UNESCO_region?: string;
     sentiment: number;
     title: string;
     url: string;
