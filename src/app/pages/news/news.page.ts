@@ -1,10 +1,11 @@
 import { AsyncPipe, DatePipe, SlicePipe } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
 import { BehaviorSubject, combineLatestWith, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, skip, startWith, switchMap, tap } from 'rxjs';
+import { getUnescoRegion, UNESCO_REGIONS } from '../../../../configuration/regions/unesco-regions';
 import { ElasticNewsItem } from '../../../../functions/api/news/articles/interface/elastic-news-item';
 import { NewsService } from '../../domain/news/service/news.service';
 import { HeatmapComponent } from '../../ui/charts/heatmap/heatmap.component';
@@ -107,7 +108,9 @@ import { BasePage } from '../base.page';
                 <label class="ml-1">EN News Only</label>
             </div>
 
-            @if (topicOptions().length) {
+            @if (isOer()) {
+                <app-menu class="z-20" queryParam="region" label="Region" [options]="regionOptions" showClear/>
+            } @else if (topicOptions().length) {
                 <app-menu class="z-20" queryParam="topic" label="Topic" [options]="topicOptions()" showClear/>
             }
         </div>
@@ -153,6 +156,9 @@ import { BasePage } from '../base.page';
 export default class NewsPage extends BasePage implements OnInit {
     private newsService = inject(NewsService);
 
+    public readonly regionOptions = UNESCO_REGIONS;
+    public readonly isOer = computed(() => (this.pilot() ?? '').toUpperCase().startsWith('OER'));
+
     public shownDate$ = new BehaviorSubject(new Date());
     public loadedDate$ = new BehaviorSubject(new Date());
     public isLoading$ = new BehaviorSubject(false);
@@ -177,6 +183,7 @@ export default class NewsPage extends BasePage implements OnInit {
 
     private setupNews() {
         const topic$ = toObservable(this.topic, { injector: this.injector });
+        const region$ = toObservable(this.region, { injector: this.injector });
         const onlyEnglish$ = toObservable(this.onlyEnglish, { injector: this.injector });
 
         return this.shownDate$.pipe(
@@ -187,18 +194,26 @@ export default class NewsPage extends BasePage implements OnInit {
                 this.isLoading$.next(false);
                 this.loadedDate$.next(this.shownDate$.value);
             }),
-            combineLatestWith(topic$, onlyEnglish$),
-            map(([ news, topic, onlyEnglish ]) => this.filterNews(news, topic, onlyEnglish)),
+            combineLatestWith(topic$, region$, onlyEnglish$),
+            map(([ news, topic, region, onlyEnglish ]) => this.filterNews(news, topic, region, onlyEnglish)),
             shareReplay(1),
         );
     }
 
-    private filterNews(news: ElasticNewsItem[], topic: string | undefined, onlyEnglish: boolean) {
+    private filterNews(news: ElasticNewsItem[], topic: string | undefined, region: string | undefined, onlyEnglish: boolean) {
         return news
             .filter(newsItem => {
                 if (topic) {
                     const slugifiedTopic = topic.replace(' ', '_').toLowerCase();
                     return newsItem.concepts.some(concept => concept.uri.toLowerCase().includes(slugifiedTopic));
+                }
+
+                return true;
+            })
+            .filter(newsItem => {
+                if (region) {
+                    const country = newsItem.location?.country?.label?.eng ?? newsItem.location?.label?.eng;
+                    return getUnescoRegion(country) === region;
                 }
 
                 return true;

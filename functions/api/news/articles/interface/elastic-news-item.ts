@@ -1,7 +1,17 @@
 export interface ElasticNewsItem {
     body: string;
     lang: string;
-    location: null;
+    location?: {
+        type: string;
+        label?: {
+            eng: string;
+        };
+        country?: {
+            label: {
+                eng: string;
+            };
+        };
+    } | null;
     pilot: string[ ];
     sentiment: number;
     title: string;
