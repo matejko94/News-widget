@@ -2,7 +2,11 @@ export const cacheMiddleware: PagesFunction = async ({ request, next }) => {
     const cache = caches.default;
     const cacheKey = request.url;
 
-    if (request.headers.get('Cache-Control') !== 'no-cache') {
+    // Navigation requests (the SPA shell) must never be served from cache — neither read nor
+    // written — so a new deploy is picked up immediately instead of staying stale for ~24h.
+    const wantsHtml = (request.headers.get('Accept') ?? '').includes('text/html');
+
+    if (!wantsHtml && request.headers.get('Cache-Control') !== 'no-cache') {
         const cachedResponse = await cache.match(cacheKey);
 
         if (cachedResponse) {
@@ -12,7 +16,11 @@ export const cacheMiddleware: PagesFunction = async ({ request, next }) => {
     }
     const response = await next();
 
-    if (response.status === 200) {
+    // Never cache the SPA shell (index.html / navigations) — it must always be re-fetched so
+    // a new deploy is picked up immediately. Hashed assets and API responses still get cached.
+    const isHtml = (response.headers.get('Content-Type') ?? '').includes('text/html');
+
+    if (response.status === 200 && !isHtml) {
         console.log('Caching response', cacheKey);
         await cache.put(cacheKey, response.clone());
     }
