@@ -2,7 +2,11 @@ export const cacheMiddleware: PagesFunction = async ({ request, next }) => {
     const cache = caches.default;
     const cacheKey = request.url;
 
-    if (request.headers.get('Cache-Control') !== 'no-cache') {
+    // Navigation requests (the SPA shell) must never be served from cache — neither read nor
+    // written — so a new deploy is picked up immediately instead of staying stale for ~24h.
+    const wantsHtml = (request.headers.get('Accept') ?? '').includes('text/html');
+
+    if (!wantsHtml && request.headers.get('Cache-Control') !== 'no-cache') {
         const cachedResponse = await cache.match(cacheKey);
 
         if (cachedResponse) {
