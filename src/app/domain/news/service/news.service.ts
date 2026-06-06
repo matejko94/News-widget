@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, map, Observable, of, shareReplay } from 'rxjs';
+import { catchError, concatMap, first, forkJoin, from, map, Observable, of, shareReplay } from 'rxjs';
 import { environment } from '../../../../../environment/environment';
 import { ElasticNewsItem } from '../../../../../functions/api/news/articles/interface/elastic-news-item';
 import { CloudTagResponse } from '../../../../../functions/api/news/tags/interface/cloud-tag-response.interface';
@@ -27,6 +27,44 @@ export class NewsService {
             }),
             shareReplay(1)
         )
+    }
+
+    /**
+     * Finds the most recent day (<= today, within `maxDaysBack`) that actually has news for
+     * the given sdg/pilot. Probes days newest-first in parallel batches and returns the newest
+     * day with a hit — so the widget can land straight on data instead of walking day-by-day
+     * through empty dates. Returns null if no day in the window has news.
+     */
+    public getLatestNewsDate(
+        sdg: number,
+        pilot: string,
+        maxDaysBack = 31,
+        batchSize = 10,
+        today = new Date()
+    ): Observable<Date | null> {
+        const days = Array.from({ length: maxDaysBack + 1 }, (_, i) => {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            return date;
+        });
+
+        const batches: Date[][] = [];
+        for (let i = 0; i < days.length; i += batchSize) {
+            batches.push(days.slice(i, i + batchSize));
+        }
+
+        return from(batches).pipe(
+            // Probe each batch (newest-first) in parallel; only continue to the next batch
+            // if the current one had no news at all.
+            concatMap(batch => forkJoin(
+                batch.map(date => this.getNews(sdg, pilot, date).pipe(
+                    map(news => ({ date, hasNews: news.length > 0 }))
+                ))
+            ).pipe(
+                map(results => results.find(result => result.hasNews)?.date ?? null)
+            )),
+            first(date => date !== null, null),
+        );
     }
 
     public getCloudTags(sdg: string, pilot: string, startDate: Date, endDate: Date, limit: number): Observable<Tag[]> {

@@ -184,6 +184,17 @@ export default class NewsPage extends BasePage implements OnInit {
         this.cloudData$ = this.setupTags();
         this.sentimentAverage$ = this.setupSentimentAverage();
         this.startCounter();
+        this.jumpToLatestNewsDate();
+    }
+
+    // Pilots can have no news for many recent days. Probe for the most recent day that
+    // actually has news and jump straight to it, so the widget lands on data instead of
+    // walking day-by-day through empty dates.
+    private jumpToLatestNewsDate() {
+        this.newsService.getLatestNewsDate(+this.sdg()!, this.pilot()!).subscribe(latestDate => {
+            this.latestDate = latestDate ?? new Date();
+            this.shownDate$.next(this.latestDate);
+        });
     }
 
     private setupNews() {
@@ -284,7 +295,9 @@ export default class NewsPage extends BasePage implements OnInit {
                 if (currentDate >= this.minDate) {
                     this.shownDate$.next(new Date(currentDate.setDate(currentDate.getDate() - 1)));
                 } else {
-                    this.shownDate$.next(new Date());
+                    // Restart the rotation at the latest day with news (not today), so we
+                    // don't re-walk the empty recent days every cycle.
+                    this.shownDate$.next(this.latestDate ?? new Date());
                 }
             }),
         ).subscribe();
@@ -292,6 +305,7 @@ export default class NewsPage extends BasePage implements OnInit {
 
     private readonly dwellMs = 5000;
     private readonly skipMs = 100;
+    private latestDate?: Date;
 
     private get minDate() {
         const maxDaysBack = 31;
