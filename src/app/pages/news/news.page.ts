@@ -107,6 +107,10 @@ import { BasePage } from '../base.page';
                 <p-checkbox [(ngModel)]="onlyEnglish" [binary]="true" size="small" class="flex"/>
                 <label class="ml-1">EN News Only</label>
             </div>
+            <div class="flex items-center mr-2">
+                <p-checkbox [(ngModel)]="onlyFrench" [binary]="true" size="small" class="flex"/>
+                <label class="ml-1">FR News Only</label>
+            </div>
 
             @if (isOer()) {
                 <app-menu class="z-20" queryParam="region" label="Region" [options]="regionOptions" showClear/>
@@ -163,6 +167,7 @@ export default class NewsPage extends BasePage implements OnInit {
     public loadedDate$ = new BehaviorSubject(new Date());
     public isLoading$ = new BehaviorSubject(false);
     public onlyEnglish = signal(false);
+    public onlyFrench = signal(false);
     public news$: Observable<ElasticNewsItem[]> = EMPTY;
     public cloudData$: Observable<CloudData[]> = EMPTY;
     public sentimentAverage$: Observable<number> = EMPTY;
@@ -185,6 +190,7 @@ export default class NewsPage extends BasePage implements OnInit {
         const topic$ = toObservable(this.topic, { injector: this.injector });
         const region$ = toObservable(this.region, { injector: this.injector });
         const onlyEnglish$ = toObservable(this.onlyEnglish, { injector: this.injector });
+        const onlyFrench$ = toObservable(this.onlyFrench, { injector: this.injector });
 
         return this.shownDate$.pipe(
             filter(() => !this.isLoading$.value),
@@ -194,13 +200,13 @@ export default class NewsPage extends BasePage implements OnInit {
                 this.isLoading$.next(false);
                 this.loadedDate$.next(this.shownDate$.value);
             }),
-            combineLatestWith(topic$, region$, onlyEnglish$),
-            map(([ news, topic, region, onlyEnglish ]) => this.filterNews(news, topic, region, onlyEnglish)),
+            combineLatestWith(topic$, region$, onlyEnglish$, onlyFrench$),
+            map(([ news, topic, region, onlyEnglish, onlyFrench ]) => this.filterNews(news, topic, region, onlyEnglish, onlyFrench)),
             shareReplay(1),
         );
     }
 
-    private filterNews(news: ElasticNewsItem[], topic: string | undefined, region: string | undefined, onlyEnglish: boolean) {
+    private filterNews(news: ElasticNewsItem[], topic: string | undefined, region: string | undefined, onlyEnglish: boolean, onlyFrench: boolean) {
         return news
             .filter(newsItem => {
                 if (topic) {
@@ -220,6 +226,13 @@ export default class NewsPage extends BasePage implements OnInit {
             .filter(newsItem => {
                 if (onlyEnglish) {
                     return newsItem.lang === 'eng';
+                }
+
+                return true;
+            })
+            .filter(newsItem => {
+                if (onlyFrench) {
+                    return newsItem.lang === 'fra';
                 }
 
                 return true;
