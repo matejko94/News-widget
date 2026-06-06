@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
 import { BehaviorSubject, combineLatestWith, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, skip, startWith, switchMap, tap } from 'rxjs';
-import { getUnescoRegion, UNESCO_REGIONS } from '../../../../configuration/regions/unesco-regions';
+import { UNESCO_REGIONS } from '../../../../configuration/regions/unesco-regions';
 import { ElasticNewsItem } from '../../../../functions/api/news/articles/interface/elastic-news-item';
 import { NewsService } from '../../domain/news/service/news.service';
 import { HeatmapComponent } from '../../ui/charts/heatmap/heatmap.component';
@@ -212,8 +212,7 @@ export default class NewsPage extends BasePage implements OnInit {
             })
             .filter(newsItem => {
                 if (region) {
-                    const country = newsItem.location?.country?.label?.eng ?? newsItem.location?.label?.eng;
-                    return getUnescoRegion(country) === region;
+                    return newsItem.UNESCO_region === region;
                 }
 
                 return true;

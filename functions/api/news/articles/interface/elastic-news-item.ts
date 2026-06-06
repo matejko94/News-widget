@@ -1,18 +1,9 @@
 export interface ElasticNewsItem {
     body: string;
     lang: string;
-    location?: {
-        type: string;
-        label?: {
-            eng: string;
-        };
-        country?: {
-            label: {
-                eng: string;
-            };
-        };
-    } | null;
+    location: null;
     pilot: string[ ];
+    UNESCO_region?: string;
     sentiment: number;
     title: string;
     url: string;
