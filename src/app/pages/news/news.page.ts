@@ -4,7 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
-import { BehaviorSubject, combineLatestWith, delay, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, pairwise, shareReplay, skip, startWith, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, shareReplay, switchMap, tap, timer } from 'rxjs';
 import { UNESCO_REGIONS } from '../../../../configuration/regions/unesco-regions';
 import { ElasticNewsItem } from '../../../../functions/api/news/articles/interface/elastic-news-item';
 import { NewsService } from '../../domain/news/service/news.service';
@@ -218,7 +218,7 @@ export default class NewsPage extends BasePage implements OnInit {
             })
             .filter(newsItem => {
                 if (region) {
-                    return newsItem.UNESCO_region === region;
+                    return (newsItem.UNESCO_region ?? '').trim() === region;
                 }
 
                 return true;
@@ -271,12 +271,13 @@ export default class NewsPage extends BasePage implements OnInit {
     }
 
     private startCounter() {
-        return this.isLoading$.pipe(
-            skip(1),
-            startWith(true),
-            pairwise(),
-            filter(([ prev, next ]) => prev && !next),
-            delay(5000),
+        // Drive the date walk off the rendered news: dwell on days that have
+        // news, but skip empty days near-instantly so pilots whose latest news
+        // is weeks old don't sit on a blank "No news today" screen. The dwell
+        // applies to the filtered result, so an active region/topic filter also
+        // skips straight to days that have matching news.
+        return this.news$.pipe(
+            switchMap(news => timer(news.length ? this.dwellMs : this.skipMs)),
             tap(() => {
                 const currentDate = new Date(this.shownDate$.value);
 
@@ -288,6 +289,9 @@ export default class NewsPage extends BasePage implements OnInit {
             }),
         ).subscribe();
     }
+
+    private readonly dwellMs = 5000;
+    private readonly skipMs = 100;
 
     private get minDate() {
         const maxDaysBack = 31;
