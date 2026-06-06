@@ -74,6 +74,10 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
     }
 
     private groupBySdg(policies: IntersectingPolicyDto[], limit: number): RadialStackedData[] {
+        // In the OER view, only the OER pilots (OER1–OER5) belong in the stack/legend; the pilot
+        // intersection endpoint also returns other pilots (OBIA1/2/3, …) which must be hidden here.
+        // For any non-OER pilot, keep showing every pilot as before.
+        const onlyOerPilots = (this.pilot() ?? '').toUpperCase().startsWith('OER');
         const topicSdgMap = new Map<string, RadialStackedData>();
 
         policies
@@ -82,6 +86,7 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
                 sdg,
                 value
             })))
+            .filter(({ sdg }) => !onlyOerPilots || sdg.toUpperCase().startsWith('OER'))
             .forEach(({ topic, sdg, value }) => {
                 if (!topicSdgMap.has(topic)) {
                     topicSdgMap.set(topic, {
