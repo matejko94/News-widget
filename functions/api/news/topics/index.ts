@@ -11,6 +11,7 @@ const pilotURIMapped: Record<string, string> = {
     'OER3': '1ebf4034-deab-452e-a0e4-edf356eb2139',
     'OER4': '50c9b223-8eec-49ee-b6cb-46631ed37dcf',
     'OER5': 'f9d34ef5-0d04-4e2e-8fc7-ade59aef9801',
+    'OER-all': '9b82e68d-e7ee-4d64-98b1-a75af9c7f138',
     'OBIA1': '99f967a0-20fa-40aa-888f-67b203554d42', // TODO: Replace with actual UUID
     'OBIA2': '3b90568b-8d96-46bc-ae29-4b409e5a07df	', // TODO: Replace with actual UUID
     'OBIA3': 'ad8bfbf3-98ce-472d-8db3-42243ff610b5', // TODO: Replace with actual UUID

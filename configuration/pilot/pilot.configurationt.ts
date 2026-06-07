@@ -258,6 +258,69 @@ export const OER5_CONFIGURATION: SdgConfiguration = {
     ]
 };
 
+export const OER_ALL_CONFIGURATION: SdgConfiguration = {
+    id: 1100,
+    color: '#0D6EFD',
+    topics: [
+        {
+            name: 'Open Education & Capacity',
+            wikiConcepts: [
+                'Open educational resources',
+                'Capacity building',
+                'Continuing education',
+                'OpenCourseWare',
+                'Competency-based learning'
+            ]
+        },
+        {
+            name: 'Open Education & Policy',
+            wikiConcepts: [
+                'Open education',
+                'Open educational resources',
+                'Education policy',
+                'Law on the state education'
+            ]
+        },
+        {
+            name: 'Social Inclusion & Open Resources',
+            wikiConcepts: [
+                'Open educational resources',
+                'Social inclusion',
+                'Open format',
+                'Vulnerable adult'
+            ]
+        },
+        {
+            name: 'Finance & Innovation',
+            wikiConcepts: [
+                'Open educational resources',
+                'Financial modeling',
+                'Long-term incentive plan',
+                'Innovation'
+            ]
+        },
+        {
+            name: 'Research & Knowledge Sharing',
+            wikiConcepts: [
+                'Open educational resources',
+                'Translational research',
+                'Multilateral Agreement on Investment',
+                'Multilingual Education',
+                'Knowledge sharing',
+                'Public–private partnership'
+            ]
+        }
+    ],
+    indicators: [
+        { name: 'Open educational resources' },
+        { name: 'Capacity building' },
+        { name: 'Continuing education' },
+        { name: 'Education policy' },
+        { name: 'Social inclusion' },
+        { name: 'Financial modeling' }
+    ]
+};
+
 export const AI_MOVEMENT_CONFIGURATION: SdgConfiguration = {
     id: 1201,
     color: '#FF006E',
