@@ -40,6 +40,10 @@ import { BasePage } from '../base.page';
         ::ng-deep angular-tag-cloud.cloud {
             overflow: visible;
             --size: 10;
+            /* Overall volume factor (0..1): shrinks the whole cloud on low-news days so a
+               single-news day, where the library buckets every tag into w10, doesn't render
+               every keyword at full size. Bound from the data in the template via --vol. */
+            --unit: calc(var(--size) * var(--vol, 1) * 1%);
 
             @media (max-width: 1000px) {
                 --size: 8;
@@ -54,43 +58,43 @@ import { BasePage } from '../base.page';
             }
 
             span.w10 {
-                font-size: calc(var(--size) * 40%);
+                font-size: calc(var(--unit) * 40);
             }
 
             span.w9 {
-                font-size: calc(var(--size) * 35%);
+                font-size: calc(var(--unit) * 35);
             }
 
             span.w8 {
-                font-size: calc(var(--size) * 32%);
+                font-size: calc(var(--unit) * 32);
             }
 
             span.w7 {
-                font-size: calc(var(--size) * 29%);
+                font-size: calc(var(--unit) * 29);
             }
 
             span.w6 {
-                font-size: calc(var(--size) * 26%);
+                font-size: calc(var(--unit) * 26);
             }
 
             span.w5 {
-                font-size: calc(var(--size) * 23%);
+                font-size: calc(var(--unit) * 23);
             }
 
             span.w4 {
-                font-size: calc(var(--size) * 20%);
+                font-size: calc(var(--unit) * 20);
             }
 
             span.w3 {
-                font-size: calc(var(--size) * 17%);
+                font-size: calc(var(--unit) * 17);
             }
 
             span.w2 {
-                font-size: calc(var(--size) * 14%);
+                font-size: calc(var(--unit) * 14);
             }
 
             span.w1 {
-                font-size: calc(var(--size) * 11%);
+                font-size: calc(var(--unit) * 11);
             }
         }
     `,
@@ -139,7 +143,7 @@ import { BasePage } from '../base.page';
             <div class="overflow-visible flex flex-col items-center">
                 @if (data?.length) {
                     <angular-tag-cloud [height]="325" [realignOnResize]="true" [data]="data!" class="-mt-6 ml-4 cloud"
-                                       [width]="width()"/>
+                                       [style.--vol]="cloudVolume(data!)" [width]="width()"/>
                 } @else {
                     <div class="h-full w-fit text-xl font-semibold text-gray-600 my-10 mx-auto">
                         No keywords today
@@ -313,6 +317,17 @@ export default class NewsPage extends BasePage implements OnInit {
                 }
             }),
         ).subscribe();
+    }
+
+    // The tag cloud sizes each keyword relative to the busiest concept of the day, so a
+    // sparse day (every concept appears once) would render every tag at the maximum size.
+    // Scale the whole cloud by the busiest concept's absolute count instead, so low-news
+    // days look visibly smaller. Relative sizing between tags is preserved.
+    public cloudVolume(data: CloudData[] | null): number {
+        const maxWeight = Math.max(0, ...(data ?? []).map(tag => tag.weight ?? 0));
+        const fullVolumeAt = 12;
+        const minVolume = 0.45;
+        return Math.min(1, Math.max(minVolume, maxWeight / fullVolumeAt));
     }
 
     private readonly dwellMs = 5000;
