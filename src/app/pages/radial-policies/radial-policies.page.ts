@@ -48,6 +48,16 @@ import { BasePage } from '../base.page';
     `
 })
 export default class RadialPolicyPage extends BasePage implements OnInit {
+    // Human-readable names shown in the OER radial tags/legend instead of the
+    // raw pilot codes. OER-all is intentionally omitted (hidden in this view).
+    private static readonly OER_LABELS: Record<string, string> = {
+        OER1: 'Capacity Building',
+        OER2: 'Supportive Policy',
+        OER3: 'Inclusive Access',
+        OER4: 'Sustainable Models',
+        OER5: 'International Cooperation',
+    };
+
     private policyService = inject(PolicyService);
 
     public sdgPolicies$!: Observable<RadialStackedData[] | null>
@@ -88,6 +98,17 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
             })))
             .filter(({ sdg }) => !onlyOerPilots || sdg.toUpperCase().startsWith('OER'))
             .forEach(({ topic, sdg, value }) => {
+                let key = sdg;
+
+                if (onlyOerPilots) {
+                    // Hide the OER-all aggregate from the tags/legend entirely.
+                    if (sdg.replace(/[_-]/g, '').toUpperCase() === 'OERALL') {
+                        return;
+                    }
+                    // Show the policy name instead of the raw OERx code.
+                    key = RadialPolicyPage.OER_LABELS[sdg] ?? sdg;
+                }
+
                 if (!topicSdgMap.has(topic)) {
                     topicSdgMap.set(topic, {
                         groupLabel: topic,
@@ -98,7 +119,7 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
                 const topicSdg = topicSdgMap.get(topic);
 
                 if (topicSdg) {
-                    topicSdg.items[sdg] = value;
+                    topicSdg.items[key] = value;
                 }
             });
 
