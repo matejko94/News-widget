@@ -85,12 +85,15 @@ interface CellData {
 export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
     public data = input.required<RadialStackedData[]>();
     public colors = input.required<string[]>();
+    // Optional explicit color per stack key (e.g. official SDG colors). When a
+    // key is absent from the map it falls back to the index-based palette.
+    public colorMap = input<Record<string, string> | null>(null);
     public keys = computed(() => Array.from(new Set(this.data().flatMap(d => Object.keys(d.items)))));
     public legendItems = computed(() => this.keys()
         .filter(key => this.data().some(d => (d.items[key] ?? 0) > 0))
         .map((label, i) => ({
             label,
-            color: this.colors()[i % this.colors().length]
+            color: this.colorMap()?.[label] ?? this.colors()[i % this.colors().length]
         })));
     private z = computed(() => scaleOrdinal<string>().domain(this.keys()).range(this.colors()));
     private yRange = computed<[number, number]>(() => {
@@ -186,7 +189,7 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
             .selectAll('g')
             .data(stackedSeries)
             .enter().append('g')
-            .attr('fill', d => this.z()(d.key)!)
+            .attr('fill', d => this.colorFor(d.key))
             .selectAll('path')
             .data(d => d)
             .enter().append('path')
@@ -267,6 +270,10 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
             .style('font-size', '12px')
             .style('font-weight', 'bold')
             .text('Documents');
+    }
+
+    private colorFor(key: string): string {
+        return this.colorMap()?.[key] ?? this.z()(key)!;
     }
 
     private format(val: number) {
