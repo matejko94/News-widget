@@ -95,6 +95,44 @@ export class PolicyService {
         return of([]);
     }
 
+    /** EDUCATION radial — queries the `education` index (one bar per topic,
+     *  stacked by SDG / OER policy = lecture counts). No region filter. */
+    public getEducationSdgTopics(sdg: number | undefined, numTopics = 20, topSdg = 5): Observable<IntersectingPolicyDto[]> {
+        const params = new URLSearchParams({
+            num_topics: numTopics.toString(),
+            top_sdg: topSdg.toString()
+        });
+        if (sdg !== undefined) {
+            params.set('sdg', sdg.toString());
+        }
+        return this.http.get<IntersectingPolicyDto[]>(
+            `${environment.api.url}/education/intersection/?${params}`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch education SDG topics', e);
+                return of([]);
+            })
+        );
+    }
+
+    public getEducationPilotTopics(pilot: string | undefined, numTopics = 20, topN = 5): Observable<IntersectingPolicyDto[]> {
+        if (!pilot) {
+            return of([]);
+        }
+        const params = new URLSearchParams({
+            num_topics: numTopics.toString(),
+            top_n: topN.toString()
+        });
+        return this.http.get<IntersectingPolicyDto[]>(
+            `${environment.api.url}/education/intersection/pilot/${pilot}?${params}`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch education pilot topics', e);
+                return of([]);
+            })
+        );
+    }
+
     public getRadarData(sdg: number | undefined, region: string | undefined, year: number): Observable<RadarDto[]> {
         const params = new URLSearchParams({
             year: year.toString(),

@@ -1,13 +1,12 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { map, Observable } from 'rxjs';
-import { SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest, map, Observable } from 'rxjs';
+import { getSDGColor, SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { loadingMap } from '../../common/utility/loading-map';
-import { createSdgObject } from '../../common/utility/sdg-object';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { IntersectingPolicyDto } from '../../domain/policy/types/intersecting-policy.dto';
 import { RadialStackedChartComponent, RadialStackedData } from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
-import { MenuComponent } from '../../ui/components/menu/menu.component';
 import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
 import { BasePage } from '../base.page';
 
@@ -17,8 +16,7 @@ import { BasePage } from '../base.page';
     imports: [
         RadialStackedChartComponent,
         AsyncPipe,
-        SpinnerComponent,
-        MenuComponent
+        SpinnerComponent
     ],
     styles: `
         :host {
@@ -31,12 +29,9 @@ import { BasePage } from '../base.page';
         }
     `,
     template: `
-        <app-menu queryParam="region" label="Select region" [options]="worldRegionOptions"
-                  showClear class="absolute top-5 right-5 z-10"/>
-
-        @if (sdgPolicies$ | async; as data) {
+        @if (topics$ | async; as data) {
             @if (data.length) {
-                <app-radial-stacked-chart [data]="data" [colors]="colors"/>
+                <app-radial-stacked-chart [data]="data" [colors]="colors" [colorMap]="colorMap"/>
             } @else {
                 <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
                     No data available
@@ -48,8 +43,7 @@ import { BasePage } from '../base.page';
     `
 })
 export default class RadialPolicyPage extends BasePage implements OnInit {
-    // Human-readable names shown in the OER radial tags/legend instead of the
-    // raw pilot codes. OER-all is intentionally omitted (hidden in this view).
+    // Human-readable names shown for the OER policies (pilot view segments).
     private static readonly OER_LABELS: Record<string, string> = {
         OER1: 'Capacity Building',
         OER2: 'Supportive Policy',
@@ -57,72 +51,61 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
         OER4: 'Sustainable Models',
         OER5: 'International Cooperation',
     };
+    private static readonly OER_COLORS: Record<string, string> = {
+        OER1: '#4C9F38',
+        OER2: '#FCC30B',
+        OER3: '#C5192D',
+        OER4: '#26BDE2',
+        OER5: '#A21942',
+    };
 
     private policyService = inject(PolicyService);
 
-    public sdgPolicies$!: Observable<RadialStackedData[] | null>
+    public topics$!: Observable<RadialStackedData[] | null>;
+    // Fallback palette for the chart; per-key colors come from `colorMap`.
     public colors = SDG_COLORS.colors;
+    // Per-segment color: official SDG color (SDG view) or OER policy color (pilot view).
+    public colorMap: Record<string, string> = {};
 
     public override ngOnInit() {
         super.ngOnInit();
 
-        this.sdgPolicies$ = this.selectedRegion$
-            .pipe(
-                loadingMap(region => {
-                    const sdgValue = this.sdg();
-                    const pilotValue = this.pilot();
-
-                    // Use pilot intersection if pilot is available, otherwise fall back to sdg intersection
-                    if (pilotValue && pilotValue !== null) {
-                        return this.policyService.getIntersectingPilotEducation(pilotValue, region, 20);
-                    } else {
-                        return this.policyService.getIntersectingSdgEducation(sdgValue ? +sdgValue : undefined, region, 20);
-                    }
-                }),
-                map(policies => policies ? this.groupBySdg(policies, 10) : null)
-            );
+        // One bar per topic (up to 20), stacked by SDG or OER policy, sourced from
+        // the education index. Re-fetch whenever the SDG or pilot selection changes.
+        this.topics$ = combineLatest([
+            toObservable(this.sdg, { injector: this.injector }),
+            toObservable(this.pilot, { injector: this.injector })
+        ]).pipe(
+            loadingMap(([sdgValue, pilotValue]) => {
+                if (pilotValue) {
+                    return this.policyService.getEducationPilotTopics(pilotValue);
+                }
+                return this.policyService.getEducationSdgTopics(sdgValue ? +sdgValue : undefined);
+            }),
+            map(dtos => dtos ? this.toRadial(dtos) : null)
+        );
     }
 
-    private groupBySdg(policies: IntersectingPolicyDto[], limit: number): RadialStackedData[] {
-        // In the OER view, only the OER pilots (OER1–OER5) belong in the stack/legend; the pilot
-        // intersection endpoint also returns other pilots (OBIA1/2/3, …) which must be hidden here.
-        // For any non-OER pilot, keep showing every pilot as before.
-        const onlyOerPilots = (this.pilot() ?? '').toUpperCase().startsWith('OER');
-        const topicSdgMap = new Map<string, RadialStackedData>();
+    // Backend returns one entry per topic: { sdg: <topic>, sdg_intersections: [{key: SDG|pilot, value}] }.
+    // Turn that into bars (groupLabel = topic) with one stacked segment per SDG / OER policy,
+    // and build the matching color map.
+    private toRadial(dtos: IntersectingPolicyDto[]): RadialStackedData[] {
+        const isPilot = !!this.pilot();
+        const colorMap: Record<string, string> = {};
 
-        policies
-            .flatMap(({ sdg, sdg_intersections }) => sdg_intersections.map(({ key: topic, value }) => ({
-                topic,
-                sdg,
-                value
-            })))
-            .filter(({ sdg }) => !onlyOerPilots || sdg.toUpperCase().startsWith('OER'))
-            .forEach(({ topic, sdg, value }) => {
-                let key = sdg;
+        const data = dtos.map(dto => {
+            const items: { [key: string]: number } = {};
+            for (const { key, value } of dto.sdg_intersections) {
+                const label = isPilot ? (RadialPolicyPage.OER_LABELS[key] ?? key) : key;
+                items[label] = value;
+                colorMap[label] = isPilot
+                    ? (RadialPolicyPage.OER_COLORS[key] ?? '#6B7280')
+                    : getSDGColor(key);
+            }
+            return { groupLabel: dto.sdg, items };
+        });
 
-                if (onlyOerPilots) {
-                    // Hide the OER-all aggregate from the tags/legend entirely.
-                    if (sdg.replace(/[_-]/g, '').toUpperCase() === 'OERALL') {
-                        return;
-                    }
-                    // Show the policy name instead of the raw OERx code.
-                    key = RadialPolicyPage.OER_LABELS[sdg] ?? sdg;
-                }
-
-                if (!topicSdgMap.has(topic)) {
-                    topicSdgMap.set(topic, {
-                        groupLabel: topic,
-                        items: createSdgObject(0)
-                    });
-                }
-
-                const topicSdg = topicSdgMap.get(topic);
-
-                if (topicSdg) {
-                    topicSdg.items[key] = value;
-                }
-            });
-
-        return Array.from(topicSdgMap.values()).slice(0, limit);
+        this.colorMap = colorMap;
+        return data;
     }
 }
