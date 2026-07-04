@@ -89,11 +89,14 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
     // Backend returns one entry per topic: { sdg: <topic>, sdg_intersections: [{key: SDG|pilot, value}] }.
     // Turn that into bars (groupLabel = topic) with one stacked segment per SDG / OER policy,
     // and build the matching color map.
+    // Cap on the number of bars so the radial labels stay legible.
+    private static readonly MAX_BARS = 14;
+
     private toRadial(dtos: IntersectingPolicyDto[]): RadialStackedData[] {
         const isPilot = !!this.pilot();
         const colorMap: Record<string, string> = {};
 
-        const data = dtos.map(dto => {
+        const bars = dtos.map(dto => {
             const items: { [key: string]: number } = {};
             for (const { key, value } of dto.sdg_intersections) {
                 const label = isPilot ? (RadialPolicyPage.OER_LABELS[key] ?? key) : key;
@@ -102,10 +105,20 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
                     ? (RadialPolicyPage.OER_COLORS[key] ?? '#6B7280')
                     : getSDGColor(key);
             }
-            return { groupLabel: dto.sdg, items };
+            const total = Object.values(items).reduce((a, b) => a + b, 0);
+            return { groupLabel: dto.sdg, items, total };
         });
 
+        // Drop the long tail of near-empty topics (they only crowd the labels)
+        // and cap the number of bars — "allow fewer when there is not enough data".
+        const maxTotal = Math.max(0, ...bars.map(b => b.total));
+        const minTotal = Math.max(3, maxTotal * 0.05);
+        const visible = bars
+            .filter(b => b.total >= minTotal)
+            .slice(0, RadialPolicyPage.MAX_BARS)
+            .map(({ groupLabel, items }) => ({ groupLabel, items }));
+
         this.colorMap = colorMap;
-        return data;
+        return visible;
     }
 }
