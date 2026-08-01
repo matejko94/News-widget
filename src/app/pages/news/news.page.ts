@@ -105,6 +105,16 @@ import { BasePage } from '../base.page';
         @let news = news$ | async;
         @let data = cloudData$ | async;
         <div class="flex items-center gap-2 p-2">
+            <button type="button" (click)="togglePlay()"
+                    class="flex items-center justify-center w-7 h-7 rounded hover:bg-gray-200 transition-colors"
+                    [attr.aria-label]="(paused$ | async) ? 'Start' : 'Stop'"
+                    [title]="(paused$ | async) ? 'Start' : 'Stop'">
+                @if (paused$ | async) {
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                } @else {
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                }
+            </button>
             <div>Date: <b>{{ loadedDate$ | async | date: 'dd.MM.yyyy' }}</b></div>
             <div>Total news: <b>{{ news?.length }}</b></div>
             <div class="flex items-center ml-auto mr-2">
@@ -170,6 +180,8 @@ export default class NewsPage extends BasePage implements OnInit {
     public shownDate$ = new BehaviorSubject(new Date());
     public loadedDate$ = new BehaviorSubject(new Date());
     public isLoading$ = new BehaviorSubject(false);
+    // Auto-play is on by default; the user can stop/start the date walk with the toggle.
+    public paused$ = new BehaviorSubject(false);
     public onlyEnglish = signal(false);
     public onlyFrench = signal(false);
     public news$: Observable<ElasticNewsItem[]> = EMPTY;
@@ -297,7 +309,14 @@ export default class NewsPage extends BasePage implements OnInit {
         // widget is live; for every other pilot/SDG we skip empty days near-instantly so a
         // pilot whose latest news is weeks old doesn't sit on a blank "No news today" screen.
         return this.news$.pipe(
-            switchMap(news => {
+            combineLatestWith(this.paused$),
+            switchMap(([ news, paused ]) => {
+                // Stopped: hold on the current day until the user starts again. Toggling
+                // paused$ re-emits here, so switchMap cancels the pending timer immediately.
+                if (paused) {
+                    return EMPTY;
+                }
+
                 if (news.length) {
                     return timer(this.dwellMs);
                 }
@@ -323,6 +342,10 @@ export default class NewsPage extends BasePage implements OnInit {
     // sparse day (every concept appears once) would render every tag at the maximum size.
     // Scale the whole cloud by the busiest concept's absolute count instead, so low-news
     // days look visibly smaller. Relative sizing between tags is preserved.
+    public togglePlay() {
+        this.paused$.next(!this.paused$.value);
+    }
+
     public cloudVolume(data: CloudData[] | null): number {
         const maxWeight = Math.max(0, ...(data ?? []).map(tag => tag.weight ?? 0));
         const fullVolumeAt = 12;
