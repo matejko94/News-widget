@@ -105,16 +105,28 @@ import { BasePage } from '../base.page';
         @let news = news$ | async;
         @let data = cloudData$ | async;
         <div class="flex items-center gap-2 p-2">
-            <button type="button" (click)="togglePlay()"
-                    class="flex items-center justify-center w-7 h-7 rounded hover:bg-gray-200 transition-colors"
-                    [attr.aria-label]="(paused$ | async) ? 'Start' : 'Stop'"
-                    [title]="(paused$ | async) ? 'Start' : 'Stop'">
-                @if (paused$ | async) {
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                } @else {
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-                }
-            </button>
+            <div class="flex items-center">
+                <button type="button" (click)="stepDay(-1)"
+                        class="flex items-center justify-center w-7 h-7 rounded hover:bg-gray-200 transition-colors"
+                        aria-label="Previous day" title="Previous day">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15 6l-6 6 6 6z"/></svg>
+                </button>
+                <button type="button" (click)="togglePlay()"
+                        class="flex items-center justify-center w-7 h-7 rounded hover:bg-gray-200 transition-colors"
+                        [attr.aria-label]="(paused$ | async) ? 'Start' : 'Stop'"
+                        [title]="(paused$ | async) ? 'Start' : 'Stop'">
+                    @if (paused$ | async) {
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    } @else {
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                    }
+                </button>
+                <button type="button" (click)="stepDay(1)"
+                        class="flex items-center justify-center w-7 h-7 rounded hover:bg-gray-200 transition-colors"
+                        aria-label="Next day" title="Next day">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6l6 6-6 6z"/></svg>
+                </button>
+            </div>
             <div>Date: <b>{{ loadedDate$ | async | date: 'dd.MM.yyyy' }}</b></div>
             <div>Total news: <b>{{ news?.length }}</b></div>
             <div class="flex items-center ml-auto mr-2">
@@ -344,6 +356,27 @@ export default class NewsPage extends BasePage implements OnInit {
     // days look visibly smaller. Relative sizing between tags is preserved.
     public togglePlay() {
         this.paused$.next(!this.paused$.value);
+    }
+
+    // Manual day step: -1 goes back one day (older), +1 forward one day (newer).
+    // Stepping pauses the auto-walk so the chosen day stays put, and the date is
+    // clamped to the same [minDate, today] window the auto-walk uses.
+    public stepDay(delta: number) {
+        if (this.isLoading$.value) {
+            return;
+        }
+
+        this.paused$.next(true);
+
+        const next = new Date(this.shownDate$.value);
+        next.setDate(next.getDate() + delta);
+
+        const today = new Date();
+        if (next < this.minDate || next > today) {
+            return;
+        }
+
+        this.shownDate$.next(next);
     }
 
     public cloudVolume(data: CloudData[] | null): number {
