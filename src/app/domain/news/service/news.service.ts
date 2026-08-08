@@ -30,6 +30,41 @@ export class NewsService {
     }
 
     /**
+     * Aggregates news for a rolling window of `days` ending on `endDate` (inclusive), so the
+     * widget can show a whole week at once. The articles API is per-day, so probe each day in
+     * the window in parallel and merge the results newest-first. Duplicate articles (the same
+     * url returned for more than one day) are collapsed, since the news list tracks by url.
+     */
+    public getNewsForWindow(sdg: number, pilot: string, endDate: Date, days: number): Observable<ElasticNewsItem[]> {
+        if (days <= 1) {
+            return this.getNews(sdg, pilot, endDate);
+        }
+
+        const dates = Array.from({ length: days }, (_, i) => {
+            const date = new Date(endDate);
+            date.setDate(date.getDate() - i);
+            return date;
+        });
+
+        return forkJoin(dates.map(date => this.getNews(sdg, pilot, date))).pipe(
+            map(results => {
+                const byUrl = new Map<string, ElasticNewsItem>();
+
+                results.flat().forEach(newsItem => {
+                    if (!byUrl.has(newsItem.url)) {
+                        byUrl.set(newsItem.url, newsItem);
+                    }
+                });
+
+                return [ ...byUrl.values() ].sort(
+                    (a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+                );
+            }),
+            shareReplay(1)
+        );
+    }
+
+    /**
      * Finds the most recent day (<= today, within `maxDaysBack`) that actually has news for
      * the given sdg/pilot. Probes days newest-first in parallel batches and returns the newest
      * day with a hit — so the widget can land straight on data instead of walking day-by-day
