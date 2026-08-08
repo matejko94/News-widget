@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
 import { BehaviorSubject, combineLatestWith, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, shareReplay, switchMap, tap, timer } from 'rxjs';
-import { OER_ACTION_AREA_STYLES, OER_ACTION_AREAS, OER_ALL_PILOT, oerActionAreasOf } from '../../../../configuration/pilot/oer-action-areas';
+import { OER_ACTION_AREA_NAMES, OER_ACTION_AREA_STYLES, OER_ACTION_AREAS, OER_ALL_PILOT, oerActionAreasOf } from '../../../../configuration/pilot/oer-action-areas';
 import { UNESCO_REGIONS } from '../../../../configuration/regions/unesco-regions';
 import { ElasticNewsItem } from '../../../../functions/api/news/articles/interface/elastic-news-item';
 import { NewsService } from '../../domain/news/service/news.service';
@@ -165,6 +165,7 @@ import { BasePage } from '../base.page';
                             @if (isOerAll()) {
                                 @for (area of actionAreasOf(newsItem); track area) {
                                     <span class="rounded px-1.5 text-base font-semibold"
+                                          [title]="actionAreaNames[area]"
                                           [style.background]="actionAreaStyles[area].background"
                                           [style.color]="actionAreaStyles[area].color">{{ area }}</span>
                                 }
@@ -219,6 +220,7 @@ export default class NewsPage extends BasePage implements OnInit {
     // labelled with each area it matches. The OER-all stream itself stays in the system.
     public readonly newsPilot = computed(() => this.isOerAll() ? OER_ACTION_AREAS.join(',') : this.pilot()!);
     public readonly actionAreaStyles = OER_ACTION_AREA_STYLES;
+    public readonly actionAreaNames = OER_ACTION_AREA_NAMES;
 
     public shownDate$ = new BehaviorSubject(new Date());
     public loadedDate$ = new BehaviorSubject(new Date());

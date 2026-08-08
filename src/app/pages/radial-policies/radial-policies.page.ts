@@ -3,6 +3,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, map, Observable } from 'rxjs';
 import { getSDGColor, SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
+import { OER_ACTION_AREA_NAMES } from '../../../../configuration/pilot/oer-action-areas';
 import { loadingMap } from '../../common/utility/loading-map';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { IntersectingPolicyDto } from '../../domain/policy/types/intersecting-policy.dto';
@@ -43,14 +44,9 @@ import { BasePage } from '../base.page';
     `
 })
 export default class RadialPolicyPage extends BasePage implements OnInit {
-    // Human-readable names shown for the OER policies (pilot view segments).
-    private static readonly OER_LABELS: Record<string, string> = {
-        OER1: 'Capacity Building',
-        OER2: 'Supportive Policy',
-        OER3: 'Inclusive Access',
-        OER4: 'Sustainable Models',
-        OER5: 'International Cooperation',
-    };
+    // Human-readable names shown for the OER policies (pilot view segments). Shared with the news
+    // widget, which shows the same names as tooltips on its action-area labels.
+    private static readonly OER_LABELS: Record<string, string> = OER_ACTION_AREA_NAMES;
     private static readonly OER_COLORS: Record<string, string> = {
         OER1: '#4C9F38',
         OER2: '#FCC30B',
