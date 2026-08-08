@@ -53,11 +53,14 @@ async function getCloudData(url: string, credentials: string, sdg: string, pilot
             }
         });
     }else if (pilot !== '0' && pilot !== null && pilot !== undefined) {
-        filters.push({
-            match: {
-                'pilot.keyword': pilot
-            }
-        })
+        // `pilot` may be a comma-separated list (OER-all is requested as OER1,..,OER5), in which
+        // case aggregate over all of them in a single query.
+        const pilots = pilot.split(',').map(entry => entry.trim()).filter(Boolean);
+
+        filters.push(pilots.length > 1
+            ? { terms: { 'pilot.keyword': pilots } }
+            : { match: { 'pilot.keyword': pilots[0] ?? pilot } }
+        );
     }
 
     const response = await fetch(url, {

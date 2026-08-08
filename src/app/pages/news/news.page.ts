@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
 import { BehaviorSubject, combineLatestWith, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, shareReplay, switchMap, tap, timer } from 'rxjs';
+import { OER_ACTION_AREA_STYLES, OER_ACTION_AREAS, OER_ALL_PILOT, oerActionAreasOf } from '../../../../configuration/pilot/oer-action-areas';
 import { UNESCO_REGIONS } from '../../../../configuration/regions/unesco-regions';
 import { ElasticNewsItem } from '../../../../functions/api/news/articles/interface/elastic-news-item';
 import { NewsService } from '../../domain/news/service/news.service';
@@ -157,8 +158,17 @@ import { BasePage } from '../base.page';
                         <a class="font-semibold text-lg mb-2" [href]="newsItem.url" target="_blank" rel="noopener noreferrer">
                             {{ newsItem.title | slice:0:40 }}
                         </a>
-                        <div class="text-gray-500 text-lg">
-                            {{ newsItem.dateTime | date: 'EEE MMM d yyyy, HH:mm': 'UTC' }}
+                        <div class="flex items-baseline flex-wrap gap-2 text-gray-500 text-lg">
+                            <span>{{ newsItem.dateTime | date: 'EEE MMM d yyyy, HH:mm': 'UTC' }}</span>
+                            <!-- Which OER action area(s) the article was identified in. Only in
+                                 OER-all, where the list mixes all five. -->
+                            @if (isOerAll()) {
+                                @for (area of actionAreasOf(newsItem); track area) {
+                                    <span class="rounded px-1.5 text-base font-semibold"
+                                          [style.background]="actionAreaStyles[area].background"
+                                          [style.color]="actionAreaStyles[area].color">{{ area }}</span>
+                                }
+                            }
                         </div>
                     </div>
                 } @empty {
@@ -202,6 +212,14 @@ export default class NewsPage extends BasePage implements OnInit {
     public readonly isWeekly = computed(() => this.windowDays() > 1);
     public readonly periodLabel = computed(() => this.isWeekly() ? 'this week' : 'today');
 
+    public readonly isOerAll = computed(() => (this.pilot() ?? '').trim().toUpperCase() === OER_ALL_PILOT.toUpperCase());
+
+    // OER-all is built from the five action areas rather than from its own data stream: query all
+    // five at once, so an article that belongs to several of them is returned once and can be
+    // labelled with each area it matches. The OER-all stream itself stays in the system.
+    public readonly newsPilot = computed(() => this.isOerAll() ? OER_ACTION_AREAS.join(',') : this.pilot()!);
+    public readonly actionAreaStyles = OER_ACTION_AREA_STYLES;
+
     public shownDate$ = new BehaviorSubject(new Date());
     public loadedDate$ = new BehaviorSubject(new Date());
     public isLoading$ = new BehaviorSubject(false);
@@ -232,7 +250,7 @@ export default class NewsPage extends BasePage implements OnInit {
     // actually has news and jump straight to it, so the widget lands on data instead of
     // walking day-by-day through empty dates.
     private jumpToLatestNewsDate() {
-        this.newsService.getLatestNewsDate(+this.sdg()!, this.pilot()!).subscribe(latestDate => {
+        this.newsService.getLatestNewsDate(+this.sdg()!, this.newsPilot()).subscribe(latestDate => {
             this.latestDate = latestDate ?? new Date();
             this.shownDate$.next(this.latestDate);
         });
@@ -247,7 +265,7 @@ export default class NewsPage extends BasePage implements OnInit {
         return this.shownDate$.pipe(
             filter(() => !this.isLoading$.value),
             tap(() => this.isLoading$.next(true)),
-            switchMap(shownDate => this.newsService.getNewsForWindow(+this.sdg()!, this.pilot()!, shownDate, this.windowDays())),
+            switchMap(shownDate => this.newsService.getNewsForWindow(+this.sdg()!, this.newsPilot(), shownDate, this.windowDays())),
             tap(() => {
                 this.isLoading$.next(false);
                 this.loadedDate$.next(this.shownDate$.value);
@@ -299,7 +317,7 @@ export default class NewsPage extends BasePage implements OnInit {
 
                 // Keywords cover the same window as the news list: a single day normally,
                 // the whole week for OER.
-                return this.newsService.getCloudTags(this.sdg()!, this.pilot()!, this.windowStart(shownDate), dayAfter, 18)
+                return this.newsService.getCloudTags(this.sdg()!, this.newsPilot(), this.windowStart(shownDate), dayAfter, 18)
             }),
             shareReplay(1),
         )
@@ -382,6 +400,11 @@ export default class NewsPage extends BasePage implements OnInit {
         }
 
         this.shownDate$.next(next);
+    }
+
+    // The OER action areas an article was identified in, for the labels next to its date.
+    public actionAreasOf(newsItem: ElasticNewsItem) {
+        return oerActionAreasOf(newsItem.pilot);
     }
 
     // First (oldest) day of the window ending on `endDate` — the window is a single day
