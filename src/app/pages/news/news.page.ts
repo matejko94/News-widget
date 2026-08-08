@@ -218,13 +218,7 @@ export default class NewsPage extends BasePage implements OnInit {
     // Pilots can have no news for many recent days. Probe for the most recent day that
     // actually has news and jump straight to it, so the widget lands on data instead of
     // walking day-by-day through empty dates.
-    // OER is intentionally excluded: there we want the widget to visibly animate through the
-    // days (empty ones included) so viewers see it is live (see startCounter).
     private jumpToLatestNewsDate() {
-        if (this.isOer()) {
-            return;
-        }
-
         this.newsService.getLatestNewsDate(+this.sdg()!, this.pilot()!).subscribe(latestDate => {
             this.latestDate = latestDate ?? new Date();
             this.shownDate$.next(this.latestDate);
@@ -316,10 +310,10 @@ export default class NewsPage extends BasePage implements OnInit {
     }
 
     private startCounter() {
-        // Drive the date walk off the rendered news: dwell on days that have news.
-        // For OER we visibly animate through empty days too (short dwell) so viewers see the
-        // widget is live; for every other pilot/SDG we skip empty days near-instantly so a
-        // pilot whose latest news is weeks old doesn't sit on a blank "No news today" screen.
+        // Drive the date walk off the rendered news: dwell on days that have news, but skip
+        // empty days near-instantly so a pilot whose latest news is weeks old doesn't sit on
+        // a blank "No news today" screen. The dwell applies to the filtered result, so an
+        // active region/topic filter also skips straight to days that have matching news.
         return this.news$.pipe(
             combineLatestWith(this.paused$),
             switchMap(([ news, paused ]) => {
@@ -329,11 +323,7 @@ export default class NewsPage extends BasePage implements OnInit {
                     return EMPTY;
                 }
 
-                if (news.length) {
-                    return timer(this.dwellMs);
-                }
-
-                return timer(this.isOer() ? this.oerEmptyDwellMs : this.skipMs);
+                return timer(news.length ? this.dwellMs : this.skipMs);
             }),
             tap(() => {
                 const currentDate = new Date(this.shownDate$.value);
@@ -341,10 +331,9 @@ export default class NewsPage extends BasePage implements OnInit {
                 if (currentDate >= this.minDate) {
                     this.shownDate$.next(new Date(currentDate.setDate(currentDate.getDate() - 1)));
                 } else {
-                    // Restart the rotation: OER walks again from today (visible animation),
-                    // others restart at the latest day with news so they don't re-walk the
-                    // empty recent days every cycle.
-                    this.shownDate$.next(this.isOer() ? new Date() : (this.latestDate ?? new Date()));
+                    // Restart the rotation at the latest day with news (not today), so we
+                    // don't re-walk the empty recent days every cycle.
+                    this.shownDate$.next(this.latestDate ?? new Date());
                 }
             }),
         ).subscribe();
@@ -388,7 +377,6 @@ export default class NewsPage extends BasePage implements OnInit {
 
     private readonly dwellMs = 5000;
     private readonly skipMs = 100;
-    private readonly oerEmptyDwellMs = 1500;
     private latestDate?: Date;
 
     private get minDate() {
