@@ -12,6 +12,19 @@ export const OER_ACTION_AREAS = [ 'OER1', 'OER2', 'OER3', 'OER4', 'OER5' ] as co
 export type OerActionArea = typeof OER_ACTION_AREAS[number];
 
 /**
+ * Human-readable names for the five action areas. The article labels stay as the short OER1..OER5
+ * codes — most articles match four areas at once, and four full names would outgrow the headline
+ * they sit under — so these are surfaced as the label's tooltip instead.
+ */
+export const OER_ACTION_AREA_NAMES: Record<OerActionArea, string> = {
+    OER1: 'Capacity Building',
+    OER2: 'Supportive Policy',
+    OER3: 'Inclusive Access',
+    OER4: 'Sustainable Models',
+    OER5: 'International Cooperation',
+};
+
+/**
  * Chip colours for the action-area labels shown next to each article. Pale backgrounds with a
  * same-hue dark text keep the labels readable inline next to the publication date; the hues
  * follow the per-area `color` in pilot.configurationt.ts.
