@@ -30,6 +30,58 @@ export class NewsService {
     }
 
     /**
+     * Aggregates news for a rolling window of `days` ending on `endDate` (inclusive), so the
+     * widget can show a whole week at once. The articles API is per-day, so probe each day in
+     * the window in parallel and merge the results newest-first.
+     *
+     * `pilot` may be a comma-separated list (OER-all is requested as its five action areas), so
+     * the merge collapses articles that appear more than once — across days, or because they
+     * belong to several of the requested pilots — into a single entry whose `pilot` is the union
+     * of every copy. That keeps the list free of repeats (the template tracks by url) and lets
+     * each article show every action area it matches.
+     */
+    public getNewsForWindow(sdg: number, pilot: string, endDate: Date, days: number): Observable<ElasticNewsItem[]> {
+        const dates = Array.from({ length: Math.max(1, days) }, (_, i) => {
+            const date = new Date(endDate);
+            date.setDate(date.getDate() - i);
+            return date;
+        });
+
+        return forkJoin(dates.map(date => this.getNews(sdg, pilot, date))).pipe(
+            map(results => this.mergeNews(results.flat())),
+            shareReplay(1)
+        );
+    }
+
+    private mergeNews(news: ElasticNewsItem[]): ElasticNewsItem[] {
+        const byUrl = new Map<string, ElasticNewsItem>();
+
+        news.forEach(newsItem => {
+            const existing = byUrl.get(newsItem.url);
+
+            if (!existing) {
+                byUrl.set(newsItem.url, { ...newsItem, pilot: this.asPilotArray(newsItem.pilot) });
+                return;
+            }
+
+            existing.pilot = [ ...new Set([ ...existing.pilot, ...this.asPilotArray(newsItem.pilot) ]) ];
+        });
+
+        return [ ...byUrl.values() ].sort(
+            (a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+        );
+    }
+
+    // Elastic returns a single-valued `pilot` field as a bare string rather than an array.
+    private asPilotArray(pilot: ElasticNewsItem['pilot'] | string | undefined | null): string[] {
+        if (Array.isArray(pilot)) {
+            return pilot;
+        }
+
+        return pilot ? [ pilot ] : [];
+    }
+
+    /**
      * Finds the most recent day (<= today, within `maxDaysBack`) that actually has news for
      * the given sdg/pilot. Probes days newest-first in parallel batches and returns the newest
      * day with a hit — so the widget can land straight on data instead of walking day-by-day

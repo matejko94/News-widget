@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
 import { BehaviorSubject, combineLatestWith, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, shareReplay, switchMap, tap, timer } from 'rxjs';
+import { OER_ACTION_AREA_STYLES, OER_ACTION_AREAS, OER_ALL_PILOT, oerActionAreasOf } from '../../../../configuration/pilot/oer-action-areas';
 import { UNESCO_REGIONS } from '../../../../configuration/regions/unesco-regions';
 import { ElasticNewsItem } from '../../../../functions/api/news/articles/interface/elastic-news-item';
 import { NewsService } from '../../domain/news/service/news.service';
@@ -105,10 +106,11 @@ import { BasePage } from '../base.page';
         @let news = news$ | async;
         @let data = cloudData$ | async;
         <div class="flex items-center gap-2 p-2">
+            @let periodName = isWeekly() ? 'week' : 'day';
             <div class="flex items-center">
-                <button type="button" (click)="stepDay(-1)"
+                <button type="button" (click)="stepPeriod(-1)"
                         class="flex items-center justify-center w-7 h-7 rounded hover:bg-gray-200 transition-colors"
-                        aria-label="Previous day" title="Previous day">
+                        [attr.aria-label]="'Previous ' + periodName" [title]="'Previous ' + periodName">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15 6l-6 6 6 6z"/></svg>
                 </button>
                 <button type="button" (click)="togglePlay()"
@@ -121,13 +123,18 @@ import { BasePage } from '../base.page';
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
                     }
                 </button>
-                <button type="button" (click)="stepDay(1)"
+                <button type="button" (click)="stepPeriod(1)"
                         class="flex items-center justify-center w-7 h-7 rounded hover:bg-gray-200 transition-colors"
-                        aria-label="Next day" title="Next day">
+                        [attr.aria-label]="'Next ' + periodName" [title]="'Next ' + periodName">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 6l6 6-6 6z"/></svg>
                 </button>
             </div>
-            <div>Date: <b>{{ loadedDate$ | async | date: 'dd.MM.yyyy' }}</b></div>
+            @let loadedDate = loadedDate$ | async;
+            @if (isWeekly()) {
+                <div>Week: <b>{{ windowStart(loadedDate!) | date: 'dd.MM' }} – {{ loadedDate | date: 'dd.MM.yyyy' }}</b></div>
+            } @else {
+                <div>Date: <b>{{ loadedDate | date: 'dd.MM.yyyy' }}</b></div>
+            }
             <div>Total news: <b>{{ news?.length }}</b></div>
             <div class="flex items-center ml-auto mr-2">
                 <p-checkbox [(ngModel)]="onlyEnglish" [binary]="true" size="small" class="flex"/>
@@ -151,13 +158,22 @@ import { BasePage } from '../base.page';
                         <a class="font-semibold text-lg mb-2" [href]="newsItem.url" target="_blank" rel="noopener noreferrer">
                             {{ newsItem.title | slice:0:40 }}
                         </a>
-                        <div class="text-gray-500 text-lg">
-                            {{ newsItem.dateTime | date: 'EEE MMM d yyyy, HH:mm': 'UTC' }}
+                        <div class="flex items-baseline flex-wrap gap-2 text-gray-500 text-lg">
+                            <span>{{ newsItem.dateTime | date: 'EEE MMM d yyyy, HH:mm': 'UTC' }}</span>
+                            <!-- Which OER action area(s) the article was identified in. Only in
+                                 OER-all, where the list mixes all five. -->
+                            @if (isOerAll()) {
+                                @for (area of actionAreasOf(newsItem); track area) {
+                                    <span class="rounded px-1.5 text-base font-semibold"
+                                          [style.background]="actionAreaStyles[area].background"
+                                          [style.color]="actionAreaStyles[area].color">{{ area }}</span>
+                                }
+                            }
                         </div>
                     </div>
                 } @empty {
                     <div class="h-full w-fit text-xl font-semibold text-gray-600 my-10 mx-auto">
-                        No news today
+                        No news {{ periodLabel() }}
                     </div>
                 }
             </div>
@@ -168,7 +184,7 @@ import { BasePage } from '../base.page';
                                        [overflow]="false" [style.--vol]="cloudVolume(data!)" [width]="width()"/>
                 } @else {
                     <div class="h-full w-fit text-xl font-semibold text-gray-600 my-10 mx-auto">
-                        No keywords today
+                        No keywords {{ periodLabel() }}
                     </div>
                 }
 
@@ -188,6 +204,21 @@ export default class NewsPage extends BasePage implements OnInit {
 
     public readonly regionOptions = UNESCO_REGIONS;
     public readonly isOer = computed(() => (this.pilot() ?? '').toUpperCase().startsWith('OER'));
+
+    // OER aggregates a whole week per step; every other pilot/SDG stays day-by-day.
+    // shownDate$/loadedDate$ hold the newest (end) day of the window, so the walk still moves
+    // backwards from the latest day with news — one week at a time instead of one day.
+    public readonly windowDays = computed(() => this.isOer() ? 7 : 1);
+    public readonly isWeekly = computed(() => this.windowDays() > 1);
+    public readonly periodLabel = computed(() => this.isWeekly() ? 'this week' : 'today');
+
+    public readonly isOerAll = computed(() => (this.pilot() ?? '').trim().toUpperCase() === OER_ALL_PILOT.toUpperCase());
+
+    // OER-all is built from the five action areas rather than from its own data stream: query all
+    // five at once, so an article that belongs to several of them is returned once and can be
+    // labelled with each area it matches. The OER-all stream itself stays in the system.
+    public readonly newsPilot = computed(() => this.isOerAll() ? OER_ACTION_AREAS.join(',') : this.pilot()!);
+    public readonly actionAreaStyles = OER_ACTION_AREA_STYLES;
 
     public shownDate$ = new BehaviorSubject(new Date());
     public loadedDate$ = new BehaviorSubject(new Date());
@@ -218,14 +249,8 @@ export default class NewsPage extends BasePage implements OnInit {
     // Pilots can have no news for many recent days. Probe for the most recent day that
     // actually has news and jump straight to it, so the widget lands on data instead of
     // walking day-by-day through empty dates.
-    // OER is intentionally excluded: there we want the widget to visibly animate through the
-    // days (empty ones included) so viewers see it is live (see startCounter).
     private jumpToLatestNewsDate() {
-        if (this.isOer()) {
-            return;
-        }
-
-        this.newsService.getLatestNewsDate(+this.sdg()!, this.pilot()!).subscribe(latestDate => {
+        this.newsService.getLatestNewsDate(+this.sdg()!, this.newsPilot()).subscribe(latestDate => {
             this.latestDate = latestDate ?? new Date();
             this.shownDate$.next(this.latestDate);
         });
@@ -240,7 +265,7 @@ export default class NewsPage extends BasePage implements OnInit {
         return this.shownDate$.pipe(
             filter(() => !this.isLoading$.value),
             tap(() => this.isLoading$.next(true)),
-            switchMap(shownDate => this.newsService.getNews(+this.sdg()!, this.pilot()!, shownDate)),
+            switchMap(shownDate => this.newsService.getNewsForWindow(+this.sdg()!, this.newsPilot(), shownDate, this.windowDays())),
             tap(() => {
                 this.isLoading$.next(false);
                 this.loadedDate$.next(this.shownDate$.value);
@@ -290,7 +315,9 @@ export default class NewsPage extends BasePage implements OnInit {
                 const dayAfter = new Date(shownDate);
                 dayAfter.setDate(dayAfter.getDate() + 1);
 
-                return this.newsService.getCloudTags(this.sdg()!, this.pilot()!, shownDate, dayAfter, 18)
+                // Keywords cover the same window as the news list: a single day normally,
+                // the whole week for OER.
+                return this.newsService.getCloudTags(this.sdg()!, this.newsPilot(), this.windowStart(shownDate), dayAfter, 18)
             }),
             shareReplay(1),
         )
@@ -316,10 +343,11 @@ export default class NewsPage extends BasePage implements OnInit {
     }
 
     private startCounter() {
-        // Drive the date walk off the rendered news: dwell on days that have news.
-        // For OER we visibly animate through empty days too (short dwell) so viewers see the
-        // widget is live; for every other pilot/SDG we skip empty days near-instantly so a
-        // pilot whose latest news is weeks old doesn't sit on a blank "No news today" screen.
+        // Drive the walk off the rendered news: dwell on periods that have news, but skip empty
+        // ones near-instantly so a pilot whose latest news is weeks old doesn't sit on a blank
+        // "No news" screen. The dwell applies to the filtered result, so an active region/topic
+        // filter also skips straight to periods that have matching news. A period is one day
+        // normally and one week for OER (windowDays).
         return this.news$.pipe(
             combineLatestWith(this.paused$),
             switchMap(([ news, paused ]) => {
@@ -329,22 +357,17 @@ export default class NewsPage extends BasePage implements OnInit {
                     return EMPTY;
                 }
 
-                if (news.length) {
-                    return timer(this.dwellMs);
-                }
-
-                return timer(this.isOer() ? this.oerEmptyDwellMs : this.skipMs);
+                return timer(news.length ? this.dwellMs : this.skipMs);
             }),
             tap(() => {
                 const currentDate = new Date(this.shownDate$.value);
 
                 if (currentDate >= this.minDate) {
-                    this.shownDate$.next(new Date(currentDate.setDate(currentDate.getDate() - 1)));
+                    this.shownDate$.next(new Date(currentDate.setDate(currentDate.getDate() - this.windowDays())));
                 } else {
-                    // Restart the rotation: OER walks again from today (visible animation),
-                    // others restart at the latest day with news so they don't re-walk the
-                    // empty recent days every cycle.
-                    this.shownDate$.next(this.isOer() ? new Date() : (this.latestDate ?? new Date()));
+                    // Restart the rotation at the latest day with news (not today), so we
+                    // don't re-walk the empty recent days every cycle.
+                    this.shownDate$.next(this.latestDate ?? new Date());
                 }
             }),
         ).subscribe();
@@ -358,10 +381,10 @@ export default class NewsPage extends BasePage implements OnInit {
         this.paused$.next(!this.paused$.value);
     }
 
-    // Manual day step: -1 goes back one day (older), +1 forward one day (newer).
-    // Stepping pauses the auto-walk so the chosen day stays put, and the date is
-    // clamped to the same [minDate, today] window the auto-walk uses.
-    public stepDay(delta: number) {
+    // Manual step: -1 goes back one period (older), +1 forward one period (newer). A period is
+    // one day normally and one week for OER. Stepping pauses the auto-walk so the chosen period
+    // stays put, and the anchor is clamped to the same [minDate, today] window the walk uses.
+    public stepPeriod(delta: number) {
         if (this.isLoading$.value) {
             return;
         }
@@ -369,7 +392,7 @@ export default class NewsPage extends BasePage implements OnInit {
         this.paused$.next(true);
 
         const next = new Date(this.shownDate$.value);
-        next.setDate(next.getDate() + delta);
+        next.setDate(next.getDate() + delta * this.windowDays());
 
         const today = new Date();
         if (next < this.minDate || next > today) {
@@ -377,6 +400,19 @@ export default class NewsPage extends BasePage implements OnInit {
         }
 
         this.shownDate$.next(next);
+    }
+
+    // The OER action areas an article was identified in, for the labels next to its date.
+    public actionAreasOf(newsItem: ElasticNewsItem) {
+        return oerActionAreasOf(newsItem.pilot);
+    }
+
+    // First (oldest) day of the window ending on `endDate` — the window is a single day
+    // normally, and the preceding 7 days for OER.
+    public windowStart(endDate: Date) {
+        const start = new Date(endDate);
+        start.setDate(start.getDate() - (this.windowDays() - 1));
+        return start;
     }
 
     public cloudVolume(data: CloudData[] | null): number {
@@ -388,7 +424,6 @@ export default class NewsPage extends BasePage implements OnInit {
 
     private readonly dwellMs = 5000;
     private readonly skipMs = 100;
-    private readonly oerEmptyDwellMs = 1500;
     private latestDate?: Date;
 
     private get minDate() {

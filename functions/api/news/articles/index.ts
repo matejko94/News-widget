@@ -48,11 +48,15 @@ async function getArticles(url: string, apiKey: string, sdg: string, pilot: stri
             }
         });
     } else if (pilot !== '0' && pilot !== null && pilot !== undefined) {
-        filters.push({
-            match: {
-                'pilot.keyword': pilot
-            }
-        })
+        // `pilot` may be a comma-separated list (OER-all is requested as OER1,..,OER5), in which
+        // case match any of them in a single query. An article that belongs to several of the
+        // requested pilots is still one document, so it comes back once.
+        const pilots = pilot.split(',').map(entry => entry.trim()).filter(Boolean);
+
+        filters.push(pilots.length > 1
+            ? { terms: { 'pilot.keyword': pilots } }
+            : { match: { 'pilot.keyword': pilots[0] ?? pilot } }
+        );
     }
     console.log(filters);
     const response = await HttpClient.post(url, {
