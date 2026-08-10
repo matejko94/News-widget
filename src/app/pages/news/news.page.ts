@@ -4,7 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CloudData, TagCloudComponent } from 'angular-tag-cloud-module';
 import { Checkbox } from 'primeng/checkbox';
-import { BehaviorSubject, combineLatestWith, distinctUntilChanged, EMPTY, filter, fromEvent, map, Observable, shareReplay, switchMap, tap, timer } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, EMPTY, filter, map, Observable, shareReplay, switchMap, tap, timer } from 'rxjs';
 import { OER_ACTION_AREA_NAMES, OER_ACTION_AREA_STYLES, OER_ACTION_AREAS, OER_ALL_PILOT, oerActionAreasOf } from '../../../../configuration/pilot/oer-action-areas';
 import { UNESCO_REGIONS } from '../../../../configuration/regions/unesco-regions';
 import { ElasticNewsItem } from '../../../../functions/api/news/articles/interface/elastic-news-item';
@@ -40,11 +40,8 @@ import { BasePage } from '../base.page';
 
         ::ng-deep angular-tag-cloud.cloud {
             overflow: visible;
-            --size: 10;
-            /* Overall volume factor (0..1): shrinks the whole cloud on low-news days so a
-               single-news day, where the library buckets every tag into w10, doesn't render
-               every keyword at full size. Bound from the data in the template via --vol. */
-            --unit: calc(var(--size) * var(--vol, 1) * 1%);
+            --size: 12;
+            --unit: calc(var(--size) * 1%);
 
             @media (max-width: 1000px) {
                 --size: 8;
@@ -58,44 +55,49 @@ import { BasePage } from '../base.page';
                 --size: 5;
             }
 
+            /* A narrow band: the largest keyword is about half again the smallest, so a busier
+               concept still reads as bigger without the cloud swinging between giant and tiny.
+               Steps 4..10 are the ones tagSizeBucket() actually assigns. Sizes are also what
+               decides how many of the 18 keywords fit — the library drops any it cannot place —
+               so the band is kept just below the point where the cloud starts shedding them. */
             span.w10 {
-                font-size: calc(var(--unit) * 40);
+                font-size: calc(var(--unit) * 25);
             }
 
             span.w9 {
-                font-size: calc(var(--unit) * 35);
+                font-size: calc(var(--unit) * 23.5);
             }
 
             span.w8 {
-                font-size: calc(var(--unit) * 32);
+                font-size: calc(var(--unit) * 22);
             }
 
             span.w7 {
-                font-size: calc(var(--unit) * 29);
+                font-size: calc(var(--unit) * 20.5);
             }
 
             span.w6 {
-                font-size: calc(var(--unit) * 26);
+                font-size: calc(var(--unit) * 19);
             }
 
             span.w5 {
-                font-size: calc(var(--unit) * 23);
+                font-size: calc(var(--unit) * 18);
             }
 
             span.w4 {
-                font-size: calc(var(--unit) * 20);
-            }
-
-            span.w3 {
                 font-size: calc(var(--unit) * 17);
             }
 
+            span.w3 {
+                font-size: calc(var(--unit) * 16);
+            }
+
             span.w2 {
-                font-size: calc(var(--unit) * 14);
+                font-size: calc(var(--unit) * 15.5);
             }
 
             span.w1 {
-                font-size: calc(var(--unit) * 11);
+                font-size: calc(var(--unit) * 15);
             }
         }
     `,
@@ -181,8 +183,8 @@ import { BasePage } from '../base.page';
 
             <div class="overflow-visible flex flex-col items-center">
                 @if (data?.length) {
-                    <angular-tag-cloud [height]="325" [realignOnResize]="true" [data]="data!" class="-mt-6 ml-4 cloud"
-                                       [overflow]="false" [style.--vol]="cloudVolume(data!)" [width]="width()"/>
+                    <angular-tag-cloud [height]="360" [realignOnResize]="true" [data]="data!" class="-mt-6 cloud"
+                                       [overflow]="false" [strict]="true" [width]="cloudWidth"/>
                 } @else {
                     <div class="h-full w-fit text-xl font-semibold text-gray-600 my-10 mx-auto">
                         No keywords {{ periodLabel() }}
@@ -232,10 +234,11 @@ export default class NewsPage extends BasePage implements OnInit {
     public news$: Observable<ElasticNewsItem[]> = EMPTY;
     public cloudData$: Observable<CloudData[]> = EMPTY;
     public sentimentAverage$: Observable<number> = EMPTY;
-    public width = toSignal(fromEvent(window, 'resize').pipe(
-        map(() => window.innerWidth / 2.5),
-        distinctUntilChanged()
-    ));
+    // The cloud fills its own column. A width of 1 or less is a fraction of the parent element,
+    // which the library re-measures on resize, so the cloud tracks the column instead of being
+    // guessed from the window width — the old guess left it without a width until the first
+    // resize, and could reach past the column's edge.
+    public readonly cloudWidth = 1;
 
     public override ngOnInit() {
         super.ngOnInit();
@@ -321,8 +324,25 @@ export default class NewsPage extends BasePage implements OnInit {
                 // the whole week for OER.
                 return this.newsService.getCloudTags(this.sdg()!, this.newsPilot(), this.windowStart(shownDate), dayAfter, 18)
             }),
+            map(tags => tags.map(tag => ({ ...tag, weight: this.tagSizeBucket(tag.weight) }))),
             shareReplay(1),
         )
+    }
+
+    // How large a keyword renders, from its absolute number of mentions.
+    //
+    // The cloud runs in `strict` mode so that this mapping decides the size. Left to itself the
+    // library stretches whatever spread a window happens to have across its full w1..w10 range,
+    // which is what made the cloud restless: in a quiet week counts of 4 and 2 were drawn as far
+    // apart as counts of 50 and 1 in a busy one, and the same concept changed size from week to
+    // week for no reason a reader could see. Mentions map to a fixed step here, so a concept
+    // mentioned four times looks the same in every window.
+    //
+    // The steps are coarse at the top because counts have a long tail — real windows range from
+    // about 1 to 13 mentions, with the occasional busy one far above that.
+    private tagSizeBucket(mentions: number): number {
+        const steps = [ 2, 3, 5, 8, 12, 18 ];
+        return steps.filter(step => mentions >= step).length + 4;
     }
 
     private setupSentimentAverage() {
@@ -375,10 +395,6 @@ export default class NewsPage extends BasePage implements OnInit {
         ).subscribe();
     }
 
-    // The tag cloud sizes each keyword relative to the busiest concept of the day, so a
-    // sparse day (every concept appears once) would render every tag at the maximum size.
-    // Scale the whole cloud by the busiest concept's absolute count instead, so low-news
-    // days look visibly smaller. Relative sizing between tags is preserved.
     public togglePlay() {
         this.paused$.next(!this.paused$.value);
     }
@@ -415,13 +431,6 @@ export default class NewsPage extends BasePage implements OnInit {
         const start = new Date(endDate);
         start.setDate(start.getDate() - (this.windowDays() - 1));
         return start;
-    }
-
-    public cloudVolume(data: CloudData[] | null): number {
-        const maxWeight = Math.max(0, ...(data ?? []).map(tag => tag.weight ?? 0));
-        const fullVolumeAt = 12;
-        const minVolume = 0.45;
-        return Math.min(1, Math.max(minVolume, maxWeight / fullVolumeAt));
     }
 
     private readonly dwellMs = 5000;
