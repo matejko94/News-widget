@@ -42,7 +42,7 @@ import { RadialSegmentDetailsComponent, SegmentEvent } from './radial-segment-de
             position: absolute;
             z-index: 30;
             inset: auto 0 0 0;
-            max-height: 60%;
+            max-height: 72%;
             border-top: 1px solid #e5e7eb;
             box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
         }
