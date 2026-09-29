@@ -24,19 +24,26 @@ export function registerTooltip<PathElement extends Element, Data, Series>(
     container: HTMLElement,
     render: (d: Data, event: any) => string
 ) {
+    // d3 types the listener's event as `MouseEvent | CustomEvent<any>` (it cannot know which
+    // typenames are pointer events), so narrow it here rather than relying on inference —
+    // the exact shape differs between @types/d3-selection releases.
     path
         .on('mouseover', (event, d) => {
+            const mouseEvent = event as MouseEvent;
+
             tooltip
                 .style('left', '-9999px')
                 .style('top', '-9999px')
                 .style('display', 'block')
-                .html(render(d, event));
+                .html(render(d, mouseEvent));
 
             tooltip
-                .style('left', calculatePositionX(event, container, tooltip) + 'px')
-                .style('top', calculatePositionY(event, container, tooltip) + 'px');
+                .style('left', calculatePositionX(mouseEvent, container, tooltip) + 'px')
+                .style('top', calculatePositionY(mouseEvent, container, tooltip) + 'px');
         })
-        .on('mousemove', (event, d) => showTooltip(event, tooltip, container, render(d, event)))
+        .on('mousemove', (event, d) =>
+            showTooltip(event as MouseEvent, tooltip, container, render(d, event))
+        )
         .on('mouseout', () => tooltip.style('display', 'none'));
 
 }
