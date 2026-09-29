@@ -1,15 +1,21 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, of, tap } from 'rxjs';
 import { getSDGColor, SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
-import { OER_ACTION_AREA_NAMES } from '../../../../configuration/pilot/oer-action-areas';
+import { OER_ACTION_AREA_NAMES, OerActionArea } from '../../../../configuration/pilot/oer-action-areas';
 import { loadingMap } from '../../common/utility/loading-map';
+import { EducationService } from '../../domain/education/service/education.service';
 import { PolicyService } from '../../domain/policy/service/policy.service';
 import { IntersectingPolicyDto } from '../../domain/policy/types/intersecting-policy.dto';
-import { RadialStackedChartComponent, RadialStackedData } from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
+import {
+    RadialSegmentSelection,
+    RadialStackedChartComponent,
+    RadialStackedData
+} from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
 import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
 import { BasePage } from '../base.page';
+import { RadialSegmentDetailsComponent, SegmentEvent } from './radial-segment-details.component';
 
 @Component({
     selector: 'radial-policy-page',
@@ -17,7 +23,8 @@ import { BasePage } from '../base.page';
     imports: [
         RadialStackedChartComponent,
         AsyncPipe,
-        SpinnerComponent
+        SpinnerComponent,
+        RadialSegmentDetailsComponent
     ],
     styles: `
         :host {
@@ -28,11 +35,46 @@ import { BasePage } from '../base.page';
             width: 100%;
             height: 100%;
         }
+
+        /* Overlays the chart rather than resizing it, so clicking a segment doesn't reflow the
+           radial underneath. Full-width sheet on narrow screens, side panel from md up. */
+        .segment-panel {
+            position: absolute;
+            z-index: 30;
+            inset: auto 0 0 0;
+            max-height: 60%;
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (min-width: 768px) {
+            .segment-panel {
+                inset: 0 0 0 auto;
+                width: 22rem;
+                max-height: none;
+                border-top: none;
+                border-left: 1px solid #e5e7eb;
+                box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
+            }
+        }
     `,
     template: `
         @if (topics$ | async; as data) {
             @if (data.length) {
-                <app-radial-stacked-chart [data]="data" [colors]="colors" [colorMap]="colorMap"/>
+                <app-radial-stacked-chart [data]="data" [colors]="colors" [colorMap]="colorMap"
+                                          [selected]="selectedSegment()"
+                                          (segmentSelect)="selectSegment($event)"/>
+
+                @if (selectedSegment(); as segment) {
+                    @let events = segmentEvents$ | async;
+
+                    <app-radial-segment-details class="segment-panel"
+                                                [segment]="segment"
+                                                [events]="events ?? []"
+                                                [loading]="!events"
+                                                [color]="colorOf(segment.label)"
+                                                (close)="selectSegment(null)"/>
+                }
             } @else {
                 <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
                     No data available
@@ -47,6 +89,7 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
     // Human-readable names shown for the OER policies (pilot view segments). Shared with the news
     // widget, which shows the same names as tooltips on its action-area labels.
     private static readonly OER_LABELS: Record<string, string> = OER_ACTION_AREA_NAMES;
+    private static readonly FALLBACK_COLOR = '#6B7280';
     private static readonly OER_COLORS: Record<string, string> = {
         OER1: '#4C9F38',
         OER2: '#FCC30B',
@@ -56,8 +99,13 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
     };
 
     private policyService = inject(PolicyService);
+    private educationService = inject(EducationService);
 
     public topics$!: Observable<RadialStackedData[] | null>;
+    // The clicked stack segment (topic x SDG/OER), or null when nothing is open.
+    public selectedSegment = signal<RadialSegmentSelection | null>(null);
+    // Events behind the open segment; undefined while loading (see `loadingMap`).
+    public segmentEvents$!: Observable<SegmentEvent[] | undefined>;
     // Fallback palette for the chart; per-key colors come from `colorMap`.
     public colors = SDG_COLORS.colors;
     // Per-segment color: official SDG color (SDG view) or OER policy color (pilot view).
@@ -72,6 +120,8 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
             toObservable(this.sdg, { injector: this.injector }),
             toObservable(this.pilot, { injector: this.injector })
         ]).pipe(
+            // A new SDG / pilot rebuilds the bars, so the open segment may no longer exist.
+            tap(() => this.clearSelection()),
             loadingMap(([sdgValue, pilotValue]) => {
                 if (pilotValue) {
                     return this.policyService.getEducationPilotTopics(pilotValue);
@@ -80,6 +130,60 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
             }),
             map(dtos => dtos ? this.toRadial(dtos) : null)
         );
+
+        // Which events the clicked segment's material comes from. /education/whitespace is the
+        // only endpoint that reaches behind the aggregation today; it returns a sample of events
+        // rather than the counted lectures, and the panel says so.
+        this.segmentEvents$ = toObservable(this.selectedSegment, { injector: this.injector }).pipe(
+            loadingMap(segment => {
+                if (!segment) {
+                    return of([]);
+                }
+
+                const actionArea = this.actionAreaOf(segment.label);
+
+                return (actionArea
+                    ? this.educationService.getPilotEvent(actionArea, segment.groupLabel)
+                    : this.educationService.getEventSdgs(this.sdgNumberOf(segment.label), segment.groupLabel)
+                ).pipe(
+                    // The endpoint pads its response with empty {id: null, title: null} entries.
+                    map(({ events }) => events.filter(event => event?.id != null && !!event.title))
+                );
+            })
+        );
+    }
+
+    /** Segment colour for the panel header; falls back to grey for unmapped keys. */
+    public colorOf(label: string): string {
+        return this.colorMap[label] || RadialPolicyPage.FALLBACK_COLOR;
+    }
+
+    public selectSegment(segment: RadialSegmentSelection | null) {
+        this.selectedSegment.set(segment);
+    }
+
+    // Close the panel whenever the underlying data changes — the open segment may no longer exist.
+    private clearSelection() {
+        this.selectedSegment.set(null);
+    }
+
+    /** `"SDG 4"` -> 4. Undefined for anything else, which leaves the request unfiltered by SDG. */
+    private sdgNumberOf(label: string): number | undefined {
+        const match = /(\d+)/.exec(label);
+        return match ? +match[1] : undefined;
+    }
+
+    /**
+     * In the pilot view the stack keys are the human-readable action-area names, while
+     * /education/whitespace/pilot expects the OER1..OER5 code. Map back.
+     */
+    private actionAreaOf(label: string): OerActionArea | undefined {
+        if (!this.pilot()) {
+            return undefined;
+        }
+
+        return (Object.keys(OER_ACTION_AREA_NAMES) as OerActionArea[])
+            .find(area => OER_ACTION_AREA_NAMES[area] === label);
     }
 
     // Backend returns one entry per topic: { sdg: <topic>, sdg_intersections: [{key: SDG|pilot, value}] }.
@@ -98,7 +202,7 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
                 const label = isPilot ? (RadialPolicyPage.OER_LABELS[key] ?? key) : key;
                 items[label] = value;
                 colorMap[label] = isPilot
-                    ? (RadialPolicyPage.OER_COLORS[key] ?? '#6B7280')
+                    ? (RadialPolicyPage.OER_COLORS[key] ?? RadialPolicyPage.FALLBACK_COLOR)
                     : getSDGColor(key);
             }
             const total = Object.values(items).reduce((a, b) => a + b, 0);

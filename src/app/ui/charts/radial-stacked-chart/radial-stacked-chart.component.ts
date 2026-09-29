@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { arc, ScaleBand, scaleBand, scaleLinear, scaleOrdinal, select, Selection, Series, stack } from 'd3';
+import { ChangeDetectionStrategy, Component, computed, effect, input, output } from '@angular/core';
+import { arc, ScaleBand, scaleBand, scaleLinear, scaleOrdinal, select, Selection, Series, SeriesPoint, stack } from 'd3';
 import { PillLegendComponent } from '../../components/legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
 import { createTooltip, registerTooltip } from '../tooltip/tooltip';
@@ -11,14 +11,21 @@ export interface RadialStackedData {
     }
 }
 
+/** One clicked stack segment: the topic (bar) and the SDG / OER key within it. */
+export interface RadialSegmentSelection {
+    groupLabel: string;
+    label: string;
+    value: number;
+    groupTotal: number;
+}
+
 interface CellData {
     groupLabel: string;
     total: number;
-    ranges: {
-        label: string;
-        start: number;
-    }[]
 }
+
+/** A stacked arc's datum: d3's [start, end] pair, plus the stack key it was drawn for. */
+type StackedPoint = SeriesPoint<CellData> & { key: string };
 
 @Component({
     selector: 'app-radial-stacked-chart',
@@ -71,6 +78,10 @@ interface CellData {
                 path {
                     transition: opacity 0.3s;
                 }
+
+                path.bar-segment {
+                    cursor: pointer;
+                }
             }
         }
     `,
@@ -88,6 +99,11 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
     // Optional explicit color per stack key (e.g. official SDG colors). When a
     // key is absent from the map it falls back to the index-based palette.
     public colorMap = input<Record<string, string> | null>(null);
+    // Currently highlighted segment. Owned by the page so it survives re-renders; the chart
+    // only dims everything else.
+    public selected = input<RadialSegmentSelection | null>(null);
+    // Emits the clicked segment, or null when the same segment is clicked again (toggle off).
+    public segmentSelect = output<RadialSegmentSelection | null>();
     public keys = computed(() => Array.from(new Set(this.data().flatMap(d => Object.keys(d.items)))));
     public legendItems = computed(() => this.keys()
         .filter(key => this.data().some(d => (d.items[key] ?? 0) > 0))
@@ -95,6 +111,7 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
             label,
             color: this.colorMap()?.[label] ?? this.colors()[i % this.colors().length]
         })));
+    private barPaths: Selection<SVGPathElement, any, any, any> | null = null;
     private z = computed(() => scaleOrdinal<string>().domain(this.keys()).range(this.colors()));
     private yRange = computed<[number, number]>(() => {
         const maxVal = Math.max(...this.data()
@@ -102,6 +119,16 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
         );
         return [0, maxVal];
     });
+
+    constructor() {
+        super();
+        // Re-apply the highlight whenever the selection changes. Separate from renderChart so
+        // clicking a segment doesn't rebuild the whole chart.
+        effect(() => {
+            this.selected();
+            this.applyHighlight();
+        });
+    }
 
     protected override renderChart() {
         console.log(this.data());
@@ -129,22 +156,12 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
         const y = (val: number) => scaleLinear().domain(this.yRange()).range([innerRadius, outerRadius])(val);
 
         const stackedInput: CellData[] = this.data().map(({ groupLabel, items }) => {
-            const ranges: CellData['ranges'] = [];
-            let currentTotal = 0;
-
-            for (const [label, value] of Object.entries(items)) {
-                const start = currentTotal;
-                currentTotal += value;
-                ranges.push({ label, start });
-            }
-
             const entries: any = {
                 groupLabel,
-                total: currentTotal,
-                ranges
+                total: keys.reduce((sum, key) => sum + (items[key] ?? 0), 0)
             };
 
-            this.keys().forEach(key => {
+            keys.forEach(key => {
                 entries[key] = items[key] ?? 0;
             });
 
@@ -191,18 +208,57 @@ export class RadialStackedChartComponent extends Chart<RadialStackedData[]> {
             .enter().append('g')
             .attr('fill', d => this.colorFor(d.key))
             .selectAll('path')
-            .data(d => d)
+            // Stamp the series key onto every point. Matching a point back to its key by its
+            // start offset is not safe: bars list their SDGs in their own order and zero-valued
+            // keys share a start, so the lookup could land on the wrong key or on none.
+            .data(series => series.map(point => Object.assign(point, { key: series.key })))
             .enter().append('path')
-            .attr('d', d => arcGen(d));
+            .attr('class', 'bar-segment')
+            .attr('d', d => arcGen(d))
+            .on('click', (_event, d) => this.onSegmentClick(d));
+
+        this.barPaths = paths as any;
+        this.applyHighlight();
 
         registerTooltip(paths, tooltip, this.chartContainer().nativeElement, (data) => {
-            const [hoveredMin, hoveredMax] = data;
-            const { total, ranges, groupLabel } = data.data as CellData;
-            const value = hoveredMax - hoveredMin;
-            const label = ranges.find(({ start }) => start === hoveredMin)?.label;
-            const percentage = (value / total * 100).toFixed(2);
-            return `Group: ${groupLabel}<br>Label: ${label}<br>Value: ${value}<br>Percentage: ${percentage}%`;
+            const { groupLabel, label, value, groupTotal } = this.segmentOf(data);
+            const percentage = (value / groupTotal * 100).toFixed(2);
+            return `Group: ${groupLabel}<br>Label: ${label}<br>Value: ${value}<br>`
+                + `Percentage: ${percentage}%<br><i>Click to see what is counted</i>`;
         });
+    }
+
+    /** The topic / key pair a stacked arc stands for. */
+    private segmentOf(data: StackedPoint): RadialSegmentSelection {
+        return {
+            groupLabel: data.data.groupLabel,
+            label: data.key,
+            value: data[1] - data[0],
+            groupTotal: data.data.total
+        };
+    }
+
+    private onSegmentClick(data: StackedPoint) {
+        const segment = this.segmentOf(data);
+        // Clicking the open segment again closes it.
+        this.segmentSelect.emit(this.isSelected(segment) ? null : segment);
+    }
+
+    private isSelected(segment: RadialSegmentSelection): boolean {
+        const selected = this.selected();
+        return !!selected
+            && selected.groupLabel === segment.groupLabel
+            && selected.label === segment.label;
+    }
+
+    /** Dim every arc except the selected one. No-op until the arcs have been drawn. */
+    private applyHighlight() {
+        if (!this.barPaths) return;
+
+        const hasSelection = !!this.selected();
+        this.barPaths.attr('opacity', (d: any) =>
+            !hasSelection || this.isSelected(this.segmentOf(d)) ? 1 : 0.2
+        );
     }
 
     private drawLabels(
