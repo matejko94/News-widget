@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, map, Observable, of, tap } from 'rxjs';
+import { combineLatest, map, Observable, Subscription, tap } from 'rxjs';
 import { getSDGColor, SDG_COLORS } from '../../../../configuration/colors/policy/sdg.colors';
 import { OER_ACTION_AREA_NAMES, OerActionArea } from '../../../../configuration/pilot/oer-action-areas';
 import { loadingMap } from '../../common/utility/loading-map';
@@ -15,7 +15,8 @@ import {
 } from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
 import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
 import { BasePage } from '../base.page';
-import { RadialSegmentDetailsComponent, SegmentEvent } from './radial-segment-details.component';
+import { SegmentDocumentDto } from '../../domain/education/types/segment-document.dto';
+import { RadialSegmentDetailsComponent } from './radial-segment-details.component';
 
 @Component({
     selector: 'radial-policy-page',
@@ -66,14 +67,16 @@ import { RadialSegmentDetailsComponent, SegmentEvent } from './radial-segment-de
                                           (segmentSelect)="selectSegment($event)"/>
 
                 @if (selectedSegment(); as segment) {
-                    @let events = segmentEvents$ | async;
-
                     <app-radial-segment-details class="segment-panel"
                                                 [segment]="segment"
-                                                [events]="events ?? []"
-                                                [loading]="!events"
+                                                [documents]="documents()"
+                                                [total]="documentsTotal()"
+                                                [hasMore]="hasMoreDocuments()"
+                                                [loading]="loadingDocuments()"
+                                                [excluded]="documentsExcluded()"
                                                 [color]="colorOf(segment.label)"
-                                                (close)="selectSegment(null)"/>
+                                                (close)="selectSegment(null)"
+                                                (loadMore)="loadMoreDocuments()"/>
                 }
             } @else {
                 <div class="flex items-center justify-center w-full h-full text-2xl text-gray-400">
@@ -104,8 +107,14 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
     public topics$!: Observable<RadialStackedData[] | null>;
     // The clicked stack segment (topic x SDG/OER), or null when nothing is open.
     public selectedSegment = signal<RadialSegmentSelection | null>(null);
-    // Events behind the open segment; undefined while loading (see `loadingMap`).
-    public segmentEvents$!: Observable<SegmentEvent[] | undefined>;
+    // The lectures behind the open segment, accumulated page by page as the panel is scrolled.
+    public documents = signal<SegmentDocumentDto[]>([]);
+    public documentsTotal = signal(0);
+    public documentsExcluded = signal(0);
+    public hasMoreDocuments = signal(false);
+    public loadingDocuments = signal(false);
+    private documentsPage = 0;
+    private documentsRequest?: Subscription;
     // Fallback palette for the chart; per-key colors come from `colorMap`.
     public colors = SDG_COLORS.colors;
     // Per-segment color: official SDG color (SDG view) or OER policy color (pilot view).
@@ -130,27 +139,6 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
             }),
             map(dtos => dtos ? this.toRadial(dtos) : null)
         );
-
-        // Which events the clicked segment's material comes from. /education/whitespace is the
-        // only endpoint that reaches behind the aggregation today; it returns a sample of events
-        // rather than the counted lectures, and the panel says so.
-        this.segmentEvents$ = toObservable(this.selectedSegment, { injector: this.injector }).pipe(
-            loadingMap(segment => {
-                if (!segment) {
-                    return of([]);
-                }
-
-                const actionArea = this.actionAreaOf(segment.label);
-
-                return (actionArea
-                    ? this.educationService.getPilotEvent(actionArea, segment.groupLabel)
-                    : this.educationService.getEventSdgs(this.sdgNumberOf(segment.label), segment.groupLabel)
-                ).pipe(
-                    // The endpoint pads its response with empty {id: null, title: null} entries.
-                    map(({ events }) => events.filter(event => event?.id != null && !!event.title))
-                );
-            })
-        );
     }
 
     /** Segment colour for the panel header; falls back to grey for unmapped keys. */
@@ -160,23 +148,71 @@ export default class RadialPolicyPage extends BasePage implements OnInit {
 
     public selectSegment(segment: RadialSegmentSelection | null) {
         this.selectedSegment.set(segment);
+        this.resetDocuments();
+
+        if (segment) {
+            this.loadMoreDocuments();
+        }
+    }
+
+    /**
+     * Fetch the next page of lectures for the open segment and append it. The sentinel at the
+     * bottom of the panel can fire repeatedly, so ignore a request while one is in flight or
+     * once the backend says there is nothing after this page.
+     */
+    public loadMoreDocuments() {
+        const segment = this.selectedSegment();
+
+        if (!segment || this.loadingDocuments() || (this.documentsPage > 0 && !this.hasMoreDocuments())) {
+            return;
+        }
+
+        const page = this.documentsPage + 1;
+        this.loadingDocuments.set(true);
+
+        this.documentsRequest = this.educationService
+            .getSegmentDocuments(segment.groupLabel, this.keyOf(segment), this.pilot(), page)
+            .subscribe(response => {
+                this.loadingDocuments.set(false);
+
+                if (!response) {
+                    return;
+                }
+
+                this.documentsPage = page;
+                this.documents.update(documents => [ ...documents, ...response.documents ]);
+                this.documentsTotal.set(response.total);
+                this.documentsExcluded.set(response.excluded_count ?? 0);
+                this.hasMoreDocuments.set(response.has_more);
+            });
     }
 
     // Close the panel whenever the underlying data changes — the open segment may no longer exist.
     private clearSelection() {
         this.selectedSegment.set(null);
+        this.resetDocuments();
     }
 
-    /** `"SDG 4"` -> 4. Undefined for anything else, which leaves the request unfiltered by SDG. */
-    private sdgNumberOf(label: string): number | undefined {
-        const match = /(\d+)/.exec(label);
-        return match ? +match[1] : undefined;
+    private resetDocuments() {
+        this.documentsRequest?.unsubscribe();
+        this.documentsPage = 0;
+        this.documents.set([]);
+        this.documentsTotal.set(0);
+        this.documentsExcluded.set(0);
+        this.hasMoreDocuments.set(false);
+        this.loadingDocuments.set(false);
     }
 
     /**
-     * In the pilot view the stack keys are the human-readable action-area names, while
-     * /education/whitespace/pilot expects the OER1..OER5 code. Map back.
+     * The key the documents endpoint expects for the clicked segment: the SDG label as shown
+     * ("SDG 4"), or — in the pilot view, where the stack keys are the human-readable action-area
+     * names — the OER1..OER5 code behind the name.
      */
+    private keyOf(segment: RadialSegmentSelection): string {
+        return this.actionAreaOf(segment.label) ?? segment.label;
+    }
+
+    /** Human-readable action-area name back to its OER1..OER5 code. Pilot view only. */
     private actionAreaOf(label: string): OerActionArea | undefined {
         if (!this.pilot()) {
             return undefined;

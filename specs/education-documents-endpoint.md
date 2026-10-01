@@ -1,5 +1,12 @@
 # Spec: `/education/intersection/documents` — dokumenti za segment radiala
 
+> **STATUS: implementirano in priklopljeno.** Backend je endpoint objavil, widget ga uporablja.
+> Preverjeno: `total` se ujema z vrednostjo segmenta (Open Education × SDG 4 = 433, Innovation ×
+> OER2 = 69), vsak dokument nosi `url` oblike `https://videolectures.net/videos/<slug>`, ki se
+> odpre na pravi video strani. Spodnje ostaja kot zapis dogovora; razlike proti specu:
+> pilot varianta uporablja `key` (ne `sdg`), odgovor doda `has_more` in `excluded_count`,
+> `id` je string, `SegmentDocument` nosi še `slug`, `duration` in `views`.
+
 **Za:** IRCAI backend team (FastAPI, `angular-visualisation.midas.ijs.si`)
 **Povezano:** IRCAI-SDGobservatory/data#63 · News-widget radial (`3. Radial`)
 
@@ -68,6 +75,21 @@ Obvezna polja: `id`, `title`, `url`, `date`, `event_title`, `sdgs`.
 - `page_size > 100` → clamp na 100 (ne 422)
 - manjka `topic` → `422` (FastAPI privzeto)
 - dokument brez naslova ali URL-ja → **izpusti iz odgovora in odštej od `total`**; trenutni `/education/whitespace` vrača `{"id": null, "title": null}` vnose in to ne sme priti do uporabnika
+
+## Zakaj je `url` nujen, ne lep dodatek
+
+Preverjeno izmerjeno, ne ugibano. Brez `url` iz backenda se do predavanja ne da priti:
+
+- ID-ji, ki jih vrača `/education/whitespace` (30177, 21273, 33600 …), so **stari VideoLectures ID-ji**. Današnji videolectures.net naslavlja dogodke s slugom nad svojim ID prostorom (`total_events: 1597`, najnovejši `id: 1598`). `/events/30177`, `/event/30177/` in `/30177/` vrnejo **404**; `/events/UNESCOdan2026` dela.
+- `old.videolectures.net` obstaja v DNS, a vrača **526** (neveljaven origin certifikat) — stare strani ni za linkat.
+- Linkanje na iskanje po naslovu je bilo poskušeno in izmerjeno na osmih pravih naslovih iz tega API-ja: **3 zadenejo, 5 pristane na nepovezanem seznamu**. Iskalnik matcha po posameznih besedah in rangira po datumu — `"8th International Conference on Mobile and Ubiquitous Multimedia"` vrne 607 od ~1600 dogodkov, z ničimer relevantnim na vrhu.
+
+VideoLectures je vaša lastna platforma, zato mapiranje skoraj zagotovo obstaja v bazi (nova stran je bila zgrajena iz starih podatkov). Prosimo za eno od dvojega:
+
+- [ ] `url` pri vsakem dokumentu v odgovoru tega endpointa — **prva izbira**, pokriva vse
+- [ ] ali vsaj mapiranje `legacy_event_id` → `slug`, da lahko povezavo sestavimo sami
+
+Dokler ne pride enega ali drugega, so naslovi v widgetu **navaden tekst brez povezave**. To je zavestna odločitev: povezava, ki izgleda kot pot do dogodka, dvakrat od treh pa ni, je slabša od nobene.
 
 ## Odprto vprašanje za backend — dvojno štetje
 

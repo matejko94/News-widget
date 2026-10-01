@@ -1,26 +1,14 @@
-import { Component, computed, effect, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, input, output, viewChild } from '@angular/core';
+import { SegmentDocumentDto } from '../../domain/education/types/segment-document.dto';
 import { RadialSegmentSelection } from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
 import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
 
-/** An event (conference, workshop, course) the clicked topic × SDG pair appears in. */
-export interface SegmentEvent {
-    id: number;
-    title: string;
-}
-
 /**
- * Panel shown when a radial segment is clicked: what the segment counts, and which events the
- * counted material comes from.
+ * Panel shown when a radial segment is clicked: what the segment counts, and the lectures behind
+ * it, each linking to its VideoLectures page.
  *
- * Each event links to a VideoLectures search for its title rather than straight to the event
- * page. The ids /education/whitespace returns (30177, 21273, ...) are legacy VideoLectures ids;
- * the current site addresses events by slug over its own id space (1..~1600), so there is no way
- * to build a direct URL from what we are given. Searching the title lands on the event whenever
- * it still exists there.
- *
- * The list pages in as it is scrolled. Today that pages a list the API returns in one go (it
- * caps out around 30 events), but the same plumbing serves the paginated per-lecture endpoint
- * once it exists — see specs/education-documents-endpoint.md.
+ * Presentational — the page owns the paging and hands down one accumulated list; this emits
+ * `loadMore` when the sentinel below the list scrolls into view.
  */
 @Component({
     selector: 'app-radial-segment-details',
@@ -43,34 +31,33 @@ export interface SegmentEvent {
         <div class="px-4 py-3 border-b border-gray-200 bg-gray-50/70">
             <div class="flex items-baseline gap-2">
                 <span class="text-3xl font-bold tabular-nums text-gray-900">{{ segment().value }}</span>
-                <span class="text-sm font-medium text-gray-500">documents · {{ share() }}% of the bar</span>
+                <span class="text-sm font-medium text-gray-500">lectures · {{ share() }}% of the bar</span>
             </div>
             <p class="mt-1.5 text-sm text-gray-600">
                 Video lectures in <b>{{ segment().groupLabel }}</b> classified as <b>{{ segment().label }}</b>.
             </p>
             <p class="mt-2 text-xs leading-relaxed text-gray-500">
-                Counts come from the education index, not from news. A lecture can be classified into
-                several SDGs, so it may be counted in more than one segment of the same bar.
+                A lecture can be classified into several SDGs, so it may be counted in more than one
+                segment of the same bar.
             </p>
         </div>
 
         <div #scrollRoot class="flex-1 overflow-y-auto relative">
-            <h3 class="px-4 pt-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Events this material comes from
-            </h3>
-
-            @if (loading()) {
+            @if (loading() && !documents().length) {
                 <div class="h-28"><app-spinner/></div>
-            } @else if (events().length) {
-                <ul class="px-2 pb-2">
-                    @for (event of visibleEvents(); track event.id) {
+            } @else if (documents().length) {
+                <ul class="px-2 py-2">
+                    @for (document of documents(); track document.id) {
                         <li>
-                            <a class="group flex items-center gap-2 h-14 px-2 rounded-lg
+                            <a class="group flex items-center gap-2 h-[4.5rem] px-2 rounded-lg
                                       hover:bg-gray-100 transition-colors"
-                               [href]="searchUrl(event)" target="_blank" rel="noopener noreferrer"
-                               [title]="'Find &quot;' + event.title + '&quot; on VideoLectures'">
-                                <span class="flex-1 min-w-0 text-sm leading-snug text-gray-800 line-clamp-2">
-                                    {{ event.title.trim() }}
+                               [href]="document.url" target="_blank" rel="noopener noreferrer"
+                               [title]="document.title.trim()">
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm leading-snug text-gray-800 line-clamp-2">
+                                        {{ document.title.trim() }}
+                                    </span>
+                                    <span class="block mt-0.5 text-xs text-gray-500 truncate">{{ meta(document) }}</span>
                                 </span>
                                 <svg class="shrink-0 w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors"
                                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -90,15 +77,15 @@ export interface SegmentEvent {
                     </div>
                 }
             } @else {
-                <div class="px-4 py-6 text-sm text-gray-500">No events found for this segment.</div>
+                <div class="px-4 py-6 text-sm text-gray-500">No lectures found for this segment.</div>
             }
         </div>
 
-        <p class="px-4 py-2 border-t border-gray-200 text-[11px] leading-snug text-gray-500"
-           title="The ids /education/whitespace returns are legacy VideoLectures ids and cannot be turned into a direct event link, so each event opens a search for its title. A per-lecture list needs the endpoint specified in specs/education-documents-endpoint.md.">
-            Events open a VideoLectures <b>search</b> — the ids here are legacy and cannot be linked
-            directly. A sample of where this topic and {{ segment().label }} co-occur, not all
-            {{ segment().value }} documents.
+        <p class="px-4 py-2 border-t border-gray-200 text-[11px] leading-snug text-gray-500">
+            Showing {{ documents().length }} of {{ total() }}. Opens on VideoLectures.
+            @if (excluded()) {
+                {{ excluded() }} without a title or link are not listed.
+            }
         </p>
     `,
     styles: `
@@ -117,35 +104,26 @@ export interface SegmentEvent {
     `
 })
 export class RadialSegmentDetailsComponent {
-    private static readonly PAGE_SIZE = 8;
-    private static readonly SEARCH_URL = 'https://videolectures.net/search';
-
     public segment = input.required<RadialSegmentSelection>();
-    public events = input.required<SegmentEvent[]>();
+    public documents = input.required<SegmentDocumentDto[]>();
+    public total = input.required<number>();
+    public hasMore = input.required<boolean>();
     public loading = input.required<boolean>();
+    public excluded = input<number>(0);
     public color = input<string>('#6B7280');
     public close = output<void>();
+    public loadMore = output<void>();
 
     private scrollRoot = viewChild<ElementRef<HTMLElement>>('scrollRoot');
     private sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
-    private shownCount = signal(RadialSegmentDetailsComponent.PAGE_SIZE);
 
-    public visibleEvents = computed(() => this.events().slice(0, this.shownCount()));
-    public hasMore = computed(() => this.shownCount() < this.events().length);
     public share = computed(() => {
         const { value, groupTotal } = this.segment();
         return groupTotal ? (value / groupTotal * 100).toFixed(1) : '0';
     });
 
     constructor() {
-        // A different segment is a different list — start it from the top again.
-        effect(() => {
-            this.segment();
-            this.events();
-            this.shownCount.set(RadialSegmentDetailsComponent.PAGE_SIZE);
-        });
-
-        // Reveal the next page once the sentinel below the list is scrolled into view.
+        // Ask for the next page once the sentinel below the list is scrolled into view.
         effect(onCleanup => {
             const sentinel = this.sentinel()?.nativeElement;
             if (!sentinel) {
@@ -155,7 +133,7 @@ export class RadialSegmentDetailsComponent {
             const observer = new IntersectionObserver(
                 entries => {
                     if (entries.some(entry => entry.isIntersecting)) {
-                        this.showNextPage();
+                        this.loadMore.emit();
                     }
                 },
                 { root: this.scrollRoot()?.nativeElement ?? null, rootMargin: '80px' }
@@ -166,14 +144,25 @@ export class RadialSegmentDetailsComponent {
         });
     }
 
-    /** VideoLectures search for the event title — see the class comment for why not a direct link. */
-    public searchUrl(event: SegmentEvent): string {
-        return `${ RadialSegmentDetailsComponent.SEARCH_URL }?query=${ encodeURIComponent(event.title.trim()) }`;
+    /** "Event title · 2 Jun 2023 · 1:08:08" — whichever parts the document has. */
+    public meta(document: SegmentDocumentDto): string {
+        return [
+            document.event_title?.trim(),
+            document.date ? new Date(document.date).toLocaleDateString('en-GB', {
+                day: 'numeric', month: 'short', year: 'numeric'
+            }) : null,
+            this.formatDuration(document.duration)
+        ].filter(Boolean).join(' · ');
     }
 
-    private showNextPage() {
-        this.shownCount.update(shown =>
-            Math.min(shown + RadialSegmentDetailsComponent.PAGE_SIZE, this.events().length)
-        );
+    private formatDuration(seconds: number | null | undefined): string | null {
+        if (!seconds) {
+            return null;
+        }
+
+        const parts = [ Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, Math.floor(seconds) % 60 ];
+        return (parts[0] ? parts : parts.slice(1))
+            .map((part, index) => index === 0 ? part.toString() : part.toString().padStart(2, '0'))
+            .join(':');
     }
 }
