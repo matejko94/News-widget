@@ -69,6 +69,21 @@ Obvezna polja: `id`, `title`, `url`, `date`, `event_title`, `sdgs`.
 - manjka `topic` → `422` (FastAPI privzeto)
 - dokument brez naslova ali URL-ja → **izpusti iz odgovora in odštej od `total`**; trenutni `/education/whitespace` vrača `{"id": null, "title": null}` vnose in to ne sme priti do uporabnika
 
+## Zakaj je `url` nujen, ne lep dodatek
+
+Preverjeno izmerjeno, ne ugibano. Brez `url` iz backenda se do predavanja ne da priti:
+
+- ID-ji, ki jih vrača `/education/whitespace` (30177, 21273, 33600 …), so **stari VideoLectures ID-ji**. Današnji videolectures.net naslavlja dogodke s slugom nad svojim ID prostorom (`total_events: 1597`, najnovejši `id: 1598`). `/events/30177`, `/event/30177/` in `/30177/` vrnejo **404**; `/events/UNESCOdan2026` dela.
+- `old.videolectures.net` obstaja v DNS, a vrača **526** (neveljaven origin certifikat) — stare strani ni za linkat.
+- Linkanje na iskanje po naslovu je bilo poskušeno in izmerjeno na osmih pravih naslovih iz tega API-ja: **3 zadenejo, 5 pristane na nepovezanem seznamu**. Iskalnik matcha po posameznih besedah in rangira po datumu — `"8th International Conference on Mobile and Ubiquitous Multimedia"` vrne 607 od ~1600 dogodkov, z ničimer relevantnim na vrhu.
+
+VideoLectures je vaša lastna platforma, zato mapiranje skoraj zagotovo obstaja v bazi (nova stran je bila zgrajena iz starih podatkov). Prosimo za eno od dvojega:
+
+- [ ] `url` pri vsakem dokumentu v odgovoru tega endpointa — **prva izbira**, pokriva vse
+- [ ] ali vsaj mapiranje `legacy_event_id` → `slug`, da lahko povezavo sestavimo sami
+
+Dokler ne pride enega ali drugega, so naslovi v widgetu **navaden tekst brez povezave**. To je zavestna odločitev: povezava, ki izgleda kot pot do dogodka, dvakrat od treh pa ni, je slabša od nobene.
+
 ## Odprto vprašanje za backend — dvojno štetje
 
 `/education/intersection/` za "Open Education" vrne `total_count: 433`, segmenti pa `SDG 4: 433`, `SDG 8: 217`, `SDG 9: 110`. Isti dokument je štet v več SDG-jih, radial pa jih zlaga → stolpec kaže ~760 dokumentov, čeprav jih je 433.

@@ -12,11 +12,14 @@ export interface SegmentEvent {
  * Panel shown when a radial segment is clicked: what the segment counts, and which events the
  * counted material comes from.
  *
- * Each event links to a VideoLectures search for its title rather than straight to the event
- * page. The ids /education/whitespace returns (30177, 21273, ...) are legacy VideoLectures ids;
- * the current site addresses events by slug over its own id space (1..~1600), so there is no way
- * to build a direct URL from what we are given. Searching the title lands on the event whenever
- * it still exists there.
+ * The events are NOT links. The ids /education/whitespace returns (30177, 21273, ...) are legacy
+ * VideoLectures ids, while the current site addresses events by slug over its own id space
+ * (1..~1600) -- /events/30177 and /30177 both 404, and old.videolectures.net no longer serves
+ * (526). Linking to a title search was tried and measured on eight real titles: three landed on
+ * the event, five landed on an unrelated list, because the search ORs on single words and ranks
+ * by date ("8th International Conference on Mobile and Ubiquitous Multimedia" returns 607 of the
+ * ~1600 events). A link that looks like it opens the event and usually does not is worse than no
+ * link, so the rows stay plain until the backend hands us a real URL per document.
  *
  * The list pages in as it is scrolled. Today that pages a list the API returns in one go (it
  * caps out around 30 events), but the same plumbing serves the paginated per-lecture endpoint
@@ -64,22 +67,10 @@ export interface SegmentEvent {
             } @else if (events().length) {
                 <ul class="px-2 pb-2">
                     @for (event of visibleEvents(); track event.id) {
-                        <li>
-                            <a class="group flex items-center gap-2 h-14 px-2 rounded-lg
-                                      hover:bg-gray-100 transition-colors"
-                               [href]="searchUrl(event)" target="_blank" rel="noopener noreferrer"
-                               [title]="'Find &quot;' + event.title + '&quot; on VideoLectures'">
-                                <span class="flex-1 min-w-0 text-sm leading-snug text-gray-800 line-clamp-2">
-                                    {{ event.title.trim() }}
-                                </span>
-                                <svg class="shrink-0 w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors"
-                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                                    <polyline points="15 3 21 3 21 9"/>
-                                    <line x1="10" y1="14" x2="21" y2="3"/>
-                                </svg>
-                            </a>
+                        <li class="flex items-center h-14 px-2" [title]="event.title.trim()">
+                            <span class="text-sm leading-snug text-gray-800 line-clamp-2">
+                                {{ event.title.trim() }}
+                            </span>
                         </li>
                     }
                 </ul>
@@ -95,10 +86,10 @@ export interface SegmentEvent {
         </div>
 
         <p class="px-4 py-2 border-t border-gray-200 text-[11px] leading-snug text-gray-500"
-           title="The ids /education/whitespace returns are legacy VideoLectures ids and cannot be turned into a direct event link, so each event opens a search for its title. A per-lecture list needs the endpoint specified in specs/education-documents-endpoint.md.">
-            Events open a VideoLectures <b>search</b> — the ids here are legacy and cannot be linked
-            directly. A sample of where this topic and {{ segment().label }} co-occur, not all
-            {{ segment().value }} documents.
+           title="The ids /education/whitespace returns are legacy VideoLectures ids; the current site addresses events by slug, so no direct link can be built. A per-lecture list with links needs the endpoint specified in specs/education-documents-endpoint.md.">
+            A sample of where this topic and {{ segment().label }} co-occur, not all
+            {{ segment().value }} documents. Not linked — VideoLectures cannot be addressed by the
+            legacy ids this API returns.
         </p>
     `,
     styles: `
@@ -118,7 +109,6 @@ export interface SegmentEvent {
 })
 export class RadialSegmentDetailsComponent {
     private static readonly PAGE_SIZE = 8;
-    private static readonly SEARCH_URL = 'https://videolectures.net/search';
 
     public segment = input.required<RadialSegmentSelection>();
     public events = input.required<SegmentEvent[]>();
@@ -164,11 +154,6 @@ export class RadialSegmentDetailsComponent {
             observer.observe(sentinel);
             onCleanup(() => observer.disconnect());
         });
-    }
-
-    /** VideoLectures search for the event title — see the class comment for why not a direct link. */
-    public searchUrl(event: SegmentEvent): string {
-        return `${ RadialSegmentDetailsComponent.SEARCH_URL }?query=${ encodeURIComponent(event.title.trim()) }`;
     }
 
     private showNextPage() {
