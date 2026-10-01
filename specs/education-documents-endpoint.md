@@ -1,5 +1,12 @@
 # Spec: `/education/intersection/documents` — dokumenti za segment radiala
 
+> **STATUS: implementirano in priklopljeno.** Backend je endpoint objavil, widget ga uporablja.
+> Preverjeno: `total` se ujema z vrednostjo segmenta (Open Education × SDG 4 = 433, Innovation ×
+> OER2 = 69), vsak dokument nosi `url` oblike `https://videolectures.net/videos/<slug>`, ki se
+> odpre na pravi video strani. Spodnje ostaja kot zapis dogovora; razlike proti specu:
+> pilot varianta uporablja `key` (ne `sdg`), odgovor doda `has_more` in `excluded_count`,
+> `id` je string, `SegmentDocument` nosi še `slug`, `duration` in `views`.
+
 **Za:** IRCAI backend team (FastAPI, `angular-visualisation.midas.ijs.si`)
 **Povezano:** IRCAI-SDGobservatory/data#63 · News-widget radial (`3. Radial`)
 
