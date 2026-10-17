@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, effect, input, output, untracked } from '@angular/core';
 import { D3DragEvent, drag, forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation, scaleOrdinal, schemeCategory10, select, Selection, Simulation, } from 'd3';
 import { LegendItem, PillLegendComponent } from '../../components/legend/pill-legend.component';
 import { Chart } from '../chart.abstract';
@@ -67,10 +67,27 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
     public tagLabel = input.required<string>();
     public fixedColor = input<string | undefined>();
     public legend = input<LegendItem[]>();
+    // Id of the highlighted node. Owned by the page so it survives re-renders; the chart only
+    // rings it and dims the rest.
+    public selected = input<string | number | null>(null);
+    // Emits the clicked node's id, or null when the selected node is clicked again (toggle off).
+    public nodeSelect = output<string | number | null>();
 
     private svg!: Selection<SVGSVGElement, unknown, null, unknown>;
     private simulation!: Simulation<ForceNode, ForceLink>;
     private nodeRadius = 5;
+    private nodes: Selection<SVGCircleElement, ForceNode, SVGGElement, unknown> | null = null;
+    private links: Selection<SVGLineElement, ForceLink, SVGGElement, unknown> | null = null;
+
+    constructor() {
+        super();
+        // Re-apply the highlight whenever the selection changes. Separate from renderChart so
+        // clicking a node doesn't restart the simulation.
+        effect(() => {
+            this.selected();
+            this.applyHighlight();
+        });
+    }
 
     protected override renderChart(): void {
         const container = this.chartContainer().nativeElement;
@@ -82,10 +99,30 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
         this.initializeSimulation(width, height);
         const links = this.drawLinks();
         const nodes = this.drawNodes();
+        this.nodes = nodes as any;
+        this.links = links as any;
+        untracked(() => this.applyHighlight());
         this.setupSimulationUpdates(height, width, links as any, nodes as any);
         const tooltip = createTooltip(container);
-        registerTooltip(nodes as any, tooltip, container, (d: any) => `${ d.tag }`);
-        registerTooltip(links as any, tooltip, container, (d: any) => `Source: ${ d.source.id }<br>Target: ${ d.target.id }<br>Shared sdgs: ${ d.value }`);
+        registerTooltip(nodes as any, tooltip, container, (d: any) => `${ d.tag }<br><i>Click for details</i>`);
+        registerTooltip(links as any, tooltip, container, (d: any) => `Source: ${ d.source.tag }<br>Target: ${ d.target.tag }<br>Shared sdgs: ${ d.value }`);
+    }
+
+    /** Ring the selected node and dim the rest, links included. No-op until the graph is drawn. */
+    private applyHighlight() {
+        if (!this.nodes || !this.links) return;
+
+        const selected = this.selected();
+        const hasSelection = selected !== null;
+        const isEndpoint = (link: ForceLink) =>
+            (link.source as ForceNode).id === selected || (link.target as ForceNode).id === selected;
+
+        this.nodes
+            .attr('r', d => d.id === selected ? this.nodeRadius * 1.8 : this.nodeRadius)
+            .attr('stroke', d => d.id === selected ? '#111827' : null)
+            .attr('stroke-width', d => d.id === selected ? 2 : null)
+            .attr('opacity', d => !hasSelection || d.id === selected ? 1 : 0.35);
+        this.links.attr('stroke-opacity', d => !hasSelection ? 0.6 : isEndpoint(d) ? 0.9 : 0.15);
     }
 
     private createSvg(container: HTMLElement, width: number, height: number): void {
@@ -122,6 +159,9 @@ export class ForceDirectedChartComponent extends Chart<ForceData> {
             .join('circle')
             .attr('r', this.nodeRadius)
             .attr('fill', d => this.fixedColor() || d.color)
+            .style('cursor', 'pointer')
+            // d3-drag swallows the click that ends a real drag, so dragging doesn't select.
+            .on('click', (_event, d) => this.nodeSelect.emit(d.id === this.selected() ? null : d.id))
             .call(
                 drag<SVGCircleElement, ForceNode>()
                     .on('start', this.dragStarted.bind(this))
