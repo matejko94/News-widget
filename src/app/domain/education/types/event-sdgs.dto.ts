@@ -9,9 +9,8 @@ export interface EventSdgsDto {
 }
 
 /**
- * One event from /education/whitespace. Today the backend sends only `id` (a legacy VideoLectures
- * id) and `title`; the rest is requested in specs/education-whitespace-event-details.md and is
- * shown as soon as it arrives.
+ * One event from /education/whitespace. `id` is a legacy VideoLectures id; `date`, `description`
+ * and `url` are null when the event has none (see specs/education-whitespace-event-details.md).
  */
 export interface EventDto {
     id: number;

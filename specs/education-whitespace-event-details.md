@@ -1,8 +1,8 @@
 # Spec: `/education/whitespace` — podrobnosti dogodka za Links vizualizacijo
 
-> **STATUS: frontend pripravljen, čaka backend.** Klik na vozlišče v `10. Links` odpre panel z
-> naslovom dogodka. Datum, opis in povezava na VideoLectures se prikažejo samodejno, ko jih
-> backend začne pošiljati — na frontendu ni treba spreminjati ničesar.
+> **STATUS: implementirano in priklopljeno.** Backend vrača `date`, `description` in `url` v obeh
+> endpointih. Preverjeno 17. 10. 2026: `?sdg=4` — 28/30 dogodkov ima `url` in `date`, 2/30 `description`;
+> `pilot/OER-all` — 25/30 `url` in `date`, 5/30 `description`. Polja, ki so `null`, panel skrije.
 
 **Za:** IRCAI backend team (FastAPI, `angular-visualisation.midas.ijs.si`)
 **Povezano:** `specs/education-documents-endpoint.md` · News-widget Links (`10. Links`)

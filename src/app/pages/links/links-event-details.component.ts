@@ -5,11 +5,9 @@ import { EventDto } from '../../domain/education/types/event-sdgs.dto';
  * Panel shown when a node in the Links graph is clicked: the event's title, date and description,
  * and a link to it on VideoLectures.
  *
- * Date, description and link render only when the backend sends them. /education/whitespace
- * currently returns just a legacy id and the title, and a VideoLectures URL cannot be built from
- * the legacy id (see specs/education-documents-endpoint.md), so until the fields in
- * specs/education-whitespace-event-details.md land the panel shows the title and how strongly the
- * event links to the others.
+ * Date, description and link come from /education/whitespace and each may be null (most events
+ * have no description), so each part renders only when present. The link is never built on the
+ * frontend: the ids are legacy VideoLectures ids (see specs/education-documents-endpoint.md).
  */
 @Component({
     selector: 'app-links-event-details',
@@ -58,7 +56,7 @@ import { EventDto } from '../../domain/education/types/event-sdgs.dto';
             </a>
         } @else {
             <p class="px-4 py-2 border-t border-gray-200 text-[11px] leading-snug text-gray-500">
-                No VideoLectures link yet — the API does not send one for this event.
+                This event has no page on VideoLectures.
             </p>
         }
     `,
