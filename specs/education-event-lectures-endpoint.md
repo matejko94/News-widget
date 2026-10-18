@@ -1,6 +1,8 @@
 # Spec: `/education/events/{event_id}/lectures` — predavanja dogodka za Links vizualizacijo
 
-> **STATUS: čaka backend.** Frontend se začne, ko je endpoint objavljen.
+> **STATUS: implementirano in priklopljeno.** Preverjeno 18. 10. 2026: `/education/events/12540/lectures`
+> (MIT World) vrne 5 predavanj, neznan dogodek vrne 404, paginacija pri `30177` da 31 unikatnih
+> predavanj. Hrošč z `duration` je popravljen: *Open Education × SDG 4* se v radialu naloži do konca (174/174).
 
 **Za:** IRCAI backend team (FastAPI, `angular-visualisation.midas.ijs.si`)
 **Povezano:** `specs/education-whitespace-event-details.md` · `specs/education-documents-endpoint.md` ·

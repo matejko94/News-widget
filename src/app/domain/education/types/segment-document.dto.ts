@@ -29,3 +29,16 @@ export interface SegmentDocumentsDto {
     excluded_count: number;
     documents: SegmentDocumentDto[];
 }
+
+/** One page of an event's lectures, from /education/events/{event_id}/lectures. */
+export interface EventLecturesDto {
+    event_id: number;
+    event_title: string;
+    total: number;
+    page: number;
+    page_size: number;
+    has_more: boolean;
+    /** Lectures the backend dropped (no title, no url); counted out of `total`. */
+    excluded_count: number;
+    documents: SegmentDocumentDto[];
+}
