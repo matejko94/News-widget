@@ -4,7 +4,7 @@ import { catchError, Observable, of } from 'rxjs';
 import { environment } from '../../../../../environment/environment';
 import { NewsOnDateDto } from '../../news/types/news-on-date.dto';
 import { EventSdgsDto } from '../types/event-sdgs.dto';
-import { SegmentDocumentsDto } from '../types/segment-document.dto';
+import { EventLecturesDto, SegmentDocumentsDto } from '../types/segment-document.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -71,6 +71,21 @@ export class EducationService {
         return this.http.get<SegmentDocumentsDto>(`${ url }?${ params }`).pipe(
             catchError(e => {
                 console.error('Failed to fetch segment documents', e);
+                return of(null);
+            })
+        );
+    }
+
+    /** One page of an event's lectures, each carrying its VideoLectures `url`. `eventId` is the
+     *  id /education/whitespace returns. */
+    public getEventLectures(eventId: number, page: number, pageSize = 20): Observable<EventLecturesDto | null> {
+        const params = new URLSearchParams({ page: page.toString(), page_size: pageSize.toString() });
+
+        return this.http.get<EventLecturesDto>(
+            `${ environment.api.url }/education/events/${ eventId }/lectures?${ params }`
+        ).pipe(
+            catchError(e => {
+                console.error('Failed to fetch event lectures', e);
                 return of(null);
             })
         );

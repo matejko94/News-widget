@@ -1,9 +1,14 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { EducationService } from '../../domain/education/service/education.service';
+import { SegmentDocumentDto } from '../../domain/education/types/segment-document.dto';
+import { LectureListComponent } from '../../ui/components/lecture-list/lecture-list.component';
 import { EventDto } from '../../domain/education/types/event-sdgs.dto';
 
 /**
  * Panel shown when a node in the Links graph is clicked: the event's title, date and description,
- * and a link to it on VideoLectures.
+ * the event's lectures (each linking to its VideoLectures page, paged in as the panel scrolls),
+ * and a link to the event itself on VideoLectures.
  *
  * Date, description and link come from /education/whitespace and each may be null (most events
  * have no description), so each part renders only when present. The link is never built on the
@@ -12,6 +17,7 @@ import { EventDto } from '../../domain/education/types/event-sdgs.dto';
 @Component({
     selector: 'app-links-event-details',
     standalone: true,
+    imports: [ LectureListComponent ],
     template: `
         <header class="flex items-start gap-3 px-4 py-3 border-b border-gray-200">
             <div class="flex-1 min-w-0">
@@ -39,6 +45,17 @@ import { EventDto } from '../../domain/education/types/event-sdgs.dto';
                 Linked to <b class="tabular-nums">{{ connections() }}</b>
                 {{ connections() === 1 ? 'other event' : 'other events' }} by shared SDGs.
             </p>
+
+            <h3 class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Lectures
+                @if (total()) {
+                    <span class="tabular-nums font-normal normal-case tracking-normal">· {{ total() }}</span>
+                }
+            </h3>
+            <app-lecture-list class="-mx-2" [documents]="lectures()" [hasMore]="hasMore()"
+                              [loading]="loading()" [showEvent]="false"
+                              emptyText="No lectures with a VideoLectures page for this event."
+                              (loadMore)="loadMoreLectures()"/>
         </div>
 
         @if (event().url; as url) {
@@ -80,6 +97,64 @@ export class LinksEventDetailsComponent {
     public connections = input.required<number>();
     public color = input<string>('#6B7280');
     public close = output<void>();
+
+    private educationService = inject(EducationService);
+
+    // The event's lectures, accumulated page by page as the panel scrolls.
+    public lectures = signal<SegmentDocumentDto[]>([]);
+    public total = signal(0);
+    public hasMore = signal(false);
+    public loading = signal(false);
+    private page = 0;
+    private request?: Subscription;
+
+    constructor() {
+        inject(DestroyRef).onDestroy(() => this.request?.unsubscribe());
+
+        // A different event replaces the list: drop what was loaded and fetch its first page.
+        effect(() => {
+            this.event().id;
+            untracked(() => {
+                this.resetLectures();
+                this.loadMoreLectures();
+            });
+        });
+    }
+
+    /**
+     * Fetch the next page of lectures and append it. The list's sentinel can fire repeatedly, so
+     * ignore a request while one is in flight or once the backend says there is nothing more.
+     */
+    public loadMoreLectures() {
+        if (this.loading() || (this.page > 0 && !this.hasMore())) {
+            return;
+        }
+
+        const page = this.page + 1;
+        this.loading.set(true);
+
+        this.request = this.educationService.getEventLectures(this.event().id, page).subscribe(response => {
+            this.loading.set(false);
+
+            if (!response) {
+                return;
+            }
+
+            this.page = page;
+            this.lectures.update(lectures => [ ...lectures, ...response.documents ]);
+            this.total.set(response.total);
+            this.hasMore.set(response.has_more);
+        });
+    }
+
+    private resetLectures() {
+        this.request?.unsubscribe();
+        this.page = 0;
+        this.lectures.set([]);
+        this.total.set(0);
+        this.hasMore.set(false);
+        this.loading.set(false);
+    }
 
     public title = computed(() => (this.event().title ?? '').trim());
 

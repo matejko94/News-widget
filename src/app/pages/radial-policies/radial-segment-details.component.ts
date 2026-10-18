@@ -1,19 +1,19 @@
-import { Component, computed, effect, ElementRef, input, output, viewChild } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { SegmentDocumentDto } from '../../domain/education/types/segment-document.dto';
 import { RadialSegmentSelection } from '../../ui/charts/radial-stacked-chart/radial-stacked-chart.component';
-import { SpinnerComponent } from '../../ui/components/spinner/spinner.component';
+import { LectureListComponent } from '../../ui/components/lecture-list/lecture-list.component';
 
 /**
  * Panel shown when a radial segment is clicked: what the segment counts, and the lectures behind
  * it, each linking to its VideoLectures page.
  *
- * Presentational — the page owns the paging and hands down one accumulated list; this emits
- * `loadMore` when the sentinel below the list scrolls into view.
+ * Presentational — the page owns the paging and hands down one accumulated list; the list
+ * emits `loadMore` when its sentinel scrolls into view.
  */
 @Component({
     selector: 'app-radial-segment-details',
     standalone: true,
-    imports: [ SpinnerComponent ],
+    imports: [ LectureListComponent ],
     template: `
         <header class="flex items-start gap-3 px-4 py-3 border-b border-gray-200">
             <div class="flex-1 min-w-0">
@@ -42,43 +42,10 @@ import { SpinnerComponent } from '../../ui/components/spinner/spinner.component'
             </p>
         </div>
 
-        <div #scrollRoot class="flex-1 overflow-y-auto relative">
-            @if (loading() && !documents().length) {
-                <div class="h-28"><app-spinner/></div>
-            } @else if (documents().length) {
-                <ul class="px-2 py-2">
-                    @for (document of documents(); track document.id) {
-                        <li>
-                            <a class="group flex items-center gap-2 h-[4.5rem] px-2 rounded-lg
-                                      hover:bg-gray-100 transition-colors"
-                               [href]="document.url" target="_blank" rel="noopener noreferrer"
-                               [title]="document.title.trim()">
-                                <span class="flex-1 min-w-0">
-                                    <span class="block text-sm leading-snug text-gray-800 line-clamp-2">
-                                        {{ document.title.trim() }}
-                                    </span>
-                                    <span class="block mt-0.5 text-xs text-gray-500 truncate">{{ meta(document) }}</span>
-                                </span>
-                                <svg class="shrink-0 w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors"
-                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                                    <polyline points="15 3 21 3 21 9"/>
-                                    <line x1="10" y1="14" x2="21" y2="3"/>
-                                </svg>
-                            </a>
-                        </li>
-                    }
-                </ul>
-
-                @if (hasMore()) {
-                    <div #sentinel class="h-10 flex items-center justify-center text-xs text-gray-400">
-                        Loading more…
-                    </div>
-                }
-            } @else {
-                <div class="px-4 py-6 text-sm text-gray-500">No lectures found for this segment.</div>
-            }
+        <div class="flex-1 overflow-y-auto relative px-2 py-2">
+            <app-lecture-list [documents]="documents()" [hasMore]="hasMore()" [loading]="loading()"
+                              emptyText="No lectures found for this segment."
+                              (loadMore)="loadMore.emit()"/>
         </div>
 
         <p class="px-4 py-2 border-t border-gray-200 text-[11px] leading-snug text-gray-500">
@@ -94,13 +61,6 @@ import { SpinnerComponent } from '../../ui/components/spinner/spinner.component'
             flex-direction: column;
             background: #fff;
         }
-
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
     `
 })
 export class RadialSegmentDetailsComponent {
@@ -114,55 +74,8 @@ export class RadialSegmentDetailsComponent {
     public close = output<void>();
     public loadMore = output<void>();
 
-    private scrollRoot = viewChild<ElementRef<HTMLElement>>('scrollRoot');
-    private sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
-
     public share = computed(() => {
         const { value, groupTotal } = this.segment();
         return groupTotal ? (value / groupTotal * 100).toFixed(1) : '0';
     });
-
-    constructor() {
-        // Ask for the next page once the sentinel below the list is scrolled into view.
-        effect(onCleanup => {
-            const sentinel = this.sentinel()?.nativeElement;
-            if (!sentinel) {
-                return;
-            }
-
-            const observer = new IntersectionObserver(
-                entries => {
-                    if (entries.some(entry => entry.isIntersecting)) {
-                        this.loadMore.emit();
-                    }
-                },
-                { root: this.scrollRoot()?.nativeElement ?? null, rootMargin: '80px' }
-            );
-
-            observer.observe(sentinel);
-            onCleanup(() => observer.disconnect());
-        });
-    }
-
-    /** "Event title · 2 Jun 2023 · 1:08:08" — whichever parts the document has. */
-    public meta(document: SegmentDocumentDto): string {
-        return [
-            document.event_title?.trim(),
-            document.date ? new Date(document.date).toLocaleDateString('en-GB', {
-                day: 'numeric', month: 'short', year: 'numeric'
-            }) : null,
-            this.formatDuration(document.duration)
-        ].filter(Boolean).join(' · ');
-    }
-
-    private formatDuration(seconds: number | null | undefined): string | null {
-        if (!seconds) {
-            return null;
-        }
-
-        const parts = [ Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, Math.floor(seconds) % 60 ];
-        return (parts[0] ? parts : parts.slice(1))
-            .map((part, index) => index === 0 ? part.toString() : part.toString().padStart(2, '0'))
-            .join(':');
-    }
 }
